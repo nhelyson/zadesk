@@ -1,0 +1,26 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="emeraldGradientIcon" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22C55E" />
+      <stop offset="100%" stop-color="#14B8A6" />
+    </linearGradient>
+    <filter id="glowIcon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Orbit Ring -->
+  <circle cx="60" cy="60" r="48" stroke="#0D1B3D" stroke-width="8" stroke-linecap="round" stroke-dasharray="240 60" />
+  
+  <!-- Dynamic Slash -->
+  <line x1="32" y1="88" x2="82" y2="38" stroke="url(#emeraldGradientIcon)" stroke-width="8" stroke-linecap="round" />
+
+  <!-- Z Geometric Shape Inside -->
+  <path d="M42 42 H78 L46 78 H78" stroke="#0D1B3D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- AI Sparkle Star -->
+  <g transform="translate(94, 14)" filter="url(#glowIcon)">
+    <path d="M0 10 C5 10 10 5 10 0 C10 5 15 10 20 10 C15 10 10 15 10 20 C10 15 5 10 0 10 Z" fill="#22C55E" />
+  </g>
+</svg>

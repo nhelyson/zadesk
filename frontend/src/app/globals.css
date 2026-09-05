@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 33% 97%;
+    --foreground: 222 47% 11%;
+    --primary: 222 65% 15%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 142 71% 45%;
+    --accent-foreground: 210 40% 98%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --border: 214.3 31.8% 91.4%;
+  }
+
+  .dark {
+    --background: 222 65% 7%;
+    --foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 65% 15%;
+    --accent: 142 71% 45%;
+    --accent-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --card: 222 65% 10%;
+    --card-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+  }
+}
+
+body {
+  color: #0D1B3D;
+  background: #F8FAFC;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  overflow-x: hidden;
+}
+
+/* Perspective & 3D Utilities (Apple / Linear style) */
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.transform-gpu-3d {
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* Glassmorphism & Apple-style Refraction */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.glass-card-floating {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 45px -15px rgba(13, 27, 61, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.6);
+}
+
+.glass-dark-card {
+  background: rgba(13, 27, 61, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, #0D1B3D 0%, #1E3A8A 45%, #22C55E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #22C55E 0%, #14B8A6 100%);
+}
+
+.gradient-radial-glow {
+  background: radial-gradient(circle at 50% 25%, rgba(34, 197, 94, 0.12), rgba(20, 184, 166, 0.06) 45%, transparent 70%);
+}
+
+/* Keyframe Animations */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.4deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(8px) rotate(-0.4deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+@keyframes ping-subtle {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.animate-ping-subtle {
+  animation: ping-subtle 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* PWA Standalone & Mobile Safe Areas */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .standalone-mode {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

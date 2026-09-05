@@ -1,0 +1,56 @@
+{
+  "name": "Zadesk — Le SAV sur WhatsApp",
+  "short_name": "Zadesk",
+  "description": "Plateforme SaaS SAV et gestion de la relation client par WhatsApp pour les entreprises.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0D1B3D",
+  "theme_color": "#0D1B3D",
+  "lang": "fr",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/zadesk-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Connexion",
+      "short_name": "Connexion",
+      "description": "Accéder à votre espace Zadesk",
+      "url": "/login",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Créer mon SAV",
+      "short_name": "Inscription",
+      "description": "Créer un compte Zadesk",
+      "url": "/register",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

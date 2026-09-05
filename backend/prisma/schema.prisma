@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  AGENT
+}
+
+enum OtpPurpose {
+  REGISTRATION
+  LOGIN
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model User {
+  id            String       @id @default(cuid())
+  googleId      String?      @unique
+  email         String       @unique
+  firstName     String
+  lastName      String
+  avatarUrl     String?
+  passwordHash  String?
+  emailVerified Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  memberships   Membership[]
+  sessions      Session[]
+  otpTokens     OtpToken[]
+  sentInvitations WorkspaceInvitation[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id                String       @id @default(cuid())
+  name              String
+  slug              String       @unique
+  description       String?
+  category          String?      @default("Autre")
+  logoUrl           String?
+  coverUrl          String?
+  verified          Boolean      @default(true)
+  isPublic          Boolean      @default(true)
+  website           String?
+  supportPhone      String?
+  supportEmail      String?
+  supportWhatsApp   String?
+  address           String?
+  city              String?      @default("Brazzaville")
+  country           String?      @default("Congo")
+  openingHours      String?
+  supportCategories Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  memberships       Membership[]
+  invitations       WorkspaceInvitation[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceInvitation {
+  id          String    @id @default(cuid())
+  email       String
+  workspaceId String
+  role        Role      @default(AGENT)
+  token       String    @unique
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([workspaceId])
+  @@index([token])
+  @@map("workspace_invitations")
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role      @default(AGENT)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("memberships")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("sessions")
+}
+
+model OtpToken {
+  id          String     @id @default(cuid())
+  userId      String
+  otpHash     String
+  purpose     OtpPurpose @default(LOGIN)
+  attempts    Int        @default(0)
+  maxAttempts Int        @default(5)
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, purpose])
+  @@map("otp_tokens")
+}
+
+model PendingRegistration {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  firstName    String
+  lastName     String
+  passwordHash String
+  otpHash      String
+  attempts     Int      @default(0)
+  maxAttempts  Int      @default(5)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("pending_registrations")
+}
+

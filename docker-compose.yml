@@ -1,0 +1,111 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: zadesk-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - zadesk-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zadesk-frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_APP_URL=http://localhost
+      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+    depends_on:
+      - backend
+    networks:
+      - zadesk-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zadesk-backend
+    restart: unless-stopped
+    expose:
+      - "4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-zadesk}:${POSTGRES_PASSWORD:-zadesk_password}@postgres:5432/${POSTGRES_DB:-zadesk}?schema=public
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - SESSION_SECRET=${SESSION_SECRET:-zadesk_session_secret_2026_congo}
+      - SESSION_MAX_AGE_DAYS=${SESSION_MAX_AGE_DAYS:-7}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - ZAVUDEV_API_KEY=${ZAVUDEV_API_KEY:-}
+      - ZAVU_FROM_EMAIL=${ZAVU_FROM_EMAIL:-zadesk@backup-sev.online}
+      - ZAVU_SENDER_ID=${ZAVU_SENDER_ID:-kd7a0za0kdsrc381rvnfp3nszd8ds0c6}
+      - OTP_EXPIRATION_MINUTES=${OTP_EXPIRATION_MINUTES:-15}
+      - OTP_MAX_ATTEMPTS=${OTP_MAX_ATTEMPTS:-5}
+      - OTP_RESEND_COOLDOWN_SECONDS=${OTP_RESEND_COOLDOWN_SECONDS:-60}
+    volumes:
+      - ./backend/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - zadesk-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: zadesk-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - zadesk-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: zadesk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-zadesk}
+      POSTGRES_USER: ${POSTGRES_USER:-zadesk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zadesk_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zadesk} -d ${POSTGRES_DB:-zadesk}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zadesk-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  zadesk-network:
+    driver: bridge
