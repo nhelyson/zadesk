@@ -191,6 +191,7 @@ describe("Zadesk Authentication API Tests", () => {
         .post("/api/auth/google")
         .send({
           credential: "fake-invalid-jwt-token-12345",
+          mode: "login",
         });
 
       assert.equal(res.status, 401);
@@ -201,6 +202,18 @@ describe("Zadesk Authentication API Tests", () => {
       const res = await request(app)
         .post("/api/auth/google")
         .send({});
+
+      assert.equal(res.status, 400);
+      assert.equal(res.body.success, false);
+    });
+
+    it("devrait refuser une requête avec un mode invalide (400)", async () => {
+      const res = await request(app)
+        .post("/api/auth/google")
+        .send({
+          credential: "fake-invalid-jwt-token-12345",
+          mode: "invalid_mode",
+        });
 
       assert.equal(res.status, 400);
       assert.equal(res.body.success, false);

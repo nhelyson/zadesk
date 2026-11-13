@@ -25,11 +25,8 @@ export const ProblemTransformation = () => {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-rose-600 bg-rose-50 px-3.5 py-1.5 rounded-full border border-rose-200">
-            LA TRANSFORMATION PRODUIT
-          </span>
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-navy-900 leading-tight">
-            Quand le SAV repose sur WhatsApp, les problèmes commencent vite.
+            Quand le SAV repose sur des canaux dispersés, les problèmes commencent vite.
           </h2>
           <p className="text-base sm:text-lg text-slate-600">
             Comparez en direct l&apos;impact d&apos;une boîte de réception non structurée face à la puissance d&apos;un espace de travail Zadesk.
@@ -45,7 +42,7 @@ export const ProblemTransformation = () => {
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
               }`}
             >
-              ❌ Le Chaos WhatsApp
+              ❌ Le Chaos Informel
             </button>
             <button
               onClick={() => setViewState("after")}
@@ -81,7 +78,7 @@ export const ProblemTransformation = () => {
                 
                 <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs space-y-2 relative">
                   <div className="flex items-center justify-between text-rose-800 font-bold">
-                    <span>WhatsApp Perso (Employé 1)</span>
+                    <span>Canal Perso (Employé 1)</span>
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                   </div>
                   <p className="text-slate-700 font-medium">« Client en colère : message lu hier sans réponse »</p>
@@ -90,7 +87,7 @@ export const ProblemTransformation = () => {
 
                 <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs space-y-2">
                   <div className="flex items-center justify-between text-rose-800 font-bold">
-                    <span>WhatsApp Perso (Employé 2)</span>
+                    <span>Canal Perso (Employé 2)</span>
                     <span className="w-2 h-2 rounded-full bg-rose-500" />
                   </div>
                   <p className="text-slate-700 font-medium">« Double réponse : 2 agents ont dit le contraire »</p>

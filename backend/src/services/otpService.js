@@ -194,6 +194,7 @@ export async function createAndSendRegistrationOtp({ firstName, lastName, email,
     email: normalizedEmail,
     purpose: "REGISTRATION",
     expiresAt,
+    devCode: emailRes.data?.devCode,
   };
 }
 
@@ -254,6 +255,13 @@ export async function verifyRegistrationOtp({ tempToken, otp }) {
   // Double check if a user was created in parallel
   const existingUser = await prisma.user.findUnique({
     where: { email: normalizedEmail },
+    include: {
+      memberships: {
+        include: {
+          workspace: true,
+        },
+      },
+    },
   });
 
   let user;
@@ -351,6 +359,7 @@ export async function resendRegistrationOtp({ tempToken }) {
     email: normalizedEmail,
     purpose: "REGISTRATION",
     expiresAt,
+    devCode: emailRes.data?.devCode,
   };
 }
 
@@ -416,6 +425,7 @@ export async function createAndSendLoginOtp({ user }) {
     email: user.email,
     purpose: "LOGIN",
     expiresAt,
+    devCode: emailRes.data?.devCode,
   };
 }
 

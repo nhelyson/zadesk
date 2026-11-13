@@ -13,15 +13,29 @@ export function errorHandler(err, req, res, next) {
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
+      ...(err.code ? { code: err.code } : {}),
     });
   }
 
   // Prisma unique constraint violation error
   if (err.code === "P2002") {
     const target = err.meta?.target || [];
+    const isUserConflict = Array.isArray(target)
+      ? target.some((t) => String(t).includes("email") || String(t).includes("googleId"))
+      : String(target).includes("email") || String(target).includes("googleId");
+
+    if (isUserConflict) {
+      return res.status(409).json({
+        success: false,
+        message: "Un compte existe déjà avec cette adresse email. Connectez-vous plutôt.",
+        code: "ACCOUNT_ALREADY_EXISTS",
+      });
+    }
+
     return res.status(409).json({
       success: false,
       message: `Une ressource avec ce(s) champ(s) existe déjà : ${Array.isArray(target) ? target.join(", ") : target}.`,
+      code: "UNIQUE_CONSTRAINT_VIOLATION",
     });
   }
 
@@ -34,6 +48,7 @@ export function errorHandler(err, req, res, next) {
   return res.status(statusCode).json({
     success: false,
     message,
+    ...(err.code ? { code: err.code } : {}),
     ...(env.IS_PROD ? {} : { stack: err.stack }),
   });
 }

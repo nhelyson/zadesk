@@ -16,16 +16,23 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0D1B3D",
+  // Deux valeurs : claire pour le mode clair (body #F8FAFC), sombre pour le mode sombre
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0D1B3D" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  // Fait réduire la zone de mise en page (layout viewport) quand le clavier Android s'ouvre
+  // Résultat : 100dvh et les zones de saisie en bas restent visibles avec le clavier ouvert
+  interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {
   title: "Zadesk — Le Service Après-Vente pensé pour les entreprises",
-  description: "Zadesk aide les entreprises à organiser, automatiser et améliorer leur service après-vente et leur relation client sur WhatsApp.",
+  description: "Zadesk aide les entreprises à organiser, automatiser et améliorer leur service client grâce à l'IA et une messagerie SAV intégrée.",
   applicationName: "Zadesk",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -54,12 +61,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${outfit.variable} ${inter.variable} scroll-smooth`}>
+    <html lang="fr" className={`${outfit.variable} ${inter.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-touch-fullscreen" content="yes" />
       </head>
-      <body className="min-h-screen font-sans antialiased bg-[#F8FAFC] text-navy-900 selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-screen font-sans antialiased bg-[#F8FAFC] text-navy-900 selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
         <PWAProvider>
           {children}
         </PWAProvider>

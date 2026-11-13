@@ -1,0 +1,103 @@
+Created At: 2026-11-04T13:40:21+01:00
+Completed At: 2026-11-04T13:40:21+01:00
+Showing lines 1-100 of 481
+1: <mxfile host="app.diagrams.net" modified="2026-10-30T17:20:00.000Z" agent="Antigravity" version="24.0.0">
+2:   <diagram id="zadesk-usecase-diagram" name="Zadesk - Use Case Diagram">
+3:     <mxGraphModel dx="2600" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1680" math="0" shadow="0">
+4:       <root>
+5:         <mxCell id="0" />
+6:         <mxCell id="1" parent="0" />
+7: 
+8:         <!-- ======================================================== -->
+9:         <!-- EN-TÊTE / TITRE DU DIAGRAMME                             -->
+10:         <!-- ======================================================== -->
+11:         <mxCell id="title" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:24px;color:#0F172A;&quot;&gt;ZADESK — DIAGRAMME DES CAS D'UTILISATION (USE CASE)&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:13px;color:#64748B;&quot;&gt;Plateforme SaaS SAV Omnicanale — Portail Public, Gestion des Tickets, Hub Conversations &amp;amp; Administration&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+12:           <mxGeometry x="620" y="20" width="900" height="55" as="geometry" />
+13:         </mxCell>
+14: 
+15:         <!-- LÉGENDE / CARTUCHE D'INFORMATION -->
+16:         <mxCell id="legend_box" value="&lt;p style=&quot;margin:0;padding:2px 0;&quot;&gt;&lt;b style=&quot;color:#0F172A;&quot;&gt;Légende UML :&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:2px 0;font-size:11px;color:#334155;&quot;&gt;— &lt;b style=&quot;color:#4F46E5;&quot;&gt;Association&lt;/b&gt; : Acteur relié à un Cas&lt;br/&gt;— &lt;b style=&quot;color:#059669;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/b&gt; : Inclusion obligatoire&lt;br/&gt;— &lt;b style=&quot;color:#D97706;&quot;&gt;&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;&lt;/b&gt; : Extension conditionnelle&lt;br/&gt;— &lt;b style=&quot;color:#475569;&quot;&gt;Généralisation&lt;/b&gt; : Héritage de rôle&lt;/p&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1.5;fontFamily=Helvetica;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+17:           <mxGeometry x="1850" y="20" width="230" height="90" as="geometry" />
+18:         </mxCell>
+19: 
+20:         <!-- ======================================================== -->
+21:         <!-- CADRE FRONTIÈRE DU SYSTÈME (SYSTEM BOUNDARY)             -->
+22:         <!-- ======================================================== -->
+23:         <mxCell id="system_boundary" value="&lt;div style=&quot;text-align:left;padding-left:15px;padding-top:8px;&quot;&gt;&lt;b style=&quot;font-size:16px;color:#1E3A8A;&quot;&gt;Système Zadesk (Plateforme SAV &amp;amp; Helpdesk Omnicanal)&lt;/b&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3B82F6;strokeWidth=2.5;dashed=0;verticalAlign=top;shadow=1;opacity=95;" vertex="1" parent="1">
+24:           <mxGeometry x="270" y="95" width="1510" height="1540" as="geometry" />
+25:         </mxCell>
+26: 
+27:         <!-- ======================================================== -->
+28:         <!-- PACKAGES / ZONES FONCTIONNELLES                          -->
+29:         <!-- ======================================================== -->
+30: 
+31:         <!-- SOUS-SYSTÈME 1 : PORTAIL PUBLIC & ANNUAIRE -->
+32:         <mxCell id="zone_public" value="&lt;b style=&quot;font-size:13px;color:#1E40AF;&quot;&gt;1. Portail Public &amp;amp; Annuaire d'Entreprises&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+33:           <mxGeometry x="295" y="140" width="1460" height="230" as="geometry" />
+34:         </mxCell>
+35: 
+36:         <!-- SOUS-SYSTÈME 2 : AUTHENTIFICATION & SÉCURITÉ -->
+37:         <mxCell id="zone_auth" value="&lt;b style=&quot;font-size:13px;color:#065F46;&quot;&gt;2. Authentification, Onboarding &amp;amp; Sécurité&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#A7F3D0;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+38:           <mxGeometry x="295" y="390" width="1460" height="230" as="geometry" />
+39:         </mxCell>
+40: 
+41:         <!-- SOUS-SYSTÈME 3 : GESTION DES TICKETS -->
+42:         <mxCell id="zone_tickets" value="&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;3. Gestion Opérationnelle des Tickets &amp;amp; Réclamations&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#DDD6FE;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+43:           <mxGeometry x="295" y="640" width="1460" height="340" as="geometry" />
+44:         </mxCell>
+45: 
+46:         <!-- SOUS-SYSTÈME 4 : CONVERSATIONS & OMNICANAL -->
+47:         <mxCell id="zone_conv" value="&lt;b style=&quot;font-size:13px;color:#0F766E;&quot;&gt;4. Hub Conversationnel &amp;amp; Messagerie Omnicanale (Direct &amp;amp; WhatsApp)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#99F6E4;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+48:           <mxGeometry x="295" y="1000" width="1460" height="250" as="geometry" />
+49:         </mxCell>
+50: 
+51:         <!-- SOUS-SYSTÈME 5 : ADMINISTRATION & GOUVERNANCE -->
+52:         <mxCell id="zone_admin" value="&lt;b style=&quot;font-size:13px;color:#92400E;&quot;&gt;5. Administration du Workspace, Équipe &amp;amp; Gouvernance&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#FDE68A;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+53:           <mxGeometry x="295" y="1270" width="1460" height="345" as="geometry" />
+54:         </mxCell>
+55: 
+56:         <!-- ======================================================== -->
+57:         <!-- ACTEURS PRINCIPAUX (GAUCHE)                              -->
+58:         <!-- ======================================================== -->
+59: 
+60:         <!-- 1. Client / Visiteur Public -->
+61:         <mxCell id="actor_client" value="&lt;b style=&quot;font-size:13px;color:#1E40AF;&quot;&gt;Client / Visiteur&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Grand Public)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=2;" vertex="1" parent="1">
+62:           <mxGeometry x="80" y="200" width="55" height="110" as="geometry" />
+63:         </mxCell>
+64: 
+65:         <!-- 2. Utilisateur Authentifié (Compte) -->
+66:         <mxCell id="actor_user" value="&lt;b style=&quot;font-size:13px;color:#065F46;&quot;&gt;Utilisateur&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Compte Enregistré)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=2;" vertex="1" parent="1">
+67:           <mxGeometry x="80" y="470" width="55" height="110" as="geometry" />
+68:         </mxCell>
+69: 
+70:         <!-- ======================================================== -->
+71:         <!-- ACTEURS OPÉRATIONNELS & MÉTIER (DROITE)                  -->
+72:         <!-- ======================================================== -->
+73: 
+74:         <!-- 3. Moteur d'Attribution Déterministe (Système Automatique) -->
+75:         <mxCell id="actor_engine" value="&lt;b style=&quot;font-size:12px;color:#B45309;&quot;&gt;&amp;lt;&amp;lt;Système&amp;gt;&amp;gt;&lt;/b&gt;&lt;br/&gt;&lt;b style=&quot;font-size:13px;color:#78350F;&quot;&gt;Moteur d'Attribution&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Capacité / Compétence)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=2;" vertex="1" parent="1">
+76:           <mxGeometry x="1940" y="650" width="55" height="110" as="geometry" />
+77:         </mxCell>
+78: 
+79:         <!-- 4. Agent SAV -->
+80:         <mxCell id="actor_agent" value="&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;Agent SAV&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Support Opérationnel)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=2;" vertex="1" parent="1">
+81:           <mxGeometry x="1940" y="820" width="55" height="110" as="geometry" />
+82:         </mxCell>
+83: 
+84:         <!-- 5. Manager / Superviseur -->
+85:         <mxCell id="actor_manager" value="&lt;b style=&quot;font-size:13px;color:#0F766E;&quot;&gt;Manager SAV&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Superviseur d'Équipe)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#F0FDFA;strokeColor=#14B8A6;strokeWidth=2;" vertex="1" parent="1">
+86:           <mxGeometry x="1940" y="1060" width="55" height="110" as="geometry" />
+87:         </mxCell>
+88: 
+89:         <!-- 6. Administrateur / Owner -->
+90:         <mxCell id="actor_admin" value="&lt;b style=&quot;font-size:13px;color:#92400E;&quot;&gt;Administrateur / Owner&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:11px;color:#64748B;&quot;&gt;(Propriétaire Workspace)&lt;/span&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=2;" vertex="1" parent="1">
+91:           <mxGeometry x="1940" y="1320" width="55" height="110" as="geometry" />
+92:         </mxCell>
+93: 
+94:         <!-- 7. Service Externe : WhatsApp Business / Meta API -->
+95:         <mxCell id="actor_whatsapp" value="&lt;b style=&quot;font-size:12px;color:#15803D;&quot;&gt;&amp;lt;&amp;lt;Système Externe&amp;gt;&amp;gt;&lt;/b&gt;&lt;br/&gt;&lt;b style=&quot;font-size:13px;color:#166534;&quot;&gt;API WhatsApp / Meta&lt;/b&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#DCFCE7;strokeColor=#22C55E;strokeWidth=2;" vertex="1" parent="1">
+96:           <mxGeometry x="1940" y="1510" width="55" height="110" as="geometry" />
+97:         </mxCell>
+98: 
+99:         <!-- HÉRITAGE DES ACTEURS (GÉNÉRALISATION UML) -->
+100:         <mxCell id="gen_manager_agent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=0;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_manager" target="actor_agent">

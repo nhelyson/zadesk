@@ -16,17 +16,29 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
   direction = "up",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [hasFinishedAnimation, setHasFinishedAnimation] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Respecter immédiatement prefers-reduced-motion
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsVisible(true);
+      setHasFinishedAnimation(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
           observer.unobserve(entry.target);
+          const timer = setTimeout(() => {
+            setHasFinishedAnimation(true);
+          }, delay + 700);
+          return () => clearTimeout(timer);
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -50px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
     );
 
     if (ref.current) {
@@ -34,33 +46,33 @@ export const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [delay]);
 
   const getTransform = () => {
-    if (isVisible) return "translate3d(0, 0, 0) scale(1)";
+    if (isVisible) return "translate3d(0, 0, 0)";
     switch (direction) {
       case "up":
-        return "translate3d(0, 28px, 0) scale(0.98)";
+        return "translate3d(0, 24px, 0)";
       case "down":
-        return "translate3d(0, -28px, 0) scale(0.98)";
+        return "translate3d(0, -24px, 0)";
       case "left":
-        return "translate3d(32px, 0, 0) scale(0.98)";
+        return "translate3d(24px, 0, 0)";
       case "right":
-        return "translate3d(-32px, 0, 0) scale(0.98)";
+        return "translate3d(-24px, 0, 0)";
       default:
-        return "scale(0.98)";
+        return "translate3d(0, 0, 0)";
     }
   };
 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${className}`}
+      className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
         transitionDelay: `${delay}ms`,
-        willChange: "transform, opacity",
+        willChange: hasFinishedAnimation ? "auto" : "transform, opacity",
       }}
     >
       {children}

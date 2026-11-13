@@ -1,0 +1,149 @@
+<mxfile host="app.diagrams.net" agent="Antigravity">
+  <diagram id="zadesk-centered-uml" name="Zadesk - UML Class Diagram">
+    <mxGraphModel dx="1648" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1450" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:22px;color:#0F172A;&quot;&gt;Zadesk — Diagramme de Classes &amp;amp; Modèle PostgreSQL&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:12px;color:#64748B;&quot;&gt;18 Tables Métier — Coordonnées de contact publiques incluses&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="820" x="450" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="workspace" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:14px;color:#1E40AF;&quot;&gt;Workspace&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #93C5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ slug : text [UQ]&lt;br/&gt;+ name : text&lt;br/&gt;+ description : text?&lt;br/&gt;+ category : text?&lt;br/&gt;+ supportEmail : text?&lt;br/&gt;+ supportPhone : text?&lt;br/&gt;+ supportWhatsApp : text?&lt;br/&gt;+ verified : boolean&lt;br/&gt;+ isPublic : boolean&lt;br/&gt;+ website : text?&lt;br/&gt;+ address : text?&lt;br/&gt;+ city : text?&lt;br/&gt;+ country : text?&lt;br/&gt;+ openingHours : text?&lt;br/&gt;+ supportCategories : jsonb?&lt;br/&gt;+ logoUrl : text?&lt;br/&gt;+ coverUrl : text?&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #93C5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;color:#475569;&quot;&gt;+ createTicket()&lt;br/&gt;+ inviteMember()&lt;/p&gt;" vertex="1">
+          <mxGeometry height="355" width="270" x="100" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="membership" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#1E40AF;&quot;&gt;Membership&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #93C5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ userId : text [FK]&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ role : Role = AGENT&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="135" width="240" x="420" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:14px;color:#065F46;&quot;&gt;User&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #6EE7B7;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ email : text [UQ]&lt;br/&gt;+ googleId : text? [UQ]&lt;br/&gt;+ firstName : text&lt;br/&gt;+ lastName : text&lt;br/&gt;+ avatarUrl : text?&lt;br/&gt;+ passwordHash : text?&lt;br/&gt;+ emailVerified : boolean&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #6EE7B7;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;color:#475569;&quot;&gt;+ verifyOtp()&lt;br/&gt;+ updateProfile()&lt;/p&gt;" vertex="1">
+          <mxGeometry height="235" width="260" x="720" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="agent_profile" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:14px;color:#92400E;&quot;&gt;AgentProfile&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #FCD34D;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ userId : text [FK]&lt;br/&gt;+ availability : Availability&lt;br/&gt;+ maxCapacity : Int = 10&lt;br/&gt;+ autoAssignmentEnabled : Boolean&lt;br/&gt;+ title : text? = &quot;Agent SAV&quot;&lt;br/&gt;+ phone : text?&lt;br/&gt;+ notificationEmail : Boolean&lt;br/&gt;+ notificationApp : Boolean&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #FCD34D;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;color:#475569;&quot;&gt;+ setAvailability()&lt;br/&gt;+ hasCapacity() : boolean&lt;/p&gt;" vertex="1">
+          <mxGeometry height="270" width="270" x="1050" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="skill" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#92400E;&quot;&gt;Skill&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #FCD34D;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ name : text&lt;br/&gt;+ description : text?&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="140" width="240" x="1370" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="agent_skill" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#92400E;&quot;&gt;AgentSkill&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #FCD34D;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ agentProfileId : text [FK]&lt;br/&gt;+ skillId : text [FK]&lt;br/&gt;+ validatedById : text?&lt;br/&gt;+ validatedAt : timestamp?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="145" width="240" x="1370" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="pending_reg" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#334155;&quot;&gt;PendingRegistration&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #CBD5E1;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ email : text [UQ]&lt;br/&gt;+ firstName : text&lt;br/&gt;+ lastName : text&lt;br/&gt;+ passwordHash : text&lt;br/&gt;+ otpHash : text&lt;br/&gt;+ attempts : Int&lt;br/&gt;+ maxAttempts : Int = 5&lt;br/&gt;+ expiresAt : timestamp&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="200" width="270" x="100" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="invitation" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#1E40AF;&quot;&gt;WorkspaceInvitation&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #93C5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ email : text&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ invitedById : text [FK]&lt;br/&gt;+ token : text [UQ]&lt;br/&gt;+ role : Role = AGENT&lt;br/&gt;+ expiresAt : timestamp&lt;br/&gt;+ acceptedAt : timestamp?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="190" width="240" x="420" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="session" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#065F46;&quot;&gt;Session&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #6EE7B7;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ sessionToken : text [UQ]&lt;br/&gt;+ userId : text [FK]&lt;br/&gt;+ expiresAt : timestamp&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="145" width="260" x="720" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="otp" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#065F46;&quot;&gt;OtpToken&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #6EE7B7;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ userId : text [FK]&lt;br/&gt;+ otpHash : text&lt;br/&gt;+ purpose : OtpPurpose&lt;br/&gt;+ attempts : Int = 0&lt;br/&gt;+ maxAttempts : Int = 5&lt;br/&gt;+ expiresAt : timestamp&lt;br/&gt;+ verifiedAt : timestamp?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="180" width="260" x="720" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=2;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:15px;color:#5B21B6;&quot;&gt;Ticket&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #C4B5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11.5px;line-height:1.45;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ reference : text&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ assignedAgentId : text? [FK]&lt;br/&gt;+ createdById : text? [FK]&lt;br/&gt;+ conversationId : text? [FK]&lt;br/&gt;+ title : text&lt;br/&gt;+ description : text&lt;br/&gt;+ category : text?&lt;br/&gt;+ priority : TicketPriority&lt;br/&gt;+ status : TicketStatus&lt;br/&gt;+ customerName : text&lt;br/&gt;+ customerPhone : text?&lt;br/&gt;+ customerEmail : text?&lt;br/&gt;+ slaDueAt : timestamp?&lt;br/&gt;+ resolvedAt : timestamp?&lt;br/&gt;+ closedAt : timestamp?&lt;br/&gt;+ metadata : jsonb?&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #C4B5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;color:#475569;&quot;&gt;+ assignAgent()&lt;br/&gt;+ resolve()&lt;/p&gt;" vertex="1">
+          <mxGeometry height="425" width="300" x="60" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="assignment" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;TicketAssignment&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #C4B5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ ticketId : text [FK]&lt;br/&gt;+ previousAgentId : text? [FK]&lt;br/&gt;+ newAgentId : text? [FK]&lt;br/&gt;+ assignedById : text? [FK]&lt;br/&gt;+ reason : text?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="170" width="250" x="440" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="activity" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;TicketActivity&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #C4B5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ ticketId : text [FK]&lt;br/&gt;+ authorId : text? [FK]&lt;br/&gt;+ type : text&lt;br/&gt;+ content : text&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="150" width="250" x="440" y="965" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket_share" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;TicketShare&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #C4B5FD;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ ticketId : text [FK]&lt;br/&gt;+ agentId : text [FK]&lt;br/&gt;+ sharedById : text [FK]&lt;br/&gt;+ accessLevel : AccessLevel&lt;br/&gt;+ expiresAt : timestamp?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="170" width="250" x="440" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#F0FDFA;strokeColor=#14B8A6;strokeWidth=2;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:15px;color:#0F766E;&quot;&gt;Conversation&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #99F6E4;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11.5px;line-height:1.45;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ assignedAgentId : text? [FK]&lt;br/&gt;+ customerName : text&lt;br/&gt;+ customerPhone : text?&lt;br/&gt;+ customerEmail : text?&lt;br/&gt;+ channel : text = &quot;PORTAL&quot;&lt;br/&gt;+ status : ConversationStatus&lt;br/&gt;+ priority : TicketPriority&lt;br/&gt;+ lastMessageAt : timestamp&lt;br/&gt;+ createdAt : timestamp&lt;br/&gt;+ updatedAt : timestamp&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #99F6E4;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;color:#475569;&quot;&gt;+ postMessage()&lt;br/&gt;+ convertToTicket()&lt;/p&gt;" vertex="1">
+          <mxGeometry height="330" width="280" x="875" y="785" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_message" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#F0FDFA;strokeColor=#14B8A6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#0F766E;&quot;&gt;ConversationMessage&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #99F6E4;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ conversationId : text [FK]&lt;br/&gt;+ senderId : text? [FK]&lt;br/&gt;+ senderType : MessageType&lt;br/&gt;+ senderName : text&lt;br/&gt;+ content : text&lt;br/&gt;+ isInternalNote : boolean&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="185" width="250" x="1330" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_share" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#F0FDFA;strokeColor=#14B8A6;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#0F766E;&quot;&gt;ConversationShare&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #99F6E4;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ conversationId : text [FK]&lt;br/&gt;+ agentId : text [FK]&lt;br/&gt;+ sharedById : text [FK]&lt;br/&gt;+ accessLevel : AccessLevel&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="165" width="250" x="1340" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="audit" parent="1" style="verticalAlign=top;align=left;overflow=fill;fontFamily=Helvetica;html=1;rounded=1;shadow=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;" value="&lt;p style=&quot;margin:0px;padding-top:6px;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:13px;color:#334155;&quot;&gt;AuditLog&lt;/b&gt;&lt;/p&gt;&lt;hr style=&quot;border:none;border-top:1px solid #CBD5E1;margin:5px 0;&quot;/&gt;&lt;p style=&quot;margin:0px 8px;font-size:11px;line-height:1.4;&quot;&gt;+ id : text [PK]&lt;br/&gt;+ workspaceId : text [FK]&lt;br/&gt;+ userId : text? [FK]&lt;br/&gt;+ action : text&lt;br/&gt;+ entityType : text&lt;br/&gt;+ entityId : text&lt;br/&gt;+ details : jsonb?&lt;br/&gt;+ ipAddress : text?&lt;br/&gt;+ createdAt : timestamp&lt;/p&gt;" vertex="1">
+          <mxGeometry height="185" width="280" x="880" y="1195" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ws_membership" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#3B82F6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#1E40AF;fontSize=10;" target="membership" value="regroupe&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_membership" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.3;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#10B981;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#065F46;fontSize=10;" target="membership" value="adhère via&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ws_invitation" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.6;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeColor=#3B82F6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#1E40AF;fontSize=10;" target="invitation" value="émet&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_invitation" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.8;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;strokeColor=#10B981;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#065F46;fontSize=10;" target="invitation" value="invite via&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_session" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#10B981;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#065F46;fontSize=10;" target="session" value="ouvre&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_otp" edge="1" parent="1" source="session" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#10B981;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#065F46;fontSize=10;" target="otp" value="authentifie via&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ws_agent" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.05;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#3B82F6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#1E40AF;fontSize=10;" target="agent_profile" value="emploie&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="137" />
+              <mxPoint x="390" y="95" />
+              <mxPoint x="1175" y="95" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_user_agent" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeColor=#10B981;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#065F46;fontSize=10;" target="agent_profile" value="possède&lt;br/&gt;1 .. 0..1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_agent_skill" edge="1" parent="1" source="agent_profile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#F59E0B;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#92400E;fontSize=10;" target="agent_skill" value="maîtrise&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_skill_agentskill" edge="1" parent="1" source="skill" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#F59E0B;strokeWidth=1.5;endArrow=classic;endFill=1;fontColor=#92400E;fontSize=10;" target="agent_skill" value="qualifie&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ws_ticket" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;strokeColor=#8B5CF6;strokeWidth=2;endArrow=diamond;endFill=1;fontColor=#5B21B6;fontSize=11;" target="ticket" value="contient&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ticket_assign" edge="1" parent="1" source="ticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#8B5CF6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#5B21B6;fontSize=10;" target="assignment" value="historise&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ticket_activity" edge="1" parent="1" source="ticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.55;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#8B5CF6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#5B21B6;fontSize=10;" target="activity" value="journalise&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ticket_share" edge="1" parent="1" source="ticket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.9;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#8B5CF6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#5B21B6;fontSize=10;" target="ticket_share" value="partage avec&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_agent_ticket" edge="1" parent="1" source="agent_profile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.85;entryY=0;entryDx=0;entryDy=0;strokeColor=#F59E0B;strokeWidth=1.5;endArrow=open;endFill=0;fontColor=#92400E;fontSize=10;" target="ticket" value="traite / assigné à&lt;br/&gt;0..1 .. 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1094" y="730" />
+              <mxPoint x="355" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_ws_conv" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;strokeColor=#14B8A6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#0F766E;fontSize=10;" target="conversation" value="héberge&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="303" y="740" />
+              <mxPoint x="796" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_conv_msg" edge="1" parent="1" source="conversation" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#14B8A6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#0F766E;fontSize=10;" target="conv_message" value="comporte&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_conv_share" edge="1" parent="1" source="conversation" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#14B8A6;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#0F766E;fontSize=10;" target="conv_share" value="partage avec&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_conv_ticket" edge="1" parent="1" source="conversation" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.45;exitDx=0;exitDy=0;strokeColor=#14B8A6;strokeWidth=1.5;dashed=1;endArrow=open;endFill=0;fontColor=#0F766E;fontSize=10;" target="ticket" value="escalade en ticket&lt;br/&gt;0..1 .. 0..*">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ws_audit" edge="1" parent="1" source="workspace" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.85;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#64748B;strokeWidth=1.5;endArrow=diamond;endFill=1;fontColor=#475569;fontSize=10;" target="audit" value="enregistre&lt;br/&gt;1 .. 0..*">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="720" />
+              <mxPoint x="710" y="720" />
+              <mxPoint x="710" y="1233" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -21,14 +21,20 @@ export interface UserProfile {
 
 export interface AuthResponse extends ApiResponse<UserProfile> {
   requiresOtp?: boolean;
+  requiresCaptcha?: boolean;
   tempToken?: string;
   email?: string;
   purpose?: "REGISTRATION" | "LOGIN" | "EMAIL_VERIFICATION" | "PASSWORD_RESET";
+  isNewUser?: boolean;
+  hasWorkspace?: boolean;
+  redirectTo?: string;
 }
 
 export interface MeResponse {
   authenticated: boolean;
   user?: UserProfile;
+  hasWorkspace?: boolean;
+  redirectTo?: string;
 }
 
 export async function registerApi(data: {
@@ -36,6 +42,7 @@ export async function registerApi(data: {
   lastName: string;
   email: string;
   password: string;
+  turnstileToken?: string;
 }): Promise<AuthResponse> {
   return (await apiRequest<UserProfile>("/auth/register", {
     method: "POST",
@@ -46,6 +53,7 @@ export async function registerApi(data: {
 export async function loginApi(data: {
   email: string;
   password: string;
+  turnstileToken?: string;
 }): Promise<AuthResponse> {
   return (await apiRequest<UserProfile>("/auth/login", {
     method: "POST",
@@ -67,6 +75,7 @@ export async function verifyOtpApi(data: {
 export async function resendOtpApi(data: {
   tempToken: string;
   purpose?: "REGISTRATION" | "LOGIN" | "EMAIL_VERIFICATION" | "PASSWORD_RESET";
+  turnstileToken?: string;
 }): Promise<{ success: boolean; message?: string; tempToken?: string; expiresAt?: string }> {
   return apiRequest("/auth/resend-otp", {
     method: "POST",
@@ -74,10 +83,22 @@ export async function resendOtpApi(data: {
   });
 }
 
-export async function googleAuthApi(credential: string): Promise<AuthResponse> {
+export const NEUTRAL_AUTH_ERROR_MESSAGE =
+  "Impossible de poursuivre avec ces informations. Si tu possèdes déjà un compte, essaie de te connecter. Sinon, tu peux créer un compte.";
+
+export const GOOGLE_AUTH_REGISTER_EXISTS_ERROR =
+  "Cette adresse Google est déjà enregistrée sur Zadesk.";
+
+export const GOOGLE_AUTH_LOGIN_NOT_FOUND_ERROR =
+  "Aucun compte n'est encore associé à cette adresse Google.";
+
+export async function googleAuthApi(
+  credential: string,
+  mode: "login" | "register" = "login"
+): Promise<AuthResponse> {
   return (await apiRequest<UserProfile>("/auth/google", {
     method: "POST",
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ credential, mode }),
   })) as AuthResponse;
 }
 
@@ -116,3 +137,24 @@ export async function fetchGoogleClientId(): Promise<string> {
   }
   return "";
 }
+
+export async function fetchTurnstileSiteKey(): Promise<string> {
+  if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+    return process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  }
+  try {
+    const res = await fetch("/api/auth/turnstile/config", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      return data.siteKey || "";
+    }
+  } catch (err) {
+    // ignore
+  }
+  // In dev / localhost: default to Cloudflare dummy test key
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    return "1x00000000000000000000AA";
+  }
+  return "";
+}
+

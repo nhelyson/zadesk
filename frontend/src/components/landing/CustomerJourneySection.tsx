@@ -59,9 +59,6 @@ export const CustomerJourneySection = () => {
         {/* Header */}
         <RevealOnScroll direction="up">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30">
-              PARCOURS DE BOUT EN BOUT
-            </span>
             <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
               De la demande du client à sa fidélisation.
             </h2>

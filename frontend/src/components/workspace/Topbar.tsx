@@ -13,7 +13,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Check,
-  Zap,
+  UserCheck,
+  Sliders,
 } from 'lucide-react';
 import { useWorkspace } from './WorkspaceContext';
 import { authApi } from '@/lib/api';
@@ -25,7 +26,7 @@ const routeTitleMap: Record<string, { title: string; category: string }> = {
   '/app/tickets': { title: 'Dossiers de Continuité', category: 'SAV' },
   '/app/customers': { title: 'Base Clients 360°', category: 'Clients' },
   '/app/agents': { title: 'Agents & Compétences', category: 'Équipe' },
-  '/app/agencies': { title: 'Réseau Agences', category: 'Réseau' },
+  '/app/agencies': { title: 'Nos établissements', category: 'Implantations' },
   '/app/ai': { title: 'Intelligence IA & Escalade', category: 'Intelligence' },
   '/app/knowledge': { title: 'Base de Connaissances RAG', category: 'Intelligence' },
   '/app/whatsapp': { title: 'Canal WhatsApp', category: 'Canaux' },
@@ -33,13 +34,20 @@ const routeTitleMap: Record<string, { title: string; category: string }> = {
   '/app/settings': { title: 'Paramètres du Workspace', category: 'Administration' },
 };
 
-export const Topbar: React.FC = () => {
-  const pathname = usePathname();
+export interface TopbarProps {
+  activePathOverride?: string;
+  onNavigate?: (href: string) => void;
+}
+
+export const Topbar: React.FC<TopbarProps> = ({ activePathOverride, onNavigate }) => {
+  const currentPath = usePathname();
+  const pathname = activePathOverride || currentPath;
   const router = useRouter();
   const {
     currentWorkspace,
     user,
     userRole,
+    setUserRole,
     setMobileSidebarOpen,
     setCommandPaletteOpen,
   } = useWorkspace();
@@ -74,29 +82,32 @@ export const Topbar: React.FC = () => {
     router.push('/login');
   };
 
+  const actualRole = currentWorkspace?.role || 'OWNER';
+  const isActualAdminOrOwner = actualRole === 'OWNER' || actualRole === 'ADMIN' || actualRole === 'MANAGER';
+
   return (
-    <header className="h-16 bg-white border-b border-slate-200/90 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 select-none">
+    <header className="h-16 bg-white border-b border-slate-200/90 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 select-none">
       {/* Left side: Hamburger + Breadcrumb */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className="md:hidden p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+          className="md:hidden p-2.5 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0"
           aria-label="Ouvrir le menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs">
-          <span className="text-slate-500 font-medium">
+        <div className="hidden sm:flex items-center gap-2 text-xs truncate">
+          <span className="text-slate-500 font-medium truncate max-w-[120px]">
             {currentWorkspace?.name || 'Workspace'}
           </span>
           <span className="text-slate-300">/</span>
           <span className="text-slate-500 font-medium">{currentRouteInfo.category}</span>
           <span className="text-slate-300">/</span>
-          <span className="text-slate-900 font-bold">{currentRouteInfo.title}</span>
+          <span className="text-slate-900 font-bold truncate">{currentRouteInfo.title}</span>
         </div>
 
-        <div className="sm:hidden font-bold text-sm text-slate-900 truncate max-w-[150px]">
+        <div className="sm:hidden font-bold text-xs xs:text-sm text-slate-900 truncate max-w-[110px] xs:max-w-[150px]">
           {currentRouteInfo.title}
         </div>
       </div>
@@ -119,35 +130,45 @@ export const Topbar: React.FC = () => {
       </div>
 
       {/* Right side: Redis Cache Badge, Notifications, User Profile */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          className="md:hidden p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100"
+          className="md:hidden p-2.5 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0"
           title="Rechercher"
+          aria-label="Rechercher"
         >
           <Search className="w-4 h-4" />
         </button>
 
-        {/* Redis Cache Status Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-600">
-          <Zap className="w-3 h-3 text-emerald-500 animate-pulse" />
-          <span className="text-slate-400">Cache :</span>
-          <span className="text-emerald-700 font-bold">Redis Actif</span>
-        </div>
+        {/* Raccourci vers l'Espace Client (Guichet Public SAV) */}
+        {currentWorkspace?.slug && (
+          <a
+            href={`/entreprises/${currentWorkspace.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/90 text-xs font-bold transition-all shadow-2xs group cursor-pointer"
+            title="Ouvrir le guichet client SAV officiel de l'entreprise dans un nouvel onglet"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Guichet Client</span>
+            <ExternalLink className="w-3.5 h-3.5 text-emerald-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
+        )}
 
         {/* Notifications Dropdown */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+            className="relative p-2.5 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0"
             title="Notifications SAV"
+            aria-label="Notifications SAV"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="fixed inset-x-3 top-16 max-w-sm mx-auto sm:max-w-none sm:mx-0 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
               <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
                   Notifications SAV
@@ -156,7 +177,7 @@ export const Topbar: React.FC = () => {
                   3 Récentes
                 </span>
               </div>
-              <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto text-xs">
+              <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto overscroll-contain text-xs">
                 <div className="p-3 hover:bg-slate-50 transition-colors cursor-pointer">
                   <p className="font-semibold text-slate-900 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -196,9 +217,10 @@ export const Topbar: React.FC = () => {
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 transition-colors text-left"
+            className="flex items-center gap-2 p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 transition-colors text-left cursor-pointer shrink-0"
+            aria-label="Menu profil utilisateur"
           >
-            <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
               {user?.firstName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="hidden xl:block">
@@ -213,7 +235,7 @@ export const Topbar: React.FC = () => {
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100">
+            <div className="fixed inset-x-3 top-16 max-w-xs mx-auto sm:max-w-none sm:mx-0 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 divide-y divide-slate-100">
               {/* Profile Card */}
               <div className="p-3.5 bg-slate-50/50">
                 <p className="text-xs font-bold text-slate-900 truncate">
@@ -230,24 +252,83 @@ export const Topbar: React.FC = () => {
                 </div>
               </div>
 
+              {/* Mode de Navigation / Rôle Switcher (Strictement réservé aux Propriétaires et Admins réels) */}
+              {isActualAdminOrOwner && (
+                <div className="p-2.5 bg-slate-50/80 border-b border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5 px-0.5">
+                    Mode de travail
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      onClick={() => { setUserRole('OWNER'); setProfileOpen(false); }}
+                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        userRole !== 'AGENT'
+                          ? 'bg-slate-900 text-white shadow-2xs'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>👑 Admin</span>
+                    </button>
+                    <button
+                      onClick={() => { setUserRole('AGENT'); setProfileOpen(false); }}
+                      className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        userRole === 'AGENT'
+                          ? 'bg-emerald-600 text-white shadow-2xs'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>🎧 Agent SAV</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Links */}
               <div className="p-1.5 space-y-0.5">
                 <Link
-                  href="/app/settings"
+                  href="/app/agent/profile"
                   onClick={() => setProfileOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                 >
-                  <ShieldCheck className="w-4 h-4 text-slate-400" />
-                  <span>Paramètres & Sécurité</span>
+                  <UserCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Mon profil Agent SAV</span>
                 </Link>
-                <Link
-                  href="/"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4 text-slate-400" />
-                  <span>Voir le site public</span>
-                </Link>
+                {isActualAdminOrOwner && (
+                  <Link
+                    href="/app/settings"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-slate-400" />
+                    <span>Paramètres & Sécurité</span>
+                  </Link>
+                )}
+                {currentWorkspace?.slug ? (
+                  <a
+                    href={`/entreprises/${currentWorkspace.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <ExternalLink className="w-4 h-4 text-emerald-600" />
+                      <span>Guichet Client (SAV Public)</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                      Public
+                    </span>
+                  </a>
+                ) : (
+                  <Link
+                    href="/"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                    <span>Voir le site public</span>
+                  </Link>
+                )}
               </div>
 
               {/* Logout Button */}

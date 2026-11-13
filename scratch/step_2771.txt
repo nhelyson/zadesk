@@ -1,0 +1,153 @@
+Created At: 2026-10-31T19:18:58+01:00
+Completed At: 2026-10-31T19:18:58+01:00
+Showing lines 1-150 of 1358
+1: "use client";
+2: 
+3: import React, { useState, useEffect, useRef, useCallback } from "react";
+4: import { useRouter } from "next/navigation";
+5: import Link from "next/link";
+6: import {
+7:   OnboardingHeader,
+8:   SaveStatus,
+9: } from "@/components/onboarding/OnboardingHeader";
+10: import {
+11:   OnboardingSidebar,
+12:   ONBOARDING_STEPS,
+13: } from "@/components/onboarding/OnboardingSidebar";
+14: import {
+15:   OnboardingPreview,
+16:   OnboardingPreviewData,
+17: } from "@/components/onboarding/OnboardingPreview";
+18: import { workspaceApi, apiRequest } from "@/lib/api";
+19: import { User } from "@/types/workspace";
+20: import { getContrastTextColor } from "@/lib/brandTheme";
+21: import {
+22:   Building2,
+23:   Check,
+24:   CheckCircle2,
+25:   ArrowRight,
+26:   ArrowLeft,
+27:   ShieldCheck,
+28:   Zap,
+29:   Phone,
+30:   MessageSquare,
+31:   Mail,
+32:   Globe,
+33:   MapPin,
+34:   Clock,
+35:   Plus,
+36:   X,
+37:   Palette,
+38:   ExternalLink,
+39:   AlertCircle,
+40:   HelpCircle,
+41:   Sparkles,
+42:   Users,
+43:   Tag,
+44:   Briefcase,
+45:   Layers,
+46:   ChevronRight,
+47:   Eye,
+48:   Loader2,
+49: } from "lucide-react";
+50: 
+51: function slugify(text: string) {
+52:   return text
+53:     .toString()
+54:     .toLowerCase()
+55:     .normalize("NFD")
+56:     .replace(/[\u0300-\u036f]/g, "")
+57:     .trim()
+58:     .replace(/\s+/g, "-")
+59:     .replace(/[^\w-]+/g, "")
+60:     .replace(/--+/g, "-")
+61:     .slice(0, 50);
+62: }
+63: 
+64: const SECTOR_SUGGESTIONS: Record<string, string[]> = {
+65:   "Commerce & Distribution": [
+66:     "Suivi de commande & expédition",
+67:     "Retour, échange ou remboursement",
+68:     "Disponibilité produit en stock",
+69:     "Facturation & Paiement Mobile Money",
+70:     "Réclamation article défectueux",
+71:   ],
+72:   "Télécommunications & FAI": [
+73:     "Forfait Internet & Rechargement 4G",
+74:     "Assistance Mobile Money / Retrait",
+75:     "Panne réseau ou box Fibre",
+76:     "Remplacement SIM & KYC",
+77:     "Offre Pro & Facturation",
+78:   ],
+79:   "Banque & Microfinance": [
+80:     "Relevé & Solde de compte",
+81:     "Blocage carte ou compte",
+82:     "Demande de prêt ou microcrédit",
+83:     "Virement & Transfert d'argent",
+84:     "Localisation d'agences & DAB",
+85:   ],
+86:   "Santé & Pharmacie": [
+87:     "Disponibilité de médicaments",
+88:     "Prise de rendez-vous consultation",
+89:     "Service de garde & Urgences",
+90:     "Prise en charge assurance",
+91:     "Horaires d'ouverture & Accès",
+92:   ],
+93:   "Transport & Logistique": [
+94:     "Suivi de colis / bordereau",
+95:     "Tarifs & Devis de fret",
+96:     "Retard ou anomalie de livraison",
+97:     "Modification d'adresse de réception",
+98:     "Perte ou colis endommagé",
+99:   ],
+100:   "Services & Technologies": [
+101:     "Assistance technique & dépannage",
+102:     "Configuration & Déploiement",
+103:     "Demande de devis & Partenariat",
+104:     "Facturation & Renouvellement",
+105:     "Assistance aux utilisateurs",
+106:   ],
+107:   "Hôtellerie & Restauration": [
+108:     "Réservation de chambre ou table",
+109:     "Modification ou annulation",
+110:     "Demande de devis événement / traiteur",
+111:     "Réclamation service & facturation",
+112:     "Renseignements sur les équipements",
+113:   ],
+114:   "Énergie & Eau": [
+115:     "Signalement de coupure ou panne",
+116:     "Recharge compteur prépayé",
+117:     "Facturation & Paiement d'échéance",
+118:     "Demande de raccordement",
+119:     "Service d'astreinte & urgence",
+120:   ],
+121:   "Autre secteur": [
+122:     "Assistance générale",
+123:     "Suivi de dossier en cours",
+124:     "Réclamation client",
+125:     "Demande d'information",
+126:   ],
+127: };
+128: 
+129: const BRAND_PALETTES = [
+130:   { name: "Navy Institutionnel", primary: "#0D1B3D" },
+131:   { name: "Bleu Congo Telecom", primary: "#1D4ED8" },
+132:   { name: "Rouge Énergie", primary: "#E11D48" },
+133:   { name: "Ambre Chaleureux", primary: "#D97706" },
+134:   { name: "Vert Banque", primary: "#047857" },
+135:   { name: "Violet Moderne", primary: "#7C3AED" },
+136:   { name: "Ardoise Foncée", primary: "#1E293B" },
+137: ];
+138: 
+139: export default function OnboardingPage() {
+140:   const router = useRouter();
+141:   const [user, setUser] = useState<User | null>(null);
+142: 
+143:   const [currentStep, setCurrentStep] = useState(1);
+144:   const [maxAccessibleStep, setMaxAccessibleStep] = useState(1);
+145:   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+146:   const [isInitializing, setIsInitializing] = useState(true);
+147:   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+148: 
+149:   // Form State
+150:   const [formData, setFormData] = useState({

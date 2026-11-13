@@ -1,417 +1,470 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { 
-  ArrowRight, 
-  CheckCircle2, 
-  Play, 
-  Star, 
-  Building, 
-  QrCode, 
-  Smartphone, 
-  Clock,
-  Sparkles
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import gsap from "gsap";
 
 export const Hero = () => {
-  const [scrollY, setScrollY] = useState(0);
-  const [step, setStep] = useState(0);
-  const [mounted, setMounted] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const paragraphRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const visualContainerRef = useRef<HTMLDivElement>(null);
+  const emblemRef = useRef<HTMLDivElement>(null);
+  const subjectBottomRef = useRef<HTMLDivElement>(null);
+  const subjectTopRef = useRef<HTMLDivElement>(null);
+  const ribbonRef = useRef<HTMLDivElement>(null);
+  const dotsRightRef = useRef<HTMLDivElement>(null);
+  const dotsLeftRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // Standard des grands SaaS : respect strict de prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setStep((prev) => (prev + 1) % 4);
-    }, 3600);
-    return () => clearInterval(timer);
-  }, []);
+    const ctx = gsap.context(() => {
+      // ==============================================================
+      // 1. TIMELINE D'ENTRÉE ORCHESTRÉE (Style Apple / Stripe)
+      // ==============================================================
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-  const rotateX = Math.max(0, 6 - scrollY * 0.02);
-  const scale = Math.min(1.02, 0.98 + scrollY * 0.0002);
+      // Séquence typographique à gauche
+      if (titleRef.current) {
+        tl.fromTo(
+          titleRef.current,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.85 }
+        );
+      }
+      if (paragraphRef.current) {
+        tl.fromTo(
+          paragraphRef.current,
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.75 },
+          "-=0.6"
+        );
+      }
+      if (ctaRef.current) {
+        tl.fromTo(
+          ctaRef.current,
+          { opacity: 0, y: 16, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "back.out(1.5)" },
+          "-=0.5"
+        );
+      }
+
+      // Éléments de profondeur d'arrière-plan
+      if (ribbonRef.current) {
+        tl.fromTo(
+          ribbonRef.current,
+          { opacity: 0, scale: 0.94, transformOrigin: "right center" },
+          { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out" },
+          "-=0.75"
+        );
+      }
+      if (dotsRightRef.current) {
+        tl.fromTo(
+          dotsRightRef.current,
+          { opacity: 0, x: 20 },
+          { opacity: 0.55, x: 0, duration: 0.9 },
+          "-=0.85"
+        );
+      }
+      if (dotsLeftRef.current) {
+        tl.fromTo(
+          dotsLeftRef.current,
+          { opacity: 0, x: -16 },
+          { opacity: 0.35, x: 0, duration: 0.9 },
+          "-=0.85"
+        );
+      }
+
+      // Séquence visuelle droite (Emblème découpé)
+      if (emblemRef.current) {
+        tl.fromTo(
+          emblemRef.current,
+          { opacity: 0, scale: 0.88, y: 32 },
+          { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "elastic.out(1, 0.88)" },
+          "-=0.8"
+        );
+      }
+
+      // Émergence du sujet (Breakout pop-out synchronisé)
+      const subjects = [subjectBottomRef.current, subjectTopRef.current].filter(Boolean);
+      if (subjects.length > 0) {
+        tl.fromTo(
+          subjects,
+          { opacity: 0, y: 44, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.95, ease: "power3.out" },
+          "-=0.7"
+        );
+      }
+
+      // ==============================================================
+      // 2. RESPIRATION EN APESANTEUR (Idle Floating Motion)
+      // ==============================================================
+      if (visualContainerRef.current) {
+        gsap.to(visualContainerRef.current, {
+          y: -7,
+          duration: 3.6,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: 1.2,
+        });
+      }
+    }, sectionRef);
+
+    // ==============================================================
+    // 3. PARALLAXE FLUIDE AU CURSEUR SUR DESKTOP (Depth of Field)
+    // ==============================================================
+    const handleMouseMove = (e: MouseEvent) => {
+      if (window.innerWidth < 1024 || !sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+
+      // Sujet (premier plan : réaction vive)
+      const subjects = [subjectBottomRef.current, subjectTopRef.current].filter(Boolean);
+      if (subjects.length > 0) {
+        gsap.to(subjects, {
+          x: mouseX * 12,
+          y: mouseY * 8,
+          duration: 0.65,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+
+      // Emblème sculpté (plan intermédiaire : mouvement amorti)
+      if (emblemRef.current) {
+        gsap.to(emblemRef.current, {
+          x: mouseX * 6,
+          y: mouseY * 4,
+          duration: 0.8,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+
+      // Ruban et trame (arrière-plan : dérive subtile inverse)
+      if (ribbonRef.current) {
+        gsap.to(ribbonRef.current, {
+          x: -mouseX * 10,
+          y: -mouseY * 6,
+          duration: 1.0,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+    };
+
+    const sectionEl = sectionRef.current;
+    if (sectionEl) {
+      sectionEl.addEventListener("mousemove", handleMouseMove);
+    }
+
+    return () => {
+      ctx.revert();
+      if (sectionEl) {
+        sectionEl.removeEventListener("mousemove", handleMouseMove);
+      }
+    };
+  }, []);
 
   return (
-    <section data-nav-theme="light" className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
-      
-      {/* Subtle Ambient Background Glow (Soft Emerald & Sunlight) */}
-      <div 
-        className={`absolute top-10 left-1/3 w-[600px] h-[400px] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none -z-10 transition-opacity duration-1000 ${
-          mounted ? "opacity-100" : "opacity-0"
-        }`} 
-      />
-      <div 
-        className={`absolute top-40 right-10 w-[500px] h-[350px] bg-teal-500/10 blur-[140px] rounded-full pointer-events-none -z-10 transition-opacity duration-1000 delay-200 ${
-          mounted ? "opacity-100" : "opacity-0"
-        }`} 
-      />
+    <section 
+      ref={sectionRef}
+      data-nav-theme="light" 
+      className="relative w-full overflow-hidden bg-[#FAFAF8] text-slate-900 selection:bg-emerald-600 selection:text-white pt-20 pb-14 sm:pt-24 sm:pb-18 lg:pt-28 lg:pb-20 min-h-[calc(100svh-4rem)] flex items-center"
+      style={{
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      {/* ============================================================== */}
+      {/* 1. ENRICHISSEMENT DU BACKGROUND (Discret & Haute Finition)    */}
+      {/* ============================================================== */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Lueur studio chaude & menthe douce */}
+        <div 
+          aria-hidden="true" 
+          className="absolute top-1/4 right-[12%] w-[460px] h-[460px] rounded-full bg-emerald-500/[0.06] blur-3xl" 
+        />
+        <div 
+          aria-hidden="true" 
+          className="absolute bottom-8 right-[20%] w-[340px] h-[340px] rounded-full bg-[#0D1B3D]/[0.04] blur-3xl" 
+        />
 
-      {/* Ultra-subtle Dot Grid Pattern */}
-      <div 
-        className="absolute inset-0 -z-10 opacity-35"
-        style={{
-          backgroundImage: `radial-gradient(rgba(13, 27, 61, 0.12) 1px, transparent 1px)`,
-          backgroundSize: "28px 28px",
-        }}
-      />
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
-        {/* Top 2-Column Grid: Copy (Left) + Visual Showcase (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16 sm:mb-20">
-          
-          {/* Left Column: Spacious & Focused Copy (Linear / Vercel style airy staggered hierarchy) */}
-          <div className="lg:col-span-7 space-y-8 sm:space-y-10 text-left">
-            
-            {/* 1. Main Headline (True Focal Point — Direct & Bold) */}
-            <h1 
-              className={`text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-950 leading-[1.06] transition-all duration-700 ease-out ${
-                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              Votre SAV, directement sur{" "}
-              <span className="bg-gradient-to-r from-[#25D366] via-emerald-600 to-navy-900 bg-clip-text text-transparent">
-                WhatsApp
-              </span>
-              .
-            </h1>
-
-            {/* 2. Focused & Crisp Value Proposition Description */}
-            <p 
-              className={`text-base sm:text-xl text-slate-600 font-normal leading-relaxed max-w-xl transition-all duration-700 ease-out delay-150 ${
-                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              Ne perdez plus jamais un client. Répondez en 30 secondes, automatisez vos demandes récurrentes et connectez vos conseillers directement sur WhatsApp.
-            </p>
-
-            {/* 3. High-Contrast Action CTAs with Breathing Room & Micro-interactions */}
-            <div 
-              className={`space-y-4 pt-2 transition-all duration-700 ease-out delay-300 ${
-                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                <Link href="/register">
-                  <Button
-                    size="xl"
-                    variant="gradient"
-                    className="w-full sm:w-auto text-base font-bold shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 justify-center group"
-                    rightIcon={<ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />}
-                  >
-                    Créer mon SAV — 14 jours gratuits
-                  </Button>
-                </Link>
-                <Link href="#comment-ca-marche">
-                  <Button
-                    size="xl"
-                    variant="outline"
-                    className="w-full sm:w-auto text-base border-slate-300 font-bold text-slate-800 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-xs hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 justify-center group"
-                    leftIcon={<Play className="w-4 h-4 text-emerald-600 fill-emerald-600 transition-transform duration-200 group-hover:scale-110" />}
-                  >
-                    Voir la démo en direct
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Guarantees */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 font-semibold pt-1">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  Zéro application à installer pour vos clients
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  Installation en 2 minutes chrono
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Photo of Surprised Customer looking at Phone + Floating WhatsApp Bubbles */}
-          <div 
-            className={`lg:col-span-5 relative transition-all duration-1000 ease-out delay-200 ${
-              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-            }`}
-          >
-            
-            {/* Crisp Frame with Soft Shadow */}
-            <div className="relative mx-auto max-w-md rounded-3xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/80 bg-white group">
-              
-              {/* Authentic Photo */}
-              <img
-                src="https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=800&auto=format&fit=crop&q=80"
-                alt="Cliente satisfaite et étonnée de la rapidité du SAV WhatsApp"
-                className="w-full h-[460px] object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
-              />
-
-              {/* Bottom Quote Bar with Crisp Contrast */}
-              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-xl text-left space-y-1 transition-all duration-300 group-hover:bg-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex text-amber-400">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                  </div>
-                  <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    30s chrono
-                  </span>
-                </div>
-                <p className="text-xs font-bold text-slate-900">
-                  « J&apos;ai juste envoyé un WhatsApp, le SAV a résolu mon problème sans me faire attendre ! »
-                </p>
-                <p className="text-[11px] text-slate-500">Mamadou K. • Brazzaville</p>
-              </div>
-
-            </div>
-
-            {/* Floating Live WhatsApp Message Bubble Top-Left */}
-            <div className="absolute -top-6 -left-6 z-20 p-3.5 rounded-2xl bg-white text-slate-900 shadow-2xl border border-slate-200 animate-float-gentle max-w-[240px] text-left hidden sm:block">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] animate-ping-subtle" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">WhatsApp SAV</span>
-              </div>
-              <p className="text-xs font-bold text-slate-950 leading-snug">
-                « Bonjour ! Votre colis est en route. Arrivée dans 20 min. »
-              </p>
-              <span className="text-[9px] text-emerald-700 font-bold block mt-1">✓ Résolu instantanément</span>
-            </div>
-
-            {/* Floating Live Speed Badge Bottom-Right */}
-            <div className="absolute -bottom-6 -right-4 z-20 p-3.5 rounded-2xl bg-slate-900 text-white shadow-2xl border border-slate-800 animate-float-reverse max-w-[220px] text-left hidden sm:block">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-black text-white">Temps d&apos;attente : 0s</span>
-              </div>
-              <p className="text-[11px] text-slate-300">
-                100% de vos clients pris en charge immédiatement.
-              </p>
-            </div>
-
-          </div>
-
+        {/* Trame de points réguliers (Dot Matrix Wecare) - Flanc Droit */}
+        <div 
+          ref={dotsRightRef}
+          aria-hidden="true"
+          className="absolute top-20 right-4 sm:right-10 lg:right-16 hidden sm:block opacity-55"
+        >
+          <svg width="120" height="200" viewBox="0 0 120 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="wecare-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="5" cy="5" r="3.5" fill="#CBD5E1" />
+              </pattern>
+            </defs>
+            <rect width="120" height="200" fill="url(#wecare-dots)" />
+          </svg>
         </div>
 
-        {/* Live Interactive Product Mockup Container (High-Contrast 3D View with Scroll Parallax) */}
-        <div className="relative mt-8 perspective-1200">
+        {/* Trame de points réguliers discrète - Flanc Gauche */}
+        <div 
+          ref={dotsLeftRef}
+          aria-hidden="true"
+          className="absolute bottom-12 left-6 sm:left-12 w-24 h-28 hidden lg:block opacity-35"
+        >
+          <svg width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hero-dots-left" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
+                <circle cx="3" cy="3" r="2" fill="#CBD5E1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-dots-left)" />
+          </svg>
+        </div>
+
+        {/* Disques décoratifs flottants doux */}
+        <div 
+          aria-hidden="true" 
+          className="absolute top-20 left-[14%] w-8 h-8 rounded-full bg-slate-200/50 hidden lg:block" 
+        />
+        <div 
+          aria-hidden="true" 
+          className="absolute bottom-20 left-[44%] w-5 h-5 rounded-full bg-emerald-500/15 hidden sm:block" 
+        />
+
+        {/* Ruban dynamique de connexion fluide */}
+        <div 
+          ref={ribbonRef}
+          aria-hidden="true"
+          className="absolute top-1/4 right-0 w-[580px] h-[340px] hidden sm:block"
+        >
+          <svg viewBox="0 0 580 340" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <path 
+              d="M -20 240 C 120 310, 240 90, 460 70 C 510 65, 550 85, 580 110" 
+              stroke="#22C55E" 
+              strokeWidth="3.5" 
+              strokeLinecap="round" 
+              className="opacity-70"
+            />
+            <path 
+              d="M 10 265 C 140 335, 270 115, 480 95" 
+              stroke="#10B981" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeDasharray="4 7"
+              className="opacity-40"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full relative z-10">
+        
+        {/* Grille Asymétrique : Contenu Éditorial (7 cols) / Mise en scène Visuelle (5 cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 lg:gap-14 items-center">
           
-          <div 
-            className="transition-transform duration-300 ease-out transform-gpu-3d"
-            style={{
-              transform: `rotateX(${rotateX}deg) scale(${scale})`,
-              boxShadow: "0 30px 80px -15px rgba(13, 27, 61, 0.2)",
-            }}
-          >
-            <div className="w-full max-w-6xl mx-auto rounded-3xl bg-slate-900/95 p-4 sm:p-6 border border-slate-700/80 text-slate-100 font-sans backdrop-blur-2xl relative overflow-hidden shadow-2xl">
+          {/* ============================================================ */}
+          {/* COLONNE GAUCHE (7 cols) : Typographie Apple Aérée & Déployée */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left relative">
+            
+            {/* Grand Titre Éditorial — Sans ponctuation & Font-size Décompressé */}
+            <h1 
+              ref={titleRef}
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.35rem] xl:text-[3.65rem] font-extrabold text-slate-950 tracking-[-0.03em] leading-[1.12]"
+            >
+              Le service client de votre entreprise
+              <span className="block text-emerald-800 font-extrabold mt-1 sm:mt-1.5">
+                réuni au même endroit
+              </span>
+            </h1>
+
+            {/* Proposition de Valeur Validée */}
+            <p 
+              ref={paragraphRef}
+              className="text-base sm:text-lg text-slate-600 font-normal leading-[1.65] max-w-[530px]"
+            >
+              Vos clients vous contactent directement depuis leur navigateur, sans inscription ni mot de passe. Votre équipe reçoit leurs demandes, échange avec eux et assure leur suivi depuis un espace de travail commun.
+            </p>
+
+            {/* Bouton Primaire Tactile — Ergonomie & Finition Apple */}
+            <div 
+              ref={ctaRef}
+              className="pt-2"
+            >
+              <Link 
+                href="/register" 
+                className="inline-block w-full sm:w-auto"
+                style={{
+                  touchAction: "manipulation",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  WebkitTouchCallout: "none"
+                }}
+              >
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="group relative w-full sm:w-auto h-[48px] px-7 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.98] transition-all duration-150 ease-out shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_14px_rgba(15,23,42,0.12)] inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer touch-manipulation"
+                >
+                  <span className="text-[14px] sm:text-[15px] font-semibold text-white tracking-[-0.01em]">
+                    Créer mon espace
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-150 shrink-0" />
+                </div>
+              </Link>
+            </div>
+
+          </div>
+
+          {/* ============================================================ */}
+          {/* COLONNE DROITE (5 cols) : Rééquilibrée & Animée GSAP       */}
+          {/* Calage harmonieux avec la colonne gauche                    */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            
+            {/* Conteneur global de la composition visuelle avec animation de respiration */}
+            <div 
+              ref={visualContainerRef}
+              className="relative w-full max-w-[340px] sm:max-w-[380px] lg:max-w-[400px] h-[410px] sm:h-[440px] lg:h-[465px]"
+            >
               
-              {/* Header Bar */}
-              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-800 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-rose-500" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="ml-2 text-slate-400 font-medium hidden sm:inline">
-                    Zadesk Workspace • Démonstration Live WhatsApp ➔ Agent ➔ Agence
-                  </span>
-                </div>
+              {/* -------------------------------------------------------- */}
+              {/* 1. EMBLÈME GÉOMÉTRIQUE DÉCOUPÉ (Option A - Hitz360 / 4)   */}
+              {/* Diamètre réajusté (~350px) pour un équilibre parfait      */}
+              {/* -------------------------------------------------------- */}
+              <div 
+                ref={emblemRef}
+                aria-hidden="true"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] sm:w-[330px] sm:h-[330px] lg:w-[350px] lg:h-[350px] pointer-events-none -z-10"
+              >
+                {/* Plaque d'ancrage Midnight Navy asymétrique en arrière-plan */}
+                <div 
+                  className="absolute -bottom-2 -right-3 w-[56%] h-[56%] rounded-br-[64px] rounded-tl-[44px] rounded-tr-[32px] rounded-bl-[24px] bg-[#0D1B3D] shadow-[0_22px_45px_-10px_rgba(13,27,61,0.48)]"
+                />
 
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/90 text-[11px] border border-slate-700">
-                  <span className="text-slate-400">Phase en direct :</span>
-                  <span className="font-bold text-emerald-400 transition-colors duration-300">
-                    {step === 0 && "1. Demande WhatsApp reçue"}
-                    {step === 1 && "2. IA SAV : Réponse intelligente"}
-                    {step === 2 && "3. Transfert vers le bon conseiller"}
-                    {step === 3 && "4. Continuité jusqu'à l'agence physique"}
-                  </span>
-                </div>
+                {/* SVG de l'emblème circulaire découpé à bandes rythmées */}
+                <svg 
+                  viewBox="0 0 350 350" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="w-full h-full drop-shadow-[0_22px_40px_rgba(22,163,74,0.34)]"
+                >
+                  <defs>
+                    <linearGradient id="optA-grad-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#22C55E" />
+                      <stop offset="100%" stopColor="#16A34A" />
+                    </linearGradient>
+                    <linearGradient id="optA-grad-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#16A34A" />
+                      <stop offset="100%" stopColor="#15803D" />
+                    </linearGradient>
+                    <linearGradient id="optA-grad-bot" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#15803D" />
+                      <stop offset="100%" stopColor="#0F766E" />
+                    </linearGradient>
+                    {/* Masque circulaire pour garantir un contour extérieur parfait */}
+                    <clipPath id="optA-circle-clip">
+                      <circle cx="175" cy="175" r="172" />
+                    </clipPath>
+                  </defs>
+
+                  {/* Groupe masqué sur le disque */}
+                  <g clipPath="url(#optA-circle-clip)">
+                    {/* Fond d'accent émeraude */}
+                    <rect width="350" height="350" fill="#15803D" />
+
+                    {/* Segment 1 : Calotte supérieure gauche */}
+                    <path 
+                      d="M -40 -40 L 390 -40 L 10 350 L -40 350 Z" 
+                      fill="url(#optA-grad-top)" 
+                    />
+
+                    {/* Fente diagonale 1 (découpe nette négative de la couleur de fond #FAFAF8) */}
+                    <line 
+                      x1="350" y1="-30" x2="-40" y2="360" 
+                      stroke="#FAFAF8" 
+                      strokeWidth="17" 
+                      strokeLinecap="round" 
+                    />
+
+                    {/* Segment 2 : Bande diagonale centrale rythmée */}
+                    <rect 
+                      x="-30" y="153" width="410" height="46" rx="23" 
+                      transform="rotate(-40 175 175)" 
+                      fill="url(#optA-grad-mid)" 
+                    />
+
+                    {/* Fente diagonale 2 (seconde découpe négative #FAFAF8) */}
+                    <line 
+                      x1="390" y1="20" x2="0" y2="410" 
+                      stroke="#FAFAF8" 
+                      strokeWidth="15" 
+                      strokeLinecap="round" 
+                    />
+
+                    {/* Segment 3 : Base inférieure droite */}
+                    <path 
+                      d="M 130 390 L 390 130 L 390 390 Z" 
+                      fill="url(#optA-grad-bot)" 
+                    />
+                  </g>
+                </svg>
               </div>
 
-              {/* 3-Column Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 text-xs">
-                
-                {/* Left: WhatsApp Inbound */}
-                <div className="lg:col-span-4 bg-slate-950/70 rounded-2xl p-3.5 border border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between font-bold text-slate-300">
-                    <span className="flex items-center gap-2">
-                      <Smartphone className="w-4 h-4 text-[#25D366]" />
-                      WhatsApp Client Direct
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px]">
-                      En direct
-                    </span>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-emerald-500/80 shadow-md space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-100 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#25D366]" />
-                        +242 06 942 09 72
-                      </span>
-                      <span className="text-[10px] text-slate-400">15:02</span>
-                    </div>
-                    <p className="text-[11px] text-slate-200">
-                      « Bonjour, mon routeur Wifi ne s&apos;allume plus après la pluie. »
-                    </p>
-                    <div className="flex items-center gap-1.5 pt-1">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700">
-                        SAV Technique
-                      </span>
-                      {step >= 2 && (
-                        <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold animate-in fade-in duration-300">
-                          Japhet I.
-                        </span>
-                      )}
-                      {step >= 3 && (
-                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold animate-in fade-in duration-300">
-                          ZDK-48291
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 opacity-60">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-slate-300">+242 05 510 88 14</span>
-                      <span className="text-[10px] text-slate-500">14:50</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 truncate">Demande de renouvellement contrat</p>
-                    <span className="text-[9px] text-emerald-400 font-bold block mt-1">✓ Résolu par l&apos;IA</span>
-                  </div>
-                </div>
-
-                {/* Center: Live Conversation Thread */}
-                <div className="lg:col-span-5 bg-slate-950/90 rounded-2xl p-4 border border-slate-800 flex flex-col justify-between min-h-[380px]">
-                  
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <div>
-                      <h4 className="font-bold text-slate-100 text-sm">Échange Client WhatsApp</h4>
-                      <p className="text-[11px] text-slate-400">Mamadou Kouka • Client vérifié</p>
-                    </div>
-                    <div className="text-[10px] px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
-                      {step === 0 && "1. Demande reçue"}
-                      {step === 1 && "2. IA active"}
-                      {step === 2 && "3. Agent en ligne"}
-                      {step === 3 && "4. Dossier Agence"}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 my-4 overflow-y-auto max-h-[220px]">
-                    <div className="flex flex-col items-start">
-                      <div className="bg-slate-900 p-3 rounded-2xl rounded-tl-sm border border-slate-800 max-w-[85%]">
-                        <p className="text-[11px] text-slate-200">
-                          Bonjour, mon routeur Wifi acheté il y a 2 semaines ne s&apos;allume plus après l&apos;orage.
-                        </p>
-                        <span className="text-[9px] text-slate-500 mt-1 block">15:02</span>
-                      </div>
-                    </div>
-
-                    {step >= 1 && (
-                      <div className="flex flex-col items-end animate-in fade-in duration-300">
-                        <div className="bg-emerald-950/70 text-emerald-200 p-3 rounded-2xl rounded-tr-sm max-w-[85%] border border-emerald-500/40 shadow-sm shadow-emerald-500/10">
-                          <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mb-1">
-                            <Sparkles className="w-3 h-3" /> IA SAV Zadesk
-                          </span>
-                          <p className="text-[11px]">
-                            Bonjour ! Avez-vous essayé d&apos;appuyer 10 secondes sur le bouton Reset à l&apos;arrière avec le chargeur d&apos;origine ?
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {step >= 2 && (
-                      <>
-                        <div className="flex flex-col items-start animate-in fade-in duration-300">
-                          <div className="bg-slate-900 p-2.5 rounded-2xl rounded-tl-sm border border-slate-800 max-w-[85%]">
-                            <p className="text-[11px] text-slate-200">
-                              Oui, j&apos;ai testé, aucun voyant ne s&apos;allume.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="bg-indigo-950/40 border border-indigo-500/30 p-2.5 rounded-xl text-[10px] text-indigo-200 flex items-center justify-between animate-in fade-in duration-300">
-                          <span>🔄 Transfert vers Japhet I. (Technique SAV)</span>
-                          <span className="font-bold text-emerald-400">Historique complet transmis ✓</span>
-                        </div>
-                      </>
-                    )}
-
-                    {step >= 3 && (
-                      <div className="bg-amber-950/60 border border-amber-500/40 p-3 rounded-2xl text-amber-200 space-y-1.5 animate-in fade-in duration-300">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-400">
-                          <span className="flex items-center gap-1.5">
-                            <Building className="w-3.5 h-3.5" />
-                            Dossier Agence créé
-                          </span>
-                          <span>Réf: ZDK-48291</span>
-                        </div>
-                        <p className="text-[11px] text-amber-100">
-                          « Rendez-vous à l&apos;agence Centre-Ville avec votre QR Code. Votre échange standard de routeur est déjà validé. »
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>Le canal change, le contexte reste intact.</span>
-                    <span className="text-emerald-400 font-bold">100% synchronisé</span>
-                  </div>
-
-                </div>
-
-                {/* Right: Agency View */}
-                <div className="lg:col-span-3 bg-slate-950/70 rounded-2xl p-3.5 border border-slate-800 space-y-3">
-                  <div className="font-bold text-slate-300 flex items-center gap-2">
-                    <Building className="w-4 h-4 text-amber-400" />
-                    Vue Guichet Agence
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center space-y-2">
-                    <div className="w-14 h-14 rounded-xl bg-white p-1 mx-auto flex items-center justify-center">
-                      <QrCode className="w-12 h-12 text-slate-950" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Référence Dossier</span>
-                      <p className="font-mono font-black text-amber-400 text-sm">ZDK-48291</p>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] space-y-1">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Client :</span>
-                      <span className="text-slate-200 font-semibold">Mamadou K.</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Produit :</span>
-                      <span className="text-slate-200 font-semibold">Routeur 4G Pro</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Diagnostic :</span>
-                      <span className="text-emerald-400 font-semibold">Alimentation HS</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Action :</span>
-                      <span className="text-amber-300 font-semibold">Échange standard</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[9px] text-slate-500 text-center">
-                    Le guichetier scanne le QR code et traite le client en 1 minute.
-                  </p>
-                </div>
-
+              {/* -------------------------------------------------------- */}
+              {/* 2. SUJET EN BAS : CLIPPÉ PAR LE DISQUE (Socle Naturel)   */}
+              {/* Plus aucun effet "posé maladroitement" ou tronc flottant */}
+              {/* -------------------------------------------------------- */}
+              <div 
+                ref={subjectBottomRef}
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] sm:w-[330px] sm:h-[330px] lg:w-[350px] lg:h-[350px] overflow-hidden rounded-full pointer-events-none z-10"
+              >
+                <img
+                  src="/images/hero-african-contemporary-cutout.png"
+                  alt="Entrepreneure africaine contemporaine souriante utilisant son smartphone"
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] sm:w-[330px] lg:w-[350px] max-w-none h-auto object-contain select-none drop-shadow-[0_18px_30px_rgba(13,27,61,0.22)]"
+                  loading="eager"
+                  decoding="async"
+                />
               </div>
+
+              {/* -------------------------------------------------------- */}
+              {/* 3. SUJET EN HAUT : BREAKOUT LIBRE (Tête, Afro, Épaules)   */}
+              {/* Émerge hors du disque au sommet sans aucune rupture      */}
+              {/* -------------------------------------------------------- */}
+              <div 
+                ref={subjectTopRef}
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[410px] sm:w-[330px] h-[440px] lg:w-[350px] lg:h-[465px] pointer-events-none z-20"
+                style={{
+                  clipPath: "inset(0 0 37% 0)",
+                }}
+              >
+                <img
+                  src="/images/hero-african-contemporary-cutout.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] sm:w-[330px] lg:w-[350px] max-w-none h-auto object-contain select-none drop-shadow-[0_18px_30px_rgba(13,27,61,0.22)]"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+
+              {/* Anneau graphique épuré d'accentuation en haut à droite */}
+              <div 
+                aria-hidden="true"
+                className="absolute top-10 -right-2 w-14 h-14 rounded-full border-2 border-emerald-500/25 pointer-events-none -z-10 hidden sm:block"
+              />
 
             </div>
           </div>
+
         </div>
 
       </div>

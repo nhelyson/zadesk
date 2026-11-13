@@ -1,0 +1,153 @@
+Created At: 2026-11-04T13:40:46+01:00
+Completed At: 2026-11-04T13:40:47+01:00
+Showing lines 251-400 of 481
+251: 
+252:         <!-- UC 3.1 -->
+253:         <mxCell id="uc_view_tickets" value="Consulter la file des tickets&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Assignés, Partagés, Historiques)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#8B5CF6;strokeWidth=2;fontColor=#5B21B6;fontSize=12.5;fontStyle=1;shadow=1;" vertex="1" parent="1">
+254:           <mxGeometry x="320" y="690" width="240" height="75" as="geometry" />
+255:         </mxCell>
+256: 
+257:         <!-- UC 3.2 -->
+258:         <mxCell id="uc_process_ticket" value="Traiter &amp;amp; Mettre à jour un ticket&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Changer statut, priorité, catégorie)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#7C3AED;strokeWidth=2;fontColor=#4C1D95;fontSize=12.5;fontStyle=1;shadow=1;" vertex="1" parent="1">
+259:           <mxGeometry x="640" y="690" width="240" height="75" as="geometry" />
+260:         </mxCell>
+261: 
+262:         <!-- UC 3.3 -->
+263:         <mxCell id="uc_auto_assign" value="Attribuer automatiquement un ticket&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#78350F;&quot;&gt;(Selon compétences &amp;amp; charge max)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+264:           <mxGeometry x="960" y="690" width="250" height="75" as="geometry" />
+265:         </mxCell>
+266: 
+267:         <!-- UC 3.4 -->
+268:         <mxCell id="uc_manual_reassign" value="Réassigner manuellement un ticket&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Vers un autre agent avec motif)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#8B5CF6;strokeWidth=1.5;fontColor=#5B21B6;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+269:           <mxGeometry x="1270" y="690" width="240" height="75" as="geometry" />
+270:         </mxCell>
+271: 
+272:         <!-- UC 3.5 : Résoudre / Clôturer -->
+273:         <mxCell id="uc_resolve_ticket" value="Résoudre &amp;amp; Clôturer un ticket&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Validation solution client &amp;amp; SLA)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#8B5CF6;strokeWidth=1.5;fontColor=#5B21B6;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+274:           <mxGeometry x="490" y="810" width="230" height="70" as="geometry" />
+275:         </mxCell>
+276: 
+277:         <!-- UC 3.6 : Partage collaboratif -->
+278:         <mxCell id="uc_share_ticket" value="Partager un ticket avec un collègue&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Lecture seule ou contribution)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#8B5CF6;strokeWidth=1.5;fontColor=#5B21B6;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+279:           <mxGeometry x="780" y="810" width="240" height="70" as="geometry" />
+280:         </mxCell>
+281: 
+282:         <!-- UC 3.7 : Historique d'activité -->
+283:         <mxCell id="uc_log_activity" value="Consigner &amp;amp; Journaliser les activités&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#64748B;&quot;&gt;(Changements de statut, réaffectations)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#94A3B8;strokeWidth=1.5;fontColor=#334155;fontSize=11;strokeDasharray=3 3;" vertex="1" parent="1">
+284:           <mxGeometry x="640" y="905" width="240" height="60" as="geometry" />
+285:         </mxCell>
+286: 
+287:         <!-- RELATIONS TICKETS -->
+288:         <mxCell id="ext_resolve" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#7C3AED;strokeWidth=1.5;fontColor=#5B21B6;fontSize=10;" edge="1" parent="1" source="uc_resolve_ticket" target="uc_process_ticket">
+289:           <mxGeometry relative="1" as="geometry" />
+290:         </mxCell>
+291:         <mxCell id="ext_share" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#7C3AED;strokeWidth=1.5;fontColor=#5B21B6;fontSize=10;" edge="1" parent="1" source="uc_share_ticket" target="uc_process_ticket">
+292:           <mxGeometry relative="1" as="geometry" />
+293:         </mxCell>
+294:         <mxCell id="inc_activity" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#059669;strokeWidth=1.5;fontColor=#065F46;fontSize=10;" edge="1" parent="1" source="uc_process_ticket" target="uc_log_activity">
+295:           <mxGeometry relative="1" as="geometry" />
+296:         </mxCell>
+297: 
+298:         <!-- LIENS ACTEURS -> TICKETS -->
+299:         <mxCell id="edge_agent_view" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8B5CF6;strokeWidth=1.5;" edge="1" parent="1" source="actor_agent" target="uc_view_tickets">
+300:           <mxGeometry relative="1" as="geometry">
+301:             <Array as="points">
+302:               <mxPoint x="1830" y="840" />
+303:               <mxPoint x="1830" y="665" />
+304:               <mxPoint x="440" y="665" />
+305:             </Array>
+306:           </mxGeometry>
+307:         </mxCell>
+308:         <mxCell id="edge_agent_process" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7C3AED;strokeWidth=2;" edge="1" parent="1" source="actor_agent" target="uc_process_ticket">
+309:           <mxGeometry relative="1" as="geometry">
+310:             <Array as="points">
+311:               <mxPoint x="1810" y="870" />
+312:               <mxPoint x="1810" y="727" />
+313:             </Array>
+314:           </mxGeometry>
+315:         </mxCell>
+316:         <mxCell id="edge_engine_auto" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#D97706;strokeWidth=2;" edge="1" parent="1" source="actor_engine" target="uc_auto_assign">
+317:           <mxGeometry relative="1" as="geometry" />
+318:         </mxCell>
+319:         <mxCell id="edge_manager_reassign" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F766E;strokeWidth=1.5;" edge="1" parent="1" source="actor_manager" target="uc_manual_reassign">
+320:           <mxGeometry relative="1" as="geometry">
+321:             <Array as="points">
+322:               <mxPoint x="1840" y="1080" />
+323:               <mxPoint x="1840" y="730" />
+324:             </Array>
+325:           </mxGeometry>
+326:         </mxCell>
+327: 
+328:         <!-- ======================================================== -->
+329:         <!-- CAS D'UTILISATION : 4. HUB CONVERSATIONNEL              -->
+330:         <!-- ======================================================== -->
+331: 
+332:         <!-- UC 4.1 -->
+333:         <mxCell id="uc_chat" value="Dialoguer en direct avec un client&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Réponses en temps réel, fil unifié)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#CCFBF1;strokeColor=#14B8A6;strokeWidth=2;fontColor=#0F766E;fontSize=12.5;fontStyle=1;shadow=1;" vertex="1" parent="1">
+334:           <mxGeometry x="320" y="1060" width="250" height="75" as="geometry" />
+335:         </mxCell>
+336: 
+337:         <!-- UC 4.2 -->
+338:         <mxCell id="uc_internal_note" value="Rédiger une note interne confidentielle&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#0F766E;&quot;&gt;(Invisible pour le client)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#CCFBF1;strokeColor=#14B8A6;strokeWidth=1.5;fontColor=#0F766E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+339:           <mxGeometry x="670" y="1060" width="250" height="75" as="geometry" />
+340:         </mxCell>
+341: 
+342:         <!-- UC 4.3 -->
+343:         <mxCell id="uc_escalate_ticket" value="Escalader une conversation en ticket&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#7C3AED;&quot;&gt;(Conversion automatique avec historique)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#8B5CF6;strokeWidth=2;fontColor=#5B21B6;fontSize=12.5;fontStyle=1;shadow=1;" vertex="1" parent="1">
+344:           <mxGeometry x="1010" y="1060" width="260" height="75" as="geometry" />
+345:         </mxCell>
+346: 
+347:         <!-- UC 4.4 : Synchronisation WhatsApp -->
+348:         <mxCell id="uc_sync_whatsapp" value="Relayer les messages via WhatsApp&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#166534;&quot;&gt;(Webhook entrant / sortant Meta)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#22C55E;strokeWidth=2;fontColor=#15803D;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+349:           <mxGeometry x="1360" y="1060" width="250" height="75" as="geometry" />
+350:         </mxCell>
+351: 
+352:         <!-- RELATIONS CONVERSATION -->
+353:         <mxCell id="ext_internal_note" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#0F766E;strokeWidth=1.5;fontColor=#0F766E;fontSize=10;" edge="1" parent="1" source="uc_internal_note" target="uc_chat">
+354:           <mxGeometry relative="1" as="geometry" />
+355:         </mxCell>
+356:         <mxCell id="ext_escalate" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#8B5CF6;strokeWidth=1.5;fontColor=#5B21B6;fontSize=10;" edge="1" parent="1" source="uc_escalate_ticket" target="uc_chat">
+357:           <mxGeometry relative="1" as="geometry">
+358:             <Array as="points">
+359:               <mxPoint x="1140" y="1170" />
+360:               <mxPoint x="445" y="1170" />
+361:             </Array>
+362:           </mxGeometry>
+363:         </mxCell>
+364:         <mxCell id="ext_sync_whatsapp" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#15803D;fontSize=10;" edge="1" parent="1" source="uc_sync_whatsapp" target="uc_chat">
+365:           <mxGeometry relative="1" as="geometry">
+366:             <Array as="points">
+367:               <mxPoint x="1485" y="1195" />
+368:               <mxPoint x="445" y="1195" />
+369:             </Array>
+370:           </mxGeometry>
+371:         </mxCell>
+372: 
+373:         <!-- LIENS ACTEURS -> CONVERSATIONS -->
+374:         <mxCell id="edge_agent_chat" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#14B8A6;strokeWidth=2;" edge="1" parent="1" source="actor_agent" target="uc_chat">
+375:           <mxGeometry relative="1" as="geometry">
+376:             <Array as="points">
+377:               <mxPoint x="1820" y="900" />
+378:               <mxPoint x="1820" y="1030" />
+379:               <mxPoint x="445" y="1030" />
+380:             </Array>
+381:           </mxGeometry>
+382:         </mxCell>
+383:         <mxCell id="edge_whatsapp_sync" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#22C55E;strokeWidth=2;" edge="1" parent="1" source="actor_whatsapp" target="uc_sync_whatsapp">
+384:           <mxGeometry relative="1" as="geometry">
+385:             <Array as="points">
+386:               <mxPoint x="1780" y="1565" />
+387:               <mxPoint x="1780" y="1100" />
+388:             </Array>
+389:           </mxGeometry>
+390:         </mxCell>
+391: 
+392:         <!-- ======================================================== -->
+393:         <!-- CAS D'UTILISATION : 5. ADMINISTRATION DU WORKSPACE       -->
+394:         <!-- ======================================================== -->
+395: 
+396:         <!-- UC 5.1 -->
+397:         <mxCell id="uc_config_ws" value="Configurer le profil entreprise&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Nom, coordonnées SAV, logo, horaires)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+398:           <mxGeometry x="320" y="1320" width="250" height="70" as="geometry" />
+399:         </mxCell>
+400: 

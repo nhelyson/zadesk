@@ -51,21 +51,47 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setIsOnline(navigator.onLine);
 
-    // Detect standalone display mode
-    const checkStandalone = () => {
+    // Detect if already installed or running in standalone mode
+    const checkIsInstalled = () => {
       const isStandalone =
         window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: window-controls-overlay)").matches ||
         (window.navigator as any).standalone === true ||
-        document.referrer.includes("android-app://");
+        document.referrer.includes("android-app://") ||
+        window.location.search.includes("source=pwa") ||
+        localStorage.getItem("zadesk_pwa_installed") === "true";
 
-      setIsInstalled(isStandalone);
       if (isStandalone) {
+        setIsInstalled(true);
+        setIsInstallable(false);
+        setShowInstallBanner(false);
+        setShowIOSPrompt(false);
         document.documentElement.classList.add("standalone-mode");
+        localStorage.setItem("zadesk_pwa_installed", "true");
+        return true;
       }
-      return isStandalone;
+      return false;
     };
 
-    const standalone = checkStandalone();
+    const alreadyInstalled = checkIsInstalled();
+
+    // Check installed apps via modern Chromium API if available
+    if (!alreadyInstalled && "getInstalledRelatedApps" in navigator) {
+      (navigator as any)
+        .getInstalledRelatedApps()
+        .then((relatedApps: any[]) => {
+          if (Array.isArray(relatedApps) && relatedApps.length > 0) {
+            setIsInstalled(true);
+            setIsInstallable(false);
+            setShowInstallBanner(false);
+            setShowIOSPrompt(false);
+            localStorage.setItem("zadesk_pwa_installed", "true");
+          }
+        })
+        .catch(() => {
+          // Ignore API permission or unsupported exceptions silently
+        });
+    }
 
     // Detect iOS device (iPhone, iPad, iPod or iPadOS MacIntel touch)
     const isIOSDevice =
@@ -76,8 +102,8 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
     setIsIOS(isIOSDevice);
 
-    // On iOS, if not standalone, it's installable via Safari manual action
-    if (isIOSDevice && !standalone) {
+    // On iOS, if not already installed, it's installable via Safari manual action
+    if (isIOSDevice && !alreadyInstalled) {
       setIsInstallable(true);
     }
 
@@ -87,8 +113,6 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
         navigator.serviceWorker
           .register("/sw.js", { scope: "/" })
           .then((registration) => {
-            console.log("[PWA] Service Worker registered with scope:", registration.scope);
-
             // Check if there is already a waiting worker
             if (registration.waiting) {
               setWaitingWorker(registration.waiting);
@@ -122,7 +146,6 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
         });
       };
 
-      // Check readyState to prevent missing the 'load' event if already completed
       if (document.readyState === "complete") {
         registerSW();
       } else {
@@ -133,6 +156,19 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     // 3. Chromium / Android Install Prompt Event listener
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+
+      // If the app is already detected as installed, suppress prompt entirely
+      if (
+        localStorage.getItem("zadesk_pwa_installed") === "true" ||
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true
+      ) {
+        setIsInstalled(true);
+        setIsInstallable(false);
+        setDeferredPrompt(null);
+        return;
+      }
+
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
 
@@ -141,7 +177,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       const isDismissedRecently =
         dismissedAt && Date.now() - parseInt(dismissedAt, 10) < 5 * 24 * 60 * 60 * 1000;
 
-      if (!isDismissedRecently && !standalone) {
+      if (!isDismissedRecently) {
         const timer = setTimeout(() => {
           setShowInstallBanner(true);
         }, 5000);
@@ -151,14 +187,15 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // 4. App Installed Event listener
+    // 4. App Installed Event listener - browser confirmed installation
     const handleAppInstalled = () => {
+      localStorage.setItem("zadesk_pwa_installed", "true");
       setIsInstalled(true);
       setIsInstallable(false);
       setShowInstallBanner(false);
       setShowIOSPrompt(false);
       setDeferredPrompt(null);
-      console.log("[PWA] Zadesk installed successfully");
+      console.log("[PWA] Zadesk installed and locked as primary app instance");
     };
 
     window.addEventListener("appinstalled", handleAppInstalled);
@@ -177,8 +214,8 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Display banner after 6s on iOS if not dismissed recently
-    if (isIOSDevice && !standalone) {
+    // Display banner after 6s on iOS if not dismissed recently and not installed
+    if (isIOSDevice && !alreadyInstalled) {
       const dismissedAt = localStorage.getItem("zadesk_pwa_dismissed");
       const isDismissedRecently =
         dismissedAt && Date.now() - parseInt(dismissedAt, 10) < 5 * 24 * 60 * 60 * 1000;
@@ -201,6 +238,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Action: Trigger Install Prompt
   const promptInstall = useCallback(async () => {
+    if (isInstalled || localStorage.getItem("zadesk_pwa_installed") === "true") {
+      return;
+    }
+
     if (isIOS) {
       setShowIOSPrompt(true);
       setShowInstallBanner(false);
@@ -208,7 +249,6 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (!deferredPrompt) {
-      // If deferred prompt is not available yet (e.g. desktop manual click), inform user
       console.log("[PWA] deferredPrompt not ready or supported");
       return;
     }
@@ -217,6 +257,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       await deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === "accepted") {
+        localStorage.setItem("zadesk_pwa_installed", "true");
         setIsInstalled(true);
         setIsInstallable(false);
       }
@@ -226,7 +267,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       setShowInstallBanner(false);
       setDeferredPrompt(null);
     }
-  }, [deferredPrompt, isIOS]);
+  }, [deferredPrompt, isIOS, isInstalled]);
 
   // Action: Dismiss Install Banner
   const dismissInstallBanner = () => {

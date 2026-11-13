@@ -17,11 +17,70 @@ enum Role {
   AGENT
 }
 
+enum MembershipStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum DowngradeRequestStatus {
+  DRAFT
+  READY
+  BLOCKED
+  SCHEDULED
+  APPLIED
+  CANCELLED
+  OBSOLETE_CANCELLED
+}
+
 enum OtpPurpose {
   REGISTRATION
   LOGIN
   EMAIL_VERIFICATION
   PASSWORD_RESET
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  PENDING_ASSIGNMENT
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum ShareAccessLevel {
+  READ_ONLY
+  CONTRIBUTE
+}
+
+enum ConversationStatus {
+  WAITING_ASSIGNMENT
+  ACTIVE
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum MessageType {
+  CUSTOMER
+  AGENT_REPLY
+  INTERNAL_NOTE
+  SYSTEM
+}
+
+enum AgentAvailability {
+  AVAILABLE
+  BUSY
+  AWAY
+  OFFLINE
 }
 
 model User {
@@ -36,10 +95,32 @@ model User {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  memberships   Membership[]
-  sessions      Session[]
-  otpTokens     OtpToken[]
-  sentInvitations WorkspaceInvitation[]
+  memberships              Membership[]
+  sessions                 Session[]
+  otpTokens                OtpToken[]
+  sentInvitations          WorkspaceInvitation[]
+  agentProfiles            AgentProfile[]
+  assignedTickets          Ticket[]              @relation("AssignedAgentTickets")
+  createdTickets           Ticket[]              @relation("CreatedTickets")
+  receivedTicketShares     TicketShare[]         @relation("ReceivedTicketShares")
+  createdTicketShares      TicketShare[]         @relation("CreatedTicketShares")
+  prevAssignments          TicketAssignment[]    @relation("PrevAgentAssignments")
+  newAssignments           TicketAssignment[]    @relation("NewAgentAssignments")
+  madeAssignments          TicketAssignment[]    @relation("AssignedByAssignments")
+  ticketActivities         TicketActivity[]
+  assignedConversations    Conversation[]        @relation("AssignedConversations")
+  messages                 ConversationMessage[]
+  receivedConvShares       ConversationShare[]   @relation("ReceivedConversationShares")
+  createdConvShares        ConversationShare[]   @relation("CreatedConversationShares")
+  auditLogs                AuditLog[]
+  onboardingDraft          OnboardingDraft?
+
+  // Facturation
+  subscriptionIntents           SubscriptionIntent[]
+  receiptAuditLogs              ProviderReceiptAuditLog[]
+  subscriptionHistoryLogs       SubscriptionHistoryLog[]
+  requestedCommercialDowngrades CommercialDowngradeRequest[] @relation("RequestedCommercialDowngrades")
+  cancelledCommercialDowngrades CommercialDowngradeRequest[] @relation("CancelledCommercialDowngrades")
 
   @@map("users")
 }
@@ -47,7 +128,9 @@ model User {
 model Workspace {
   id                String       @id @default(cuid())
   name              String
+  normalizedName    String?
   slug              String       @unique
+  hasExistingSav    Boolean      @default(false)
   description       String?
   category          String?      @default("Autre")
   logoUrl           String?
@@ -63,48 +146,117 @@ model Workspace {
   country           String?      @default("Congo")
   openingHours      String?
   supportCategories Json?
+  brandColor        String?
+  brandPalette      Json?
+  cannedResponses   Json?
+  businessHours     Json?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
   memberships       Membership[]
   invitations       WorkspaceInvitation[]
+  whatsAppConnection WhatsAppConnection?
+  agentProfiles     AgentProfile[]
+  skills            Skill[]
+  tickets           Ticket[]
+  conversations     Conversation[]
+  auditLogs         AuditLog[]
+  outboxEvents      OutboxEvent[]
+  establishments    Establishment[]
 
+  // Facturation
+  subscription             Subscription?
+  subscriptionIntents      SubscriptionIntent[]
+  paymentAttempts          PaymentAttempt[]
+  paymentTransactions      PaymentTransaction[]
+  providerPaymentReceipts  ProviderPaymentReceipt[]
+  subscriptionHistoryLogs  SubscriptionHistoryLog[]
+  downgradeRequests        CommercialDowngradeRequest[]
+
+  @@unique([normalizedName, country], name: "unique_normalized_name_country")
+  @@index([normalizedName])
   @@map("workspaces")
 }
 
 model WorkspaceInvitation {
-  id          String    @id @default(cuid())
-  email       String
-  workspaceId String
-  role        Role      @default(AGENT)
-  token       String    @unique
-  invitedById String
-  expiresAt   DateTime
-  acceptedAt  DateTime?
-  createdAt   DateTime  @default(now())
+  id                String    @id @default(cuid())
+  email             String
+  workspaceId       String
+  role              Role      @default(AGENT)
+  token             String    @unique
+  invitedById       String
+  expiresAt         DateTime
+  acceptedAt        DateTime?
+  revokedAt         DateTime?
+  dispatchStatus    String?   @default("PENDING")
+  dispatchLockedBy  String?
+  dispatchStartedAt DateTime?
+  dispatchAttempts  Int       @default(0)
+  nextRetryAt       DateTime?
+  dispatchError     String?
+  createdAt         DateTime  @default(now())
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  invitedBy   User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy         User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)
 
   @@index([email])
   @@index([workspaceId])
   @@index([token])
+  @@index([workspaceId, dispatchStatus])
   @@map("workspace_invitations")
 }
 
-model Membership {
-  id          String    @id @default(cuid())
-  userId      String
-  workspaceId String
-  role        Role      @default(AGENT)
-  createdAt   DateTime  @default(now())
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+model OutboxEvent {
+  id          String       @id @default(cuid())
+  workspaceId String
+  eventType   String
+  queueName   String
+  jobName     String
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  jobId       String?
+  attempts    Int          @default(0)
+  maxAttempts Int          @default(5)
+  lastError   String?
+  lockedAt    DateTime?
+  lockedBy    String?
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([workspaceId, status])
+  @@index([lockedBy])
+  @@map("outbox_events")
+}
+
+model Membership {
+  id              String           @id @default(cuid())
+  userId          String
+  workspaceId     String
+  role            Role             @default(AGENT)
+  status          MembershipStatus @default(ACTIVE)
+  suspendedAt     DateTime?
+  suspendedReason String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, workspaceId])
   @@index([userId])
   @@index([workspaceId])
+  @@index([workspaceId, status])
   @@map("memberships")
 }
 
@@ -159,4 +311,686 @@ model PendingRegistration {
   @@index([expiresAt])
   @@map("pending_registrations")
 }
+
+model OnboardingDraft {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  step      Int      @default(1)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("onboarding_drafts")
+}
+
+model WhatsAppConnection {
+  id                 String    @id @default(cuid())
+  workspaceId        String    @unique
+  wabaId             String
+  phoneNumberId      String
+  displayPhoneNumber String
+  verifiedName       String?
+  accessToken        String
+  status             String    @default("CONNECTED") // CONNECTED, DISCONNECTED, ERROR
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([phoneNumberId])
+  @@map("whatsapp_connections")
+}
+
+model AgentProfile {
+  id                    String            @id @default(cuid())
+  workspaceId           String
+  userId                String
+  availability          AgentAvailability @default(AVAILABLE)
+  maxCapacity           Int               @default(10)
+  autoAssignmentEnabled Boolean           @default(true)
+  title                 String?           @default("Agent SAV")
+  phone                 String?
+  notificationEmail     Boolean           @default(true)
+  notificationApp       Boolean           @default(true)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills                AgentSkill[]
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([workspaceId, availability])
+  @@map("agent_profiles")
+}
+
+model Skill {
+  id          String       @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agents      AgentSkill[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("skills")
+}
+
+model AgentSkill {
+  id             String       @id @default(cuid())
+  agentProfileId String
+  skillId        String
+  validatedById  String?
+  validatedAt    DateTime?
+  createdAt      DateTime     @default(now())
+
+  agentProfile   AgentProfile @relation(fields: [agentProfileId], references: [id], onDelete: Cascade)
+  skill          Skill        @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([agentProfileId, skillId])
+  @@index([skillId])
+  @@map("agent_skills")
+}
+
+model Ticket {
+  id              String            @id @default(cuid())
+  reference       String
+  workspaceId     String
+  assignedAgentId String?
+  createdById     String?
+  title           String
+  description     String
+  category        String?
+  priority        TicketPriority    @default(MEDIUM)
+  status          TicketStatus      @default(OPEN)
+  customerName    String
+  customerPhone   String?
+  customerEmail   String?
+  slaDueAt        DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  conversationId  String?
+  metadata        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedAgent   User?             @relation("AssignedAgentTickets", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  createdBy       User?             @relation("CreatedTickets", fields: [createdById], references: [id], onDelete: SetNull)
+  conversation    Conversation?     @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  assignments     TicketAssignment[]
+  shares          TicketShare[]
+  activities      TicketActivity[]
+
+  @@unique([workspaceId, reference])
+  @@index([workspaceId])
+  @@index([workspaceId, assignedAgentId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, priority])
+  @@map("tickets")
+}
+
+model TicketAssignment {
+  id              String    @id @default(cuid())
+  ticketId        String
+  previousAgentId String?
+  newAgentId      String?
+  assignedById    String?
+  reason          String?
+  createdAt       DateTime  @default(now())
+
+  ticket          Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  previousAgent   User?     @relation("PrevAgentAssignments", fields: [previousAgentId], references: [id], onDelete: SetNull)
+  newAgent        User?     @relation("NewAgentAssignments", fields: [newAgentId], references: [id], onDelete: SetNull)
+  assignedBy      User?     @relation("AssignedByAssignments", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@map("ticket_assignments")
+}
+
+model TicketShare {
+  id          String           @id @default(cuid())
+  ticketId    String
+  agentId     String
+  sharedById  String
+  accessLevel ShareAccessLevel @default(READ_ONLY)
+  expiresAt   DateTime?
+  createdAt   DateTime         @default(now())
+
+  ticket      Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  agent       User             @relation("ReceivedTicketShares", fields: [agentId], references: [id], onDelete: Cascade)
+  sharedBy    User             @relation("CreatedTicketShares", fields: [sharedById], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, agentId])
+  @@index([agentId])
+  @@index([ticketId])
+  @@map("ticket_shares")
+}
+
+model TicketActivity {
+  id        String    @id @default(cuid())
+  ticketId  String
+  authorId  String?
+  type      String    // STATUS_CHANGE, NOTE, ASSIGNMENT, PRIORITY_CHANGE, RESOLUTION
+  content   String
+  createdAt DateTime  @default(now())
+
+  ticket    Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@map("ticket_activities")
+}
+
+model Conversation {
+  id              String                @id @default(cuid())
+  workspaceId     String
+  assignedAgentId String?
+  customerName    String
+  customerPhone   String?
+  customerEmail   String?
+  category        String?
+  channel         String                @default("PORTAL") // PORTAL, WHATSAPP, EMAIL
+  status          ConversationStatus    @default(ACTIVE)
+  priority        TicketPriority        @default(MEDIUM)
+  publicTokenHash String?
+  lastMessageAt   DateTime              @default(now())
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedAgent   User?                 @relation("AssignedConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+
+  messages        ConversationMessage[]
+  shares          ConversationShare[]
+  tickets         Ticket[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, assignedAgentId])
+  @@index([workspaceId, status])
+  @@map("conversations")
+}
+
+model ConversationMessage {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String?
+  senderType     MessageType  @default(CUSTOMER)
+  senderName     String
+  content        String
+  isInternalNote Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+  @@index([conversationId, isInternalNote])
+  @@map("conversation_messages")
+}
+
+model ConversationShare {
+  id             String           @id @default(cuid())
+  conversationId String
+  agentId        String
+  sharedById     String
+  accessLevel    ShareAccessLevel @default(READ_ONLY)
+  createdAt      DateTime         @default(now())
+
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  agent          User             @relation("ReceivedConversationShares", fields: [agentId], references: [id], onDelete: Cascade)
+  sharedBy       User             @relation("CreatedConversationShares", fields: [sharedById], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, agentId])
+  @@index([agentId])
+  @@map("conversation_shares")
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      String    // TICKET_ASSIGNED, TICKET_REASSIGNED, TICKET_SHARED, STATUS_CHANGED, NOTE_ADDED
+  entityType  String    // TICKET, CONVERSATION, AGENT_PROFILE
+  entityId    String
+  details     Json?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([workspaceId, entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum EstablishmentType {
+  HEADQUARTERS
+  BRANCH
+  STORE
+  POINT_OF_SALE
+  SERVICE_POINT
+  PICKUP_POINT
+  TECH_CENTER
+  OTHER
+}
+
+model Establishment {
+  id              String            @id @default(cuid())
+  workspaceId     String
+  name            String
+  type            EstablishmentType @default(BRANCH)
+  description     String?
+  isMain          Boolean           @default(false)
+  isPublic        Boolean           @default(true)
+  isActive        Boolean           @default(true)
+
+  // Coordonnées
+  address         String
+  city            String            @default("Brazzaville")
+  country         String            @default("Congo")
+  addressDetails  String?
+  phone           String?
+  email           String?
+  whatsapp        String?
+
+  // Horaires
+  openingHours    String?
+  businessHours   Json?
+
+  // Informations complémentaires
+  imageUrl        String?           @db.Text
+  galleryImages   Json?
+  services        Json?
+  practicalInfo   String?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, isPublic])
+  @@index([workspaceId, isActive])
+  @@map("establishments")
+}
+
+// ====================================================
+// FACTURATION ZADESK & REGISTRE FINANCIER SASPAY
+// ====================================================
+
+enum PlanType {
+  DECOUVERTE
+  STARTER
+  PRO
+  ENTREPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  RENEWAL_DUE
+  GRACE_PERIOD
+  EXPIRED
+  CANCELLED
+}
+
+enum IntentType {
+  INITIAL_PURCHASE
+  RENEWAL
+  UPGRADE
+  DOWNGRADE
+}
+
+enum IntentStatus {
+  PENDING
+  COMPLETED
+  ABANDONED
+  EXPIRED
+}
+
+enum AttemptStatus {
+  INITIATED
+  CHECKOUT_CREATED
+  PAYMENT_PENDING
+  RESULT_UNKNOWN
+  RECONCILIATION_REQUIRED
+  PAYMENT_CONFIRMED
+  CONFIRMED_FAILURE
+  SESSION_EXPIRED
+}
+
+enum ReceiptValidationStatus {
+  VALID
+  INVALID_AMOUNT
+  INVALID_CURRENCY
+  INVALID_PAID_AT
+  MALFORMED_DATA
+}
+
+enum ReceiptReconciliationStatus {
+  PENDING_MATCHING
+  MATCHED_AND_APPLIED
+  DUPLICATE_PAYMENT
+  AMOUNT_MISMATCH
+  UNMATCHED_METADATA
+  EXPIRED_INTENT_PAID
+  ABANDONED_INTENT_PAID
+  CONFLICTING_ATTEMPT_STATUS
+  INVESTIGATION_REQUIRED
+  MANUALLY_RESOLVED
+  REFUNDED
+}
+
+enum TransactionApplicationStatus {
+  APPLIED_TO_SUBSCRIPTION
+  DUPLICATE_PAYMENT_RECORDED
+  MANUAL_ADJUSTMENT
+  REFUNDED
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  workspaceId          String             @unique
+  plan                 PlanType           @default(DECOUVERTE)
+  status               SubscriptionStatus @default(ACTIVE)
+  activePriceXaf       Int                @default(0)
+
+  currentPeriodStart   DateTime           @default(now())
+  currentPeriodEnd     DateTime?
+  gracePeriodEnd       DateTime?
+  billingAnchorDay     Int?
+  version              Int                @default(1)
+
+  lastNoticeSentAt     DateTime?
+  noticeCount          Int                @default(0)
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  intents              SubscriptionIntent[]
+  transactions         PaymentTransaction[]
+  history              SubscriptionHistoryLog[]
+  downgradeRequests    CommercialDowngradeRequest[]
+
+  @@index([status, currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+model SubscriptionIntent {
+  id                          String             @id @default(cuid())
+  workspaceId                 String
+  subscriptionId              String
+  userId                      String
+
+  intentType                  IntentType         @default(INITIAL_PURCHASE)
+  targetPlan                  PlanType
+  priceXaf                    Int
+  currency                    String             @default("XAF")
+
+  status                      IntentStatus       @default(PENDING)
+  clientMutationKey           String             @unique
+  expectedSubscriptionVersion Int                @default(1)
+
+  createdAt                   DateTime           @default(now())
+  updatedAt                   DateTime           @updatedAt
+
+  workspace                   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  subscription                Subscription       @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  user                        User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  attempts                    PaymentAttempt[]
+  transactions                PaymentTransaction[]
+  receipts                    ProviderPaymentReceipt[]
+
+  @@index([workspaceId, status])
+  @@map("subscription_intents")
+}
+
+model PaymentAttempt {
+  id                   String             @id @default(cuid())
+  intentId             String
+  workspaceId          String
+  attemptNumber        Int                @default(1)
+
+  provider             String             @default("SASPAY")
+  providerSessionId    String?            @unique
+  checkoutUrl          String?
+  status               AttemptStatus      @default(INITIATED)
+  localAttemptKey      String             @unique
+
+  expiresAt            DateTime?
+  failureReason        String?
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  intent               SubscriptionIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  transactions         PaymentTransaction[]
+  receipts             ProviderPaymentReceipt[]
+
+  @@unique([intentId, attemptNumber])
+  @@index([providerSessionId])
+  @@map("payment_attempts")
+}
+
+model ProviderPaymentReceipt {
+  id                    String                      @id @default(cuid())
+  provider              String                      @default("SASPAY")
+  providerTransactionId String
+  providerReference     String?
+
+  amountRaw             String?
+  currencyRaw           String?
+  paidAtRaw             String?
+
+  amountXaf             Int?
+  currency              String?
+  paidAt                DateTime?
+
+  paymentMethod         String?
+  operatorReference     String?
+
+  validationStatus      ReceiptValidationStatus     @default(VALID)
+  reconciliationStatus  ReceiptReconciliationStatus @default(PENDING_MATCHING)
+  diagnosticNotes       String?
+
+  workspaceId           String?
+  intentId              String?
+  attemptId             String?
+
+  rawPayload            Json
+
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+
+  workspace             Workspace?                  @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  intent                SubscriptionIntent?         @relation(fields: [intentId], references: [id], onDelete: SetNull)
+  attempt               PaymentAttempt?             @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  transaction           PaymentTransaction?
+  events                ProviderReceiptEvent[]
+  auditLogs             ProviderReceiptAuditLog[]
+
+  @@unique([provider, providerTransactionId])
+  @@index([reconciliationStatus, createdAt])
+  @@index([workspaceId, paidAt])
+  @@map("provider_payment_receipts")
+}
+
+model ProviderReceiptEvent {
+  id                    String                 @id @default(cuid())
+  receiptId             String
+  provider              String                 @default("SASPAY")
+  eventKey              String
+  eventType             String
+
+  rawHeaders            Json
+  rawBodyText           String                 @db.Text
+  payloadHash           String
+
+  amountRaw             String?
+  currencyRaw           String?
+  paidAtRaw             String?
+  providerReference     String?
+
+  rawPayload            Json
+  isIdenticalToReceipt  Boolean
+  discrepancyNotes      String?
+
+  createdAt             DateTime               @default(now())
+
+  receipt               ProviderPaymentReceipt @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, eventKey])
+  @@index([receiptId])
+  @@index([payloadHash])
+  @@map("provider_receipt_events")
+}
+
+model PaymentTransaction {
+  id                    String                       @id @default(cuid())
+  receiptId             String                       @unique
+  workspaceId           String
+  subscriptionId        String
+  intentId              String
+  attemptId             String?
+
+  provider              String                       @default("SASPAY")
+  providerTransactionId String
+
+  amountXaf             Int
+  currency              String                       @default("XAF")
+  paymentMethod         String?
+  operatorReference     String?
+
+  status                TransactionApplicationStatus
+  paidAt                DateTime
+
+  createdAt             DateTime                     @default(now())
+
+  receipt               ProviderPaymentReceipt       @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+  workspace             Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  subscription          Subscription                 @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  intent                SubscriptionIntent           @relation(fields: [intentId], references: [id], onDelete: Restrict)
+  attempt               PaymentAttempt?              @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, paidAt])
+  @@map("payment_transactions")
+}
+
+model ProviderReceiptAuditLog {
+  id                     String                      @id @default(cuid())
+  receiptId              String
+  actorUserId            String?
+
+  previousReconciliation ReceiptReconciliationStatus
+  newReconciliation      ReceiptReconciliationStatus
+  reason                 String
+  decisionNotes          String?
+
+  createdAt              DateTime                    @default(now())
+
+  receipt                ProviderPaymentReceipt      @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+  actorUser              User?                       @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([receiptId, createdAt])
+  @@map("provider_receipt_audit_logs")
+}
+
+model QuarantinedWebhookPayload {
+  id                    String             @id @default(cuid())
+  provider              String             @default("SASPAY")
+  payloadHash           String             @unique
+  rawHeaders            Json
+  rawBodyText           String             @db.Text
+  rejectionReason       String
+  retryCount            Int                @default(1)
+  lastSeenAt            DateTime           @default(now())
+
+  createdAt             DateTime           @default(now())
+
+  @@index([createdAt])
+  @@map("quarantined_webhook_payloads")
+}
+
+model SubscriptionHistoryLog {
+  id                   String             @id @default(cuid())
+  subscriptionId       String
+  workspaceId          String
+  actorUserId          String?
+
+  fromPlan             PlanType
+  toPlan               PlanType
+  reason               String
+  periodStart          DateTime
+  periodEnd            DateTime?
+
+  createdAt            DateTime           @default(now())
+
+  subscription         Subscription       @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  actorUser            User?              @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@map("subscription_history_logs")
+}
+
+model ProcessedWebhookEvent {
+  id                   String             @id @default(cuid())
+  provider             String             @default("SASPAY")
+  eventKey             String
+  eventType            String
+
+  processedAt          DateTime           @default(now())
+  status               String
+
+  @@unique([provider, eventKey])
+  @@index([processedAt])
+  @@map("processed_webhook_events")
+}
+
+model CommercialDowngradeRequest {
+  id                       String                 @id @default(cuid())
+  workspaceId              String
+  requestedByUserId        String
+  subscriptionId           String?
+  currentPlanId            String
+  targetPlanId             String
+  status                   DowngradeRequestStatus @default(DRAFT)
+  effectiveDate            DateTime
+  isBlocked                Boolean                @default(false)
+  blockedReason            String?
+  retainedMemberIds        Json                   @default("[]")
+  retainedEstablishmentIds Json                   @default("[]")
+  revokedInvitationIds     Json                   @default("[]")
+  cancelledAt              DateTime?
+  cancelledByUserId        String?
+  appliedAt                DateTime?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+
+  workspace                Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  requestedByUser          User                   @relation("RequestedCommercialDowngrades", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  cancelledByUser          User?                  @relation("CancelledCommercialDowngrades", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  subscription             Subscription?          @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status])
+  @@index([effectiveDate, status])
+  @@map("commercial_downgrade_requests")
+}
+
+
 

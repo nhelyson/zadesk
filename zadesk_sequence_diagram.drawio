@@ -1,0 +1,285 @@
+<mxfile host="app.diagrams.net" modified="2026-10-30T10:55:00.000Z" agent="Antigravity" version="24.0.0">
+  <diagram id="zadesk-seq-ticket-hd" name="Zadesk - Séquence Cycle de Vie Ticket">
+    <mxGraphModel dx="2600" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1680" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITRE PRINCIPAL -->
+        <mxCell id="title" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:24px;color:#0F172A;&quot;&gt;ZADESK — SÉQUENCE DU CYCLE DE VIE DES TICKETS&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:13px;color:#64748B;&quot;&gt;Flux Détaillé : Réclamation Client ➔ Moteur d'Attribution Déterministe ➔ Résolution SAV&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="880" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ======================================================== -->
+        <!-- LIGNES DE VIE (ESPACEMENT ÉLARGI & HAUTE LISIBILITÉ)     -->
+        <!-- ======================================================== -->
+
+        <!-- 1. Client -->
+        <mxCell id="ll_client" value="&lt;b style=&quot;font-size:13px;color:#1E40AF;&quot;&gt;Client&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#3B82F6;&quot;&gt;Portail Public&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="70" y="95" width="140" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- 2. Frontend Web -->
+        <mxCell id="ll_front" value="&lt;b style=&quot;font-size:13px;color:#334155;&quot;&gt;Frontend Web&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#64748B;&quot;&gt;Next.js App&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="330" y="95" width="140" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- 3. Backend API -->
+        <mxCell id="ll_api" value="&lt;b style=&quot;font-size:13px;color:#5B21B6;&quot;&gt;API Express&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#8B5CF6;&quot;&gt;Controller &amp;amp; Service&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#FAF5FF;strokeColor=#8B5CF6;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="600" y="95" width="150" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- 4. Assignment Engine -->
+        <mxCell id="ll_engine" value="&lt;b style=&quot;font-size:13px;color:#92400E;&quot;&gt;AssignmentEngine&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#D97706;&quot;&gt;Moteur d'Attribution&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="890" y="95" width="170" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- 5. PostgreSQL DB -->
+        <mxCell id="ll_db" value="&lt;b style=&quot;font-size:13px;color:#065F46;&quot;&gt;PostgreSQL DB&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#10B981;&quot;&gt;Prisma ORM&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="95" width="150" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- 6. Agent SAV -->
+        <mxCell id="ll_agent" value="&lt;b style=&quot;font-size:13px;color:#0F766E;&quot;&gt;Agent SAV&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:11px;color:#14B8A6;&quot;&gt;Dashboard Support&lt;/font&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=#F0FDFA;strokeColor=#14B8A6;strokeWidth=2;size=55;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="95" width="140" height="1520" as="geometry" />
+        </mxCell>
+
+        <!-- ======================================================== -->
+        <!-- BANNIÈRE PHASE 1                                         -->
+        <!-- ======================================================== -->
+        <mxCell id="phase_1" value="&lt;b style=&quot;font-size:12px;letter-spacing:1px;&quot;&gt;PHASE 1 : CRÉATION ET ENREGISTREMENT DE LA RÉCLAMATION&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF2FF;strokeColor=#6366F1;strokeWidth=1.5;fontColor=#4338CA;align=center;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="170" width="1530" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- 1. Client -> Front -->
+        <mxCell id="msg_1" value="&lt;b&gt;[1]&lt;/b&gt; Saisie réclamation (Catégorie, Objet, Description, Coordonnées)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E40AF;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#DBEAFE;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="225" as="sourcePoint" />
+            <mxPoint x="400" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. Front -> API -->
+        <mxCell id="msg_2" value="&lt;b&gt;[2]&lt;/b&gt; POST /api/workspaces/:id/tickets (Validation payload &amp;amp; Turnstile)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#4F46E5;strokeWidth=2;fontColor=#3730A3;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#E0E7FF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="275" as="sourcePoint" />
+            <mxPoint x="675" y="275" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. API -> DB -->
+        <mxCell id="msg_3" value="&lt;b&gt;[3]&lt;/b&gt; INSERT INTO tickets (status: 'PENDING_ASSIGNMENT', SLA: 48h, ref: TK-YYYY-XXXX)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="325" as="sourcePoint" />
+            <mxPoint x="1265" y="325" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3b. DB -> API -->
+        <mxCell id="msg_3_resp" value="Ticket ID généré &amp;amp; Persisté avec succès" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#059669;strokeWidth=1.5;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1265" y="370" as="sourcePoint" />
+            <mxPoint x="675" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================================================== -->
+        <!-- BANNIÈRE PHASE 2                                         -->
+        <!-- ======================================================== -->
+        <mxCell id="phase_2" value="&lt;b style=&quot;font-size:12px;letter-spacing:1px;&quot;&gt;PHASE 2 : MOTEUR D'ATTRIBUTION DÉTERMINISTE (ASSIGNMENT ENGINE)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontColor=#92400E;align=center;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="420" width="1530" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- 4. API -> Engine -->
+        <mxCell id="msg_4" value="&lt;b&gt;[4]&lt;/b&gt; autoAssignTicket({ ticketId, workspaceId, category, priority })" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#D97706;strokeWidth=2;fontColor=#92400E;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#FDE68A;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="475" as="sourcePoint" />
+            <mxPoint x="975" y="475" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Engine -> DB -->
+        <mxCell id="msg_5" value="&lt;b&gt;[5]&lt;/b&gt; SELECT AgentProfile WHERE availability='AVAILABLE' &amp;amp; autoAssignmentEnabled=true" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="525" as="sourcePoint" />
+            <mxPoint x="1265" y="525" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5b. DB -> Engine -->
+        <mxCell id="msg_5_resp" value="Retourne profils éligibles avec compétences (Skills) validées" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#059669;strokeWidth=1.5;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1265" y="570" as="sourcePoint" />
+            <mxPoint x="975" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Engine -> DB (Calcul charge pondérée) -->
+        <mxCell id="msg_6" value="&lt;b&gt;[6]&lt;/b&gt; Calcul charge pondérée : URGENT(3pts) + HIGH(2pts) + MEDIUM(1pt) &amp;amp; vérifie maxCapacity" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#D97706;strokeWidth=2;fontColor=#92400E;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#FDE68A;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="620" as="sourcePoint" />
+            <mxPoint x="1265" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================================================== -->
+        <!-- CADRE ALTERNATIF ALT (GRAND, LISIBLE & AÉRÉ)              -->
+        <!-- ======================================================== -->
+        <mxCell id="frame_alt" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=60;height=30;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=10;fillColor=#FFFFFF;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="670" width="980" height="390" as="geometry" />
+        </mxCell>
+
+        <!-- En-tête branche A -->
+        <mxCell id="alt_label_a" value="&lt;b style=&quot;color:#047857;&quot;&gt;[ CAS A : Au moins un agent qualifié disponible sous maxCapacity ]&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="660" y="675" width="450" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- 7a. Engine -> DB Update -->
+        <mxCell id="msg_7a" value="&lt;b&gt;[7a]&lt;/b&gt; UPDATE tickets SET assignedAgentId = BestAgent.userId, status = 'OPEN'" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="720" as="sourcePoint" />
+            <mxPoint x="1265" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8a. Engine -> DB Log History -->
+        <mxCell id="msg_8a" value="&lt;b&gt;[8a]&lt;/b&gt; INSERT INTO ticket_assignments &amp;amp; INSERT INTO ticket_activities (type: 'ASSIGNMENT')" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="765" as="sourcePoint" />
+            <mxPoint x="1265" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9a. API -> Agent Notification -->
+        <mxCell id="msg_9a" value="&lt;b&gt;[9a]&lt;/b&gt; Notification temps réel : Nouveau ticket dans votre boîte SAV" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#0D9488;strokeWidth=2;fontColor=#0F766E;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#CCFBF1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="810" as="sourcePoint" />
+            <mxPoint x="1530" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Séparateur ELSE -->
+        <mxCell id="line_alt_else" value="" style="line;strokeWidth=2;dashed=1;strokeColor=#F59E0B;fillColor=none;" edge="1" parent="1">
+          <mxGeometry width="100" as="geometry">
+            <mxPoint x="580" y="860" as="sourcePoint" />
+            <mxPoint x="1560" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- En-tête branche B -->
+        <mxCell id="alt_label_b" value="&lt;b style=&quot;color:#B91C1C;&quot;&gt;[ CAS B : Aucun agent disponible ou tous au quota maximal (Surcharge) ]&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="660" y="865" width="500" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- 7b. Engine -> DB Pending -->
+        <mxCell id="msg_7b" value="&lt;b&gt;[7b]&lt;/b&gt; UPDATE tickets SET status = 'PENDING_ASSIGNMENT', assignedAgentId = NULL" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#DC2626;strokeWidth=2;fontColor=#991B1B;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#FEE2E2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="910" as="sourcePoint" />
+            <mxPoint x="1265" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8b. Engine -> DB Log Pending Activity -->
+        <mxCell id="msg_8b" value="&lt;b&gt;[8b]&lt;/b&gt; INSERT INTO ticket_activities (type: 'ASSIGNMENT_PENDING', cause: 'Capacité atteinte')" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#DC2626;strokeWidth=2;fontColor=#991B1B;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#FEE2E2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="955" as="sourcePoint" />
+            <mxPoint x="1265" y="955" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Retour du moteur vers l'API -->
+        <mxCell id="msg_engine_return" value="Résultat d'attribution : { assigned: true/false, agentName, reason }" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#D97706;strokeWidth=1.5;fontColor=#92400E;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="975" y="1015" as="sourcePoint" />
+            <mxPoint x="675" y="1015" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. API -> Front -->
+        <mxCell id="msg_10" value="&lt;b&gt;[10]&lt;/b&gt; 201 Created : { reference: 'TK-YYYY-XXXX', status, slaDueAt }" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#4F46E5;strokeWidth=2;fontColor=#3730A3;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#E0E7FF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="1085" as="sourcePoint" />
+            <mxPoint x="400" y="1085" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Front -> Client -->
+        <mxCell id="msg_11" value="&lt;b&gt;[11]&lt;/b&gt; Affichage reçu de réclamation avec Référence de suivi &amp;amp; Délais SLA" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E40AF;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#DBEAFE;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="1135" as="sourcePoint" />
+            <mxPoint x="140" y="1135" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================================================== -->
+        <!-- BANNIÈRE PHASE 3                                         -->
+        <!-- ======================================================== -->
+        <mxCell id="phase_3" value="&lt;b style=&quot;font-size:12px;letter-spacing:1px;&quot;&gt;PHASE 3 : TRAITEMENT SAV, PRISE EN CHARGE &amp;amp; RÉSOLUTION&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#065F46;align=center;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1185" width="1530" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- 12. Agent -> API Get Details -->
+        <mxCell id="msg_12" value="&lt;b&gt;[12]&lt;/b&gt; GET /api/agent/tickets/:id (Vérification des permissions RBAC &amp;amp; Shares)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#7C3AED;strokeWidth=2;fontColor=#5B21B6;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#EDE9FE;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1530" y="1240" as="sourcePoint" />
+            <mxPoint x="675" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Agent -> API In Progress -->
+        <mxCell id="msg_13" value="&lt;b&gt;[13]&lt;/b&gt; PATCH /api/agent/tickets/:id (status: 'IN_PROGRESS', note: 'Diagnostic initié')" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#7C3AED;strokeWidth=2;fontColor=#5B21B6;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#EDE9FE;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1530" y="1290" as="sourcePoint" />
+            <mxPoint x="675" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. API -> DB Update Status -->
+        <mxCell id="msg_14" value="&lt;b&gt;[14]&lt;/b&gt; UPDATE tickets SET status = 'IN_PROGRESS' &amp;amp; INSERT INTO ticket_activities" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="1335" as="sourcePoint" />
+            <mxPoint x="1265" y="1335" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. Agent -> API Resolve -->
+        <mxCell id="msg_15" value="&lt;b&gt;[15]&lt;/b&gt; PATCH /api/agent/tickets/:id (status: 'RESOLVED', solution: 'Incident résolu')" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#16A34A;strokeWidth=2.5;fontColor=#15803D;fontSize=11;fontStyle=1;labelBackgroundColor=#FFFFFF;labelBorderColor=#BBF7D0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1530" y="1385" as="sourcePoint" />
+            <mxPoint x="675" y="1385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 16. API -> DB Close -->
+        <mxCell id="msg_16" value="&lt;b&gt;[16]&lt;/b&gt; UPDATE tickets SET status = 'RESOLVED', resolvedAt = NOW() (Sortie des tickets actifs)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#D1FAE5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="1430" as="sourcePoint" />
+            <mxPoint x="1265" y="1430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Note de libération du quota -->
+        <mxCell id="note_quota" value="&lt;b style=&quot;font-size:11px;color:#166534;&quot;&gt;✔ Libération du Quota Agent :&lt;/b&gt;&lt;br/&gt;Le ticket résolu ne compte plus dans les tickets en cours (OPEN / IN_PROGRESS). La capacité disponible de l'agent augmente immédiatement pour les prochaines attributions." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=1.5;fontColor:#14532D;fontSize=10;size=14;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1470" width="370" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 17. API -> Agent Success -->
+        <mxCell id="msg_17" value="&lt;b&gt;[17]&lt;/b&gt; Confirmation de clôture avec succès" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#15803D;fontSize=11;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="1545" as="sourcePoint" />
+            <mxPoint x="1530" y="1545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 18. API -> Client Notif -->
+        <mxCell id="msg_18" value="&lt;b&gt;[18]&lt;/b&gt; Notification client (Email / SMS Zavu) : Réclamation résolue avec succès" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E40AF;fontSize=11;labelBackgroundColor=#FFFFFF;labelBorderColor=#DBEAFE;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="1585" as="sourcePoint" />
+            <mxPoint x="140" y="1585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

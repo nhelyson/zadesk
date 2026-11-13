@@ -7,7 +7,8 @@ import {
   googleAuth, 
   logout, 
   me, 
-  getGoogleConfig 
+  getGoogleConfig,
+  getTurnstileConfig
 } from "../controllers/authController.js";
 import { validateBody } from "../middleware/validate.js";
 import { 
@@ -18,22 +19,31 @@ import {
   googleAuthSchema 
 } from "../utils/validation.js";
 import { requireAuth, optionalAuth } from "../middleware/requireAuth.js";
-import { authRateLimiter } from "../middleware/rateLimiter.js";
+import { 
+  registerRateLimiter, 
+  loginRateLimiter, 
+  otpVerifyRateLimiter, 
+  otpResendRateLimiter, 
+  googleAuthRateLimiter 
+} from "../middleware/rateLimiter.js";
+import { requireTurnstile } from "../middleware/requireTurnstile.js";
 
 const router = Router();
 
-// Public auth routes with rate limiting
-router.post("/register", authRateLimiter, validateBody(registerSchema), register);
-router.post("/login", authRateLimiter, validateBody(loginSchema), login);
-router.post("/verify-otp", authRateLimiter, validateBody(verifyOtpSchema), verifyOtp);
-router.post("/resend-otp", authRateLimiter, validateBody(resendOtpSchema), resendOtp);
-router.post("/google", authRateLimiter, validateBody(googleAuthSchema), googleAuth);
+// Public auth routes with separated, distributed rate limiting and bot protection
+router.post("/register", registerRateLimiter, requireTurnstile, validateBody(registerSchema), register);
+router.post("/login", loginRateLimiter, validateBody(loginSchema), login);
+router.post("/verify-otp", otpVerifyRateLimiter, validateBody(verifyOtpSchema), verifyOtp);
+router.post("/resend-otp", otpResendRateLimiter, requireTurnstile, validateBody(resendOtpSchema), resendOtp);
+router.post("/google", googleAuthRateLimiter, validateBody(googleAuthSchema), googleAuth);
 
-// Configuration route for Google OAuth client ID (public, no secret)
+// Configuration routes (public, safe, no secrets)
 router.get("/google/config", getGoogleConfig);
+router.get("/turnstile/config", getTurnstileConfig);
 
 // Protected / session-based auth routes
 router.post("/logout", requireAuth, logout);
 router.get("/me", optionalAuth, me);
 
 export default router;
+

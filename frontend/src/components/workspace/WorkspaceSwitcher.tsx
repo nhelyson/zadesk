@@ -147,12 +147,12 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ collapsed 
             <button
               onClick={() => {
                 setIsOpen(false);
-                setCreateModalOpen(true);
+                window.location.href = '/app/onboarding';
               }}
-              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Créer un nouvel espace</span>
+              <span>Configurer un nouvel espace SAV</span>
             </button>
           </div>
         </div>

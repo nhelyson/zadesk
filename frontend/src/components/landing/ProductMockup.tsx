@@ -142,7 +142,7 @@ export const ProductMockup = () => {
                   Priorité Normale
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Canal WhatsApp • Mamadou Kouka (+242 06 ...)</p>
+              <p className="text-[11px] text-slate-400">Canal Messagerie Directe • Mamadou Kouka (+242 06 ...)</p>
             </div>
 
             <div className="flex items-center gap-1.5 text-[11px] bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-800">

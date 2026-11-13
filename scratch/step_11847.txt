@@ -1,0 +1,84 @@
+Created At: 2026-11-04T13:41:04+01:00
+Completed At: 2026-11-04T13:41:05+01:00
+Showing lines 401-481 of 481
+401:         <!-- UC 5.2 -->
+402:         <mxCell id="uc_manage_members" value="Gérer l'équipe &amp;amp; Rôles RBAC&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Inviter agents, attribuer rôles)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+403:           <mxGeometry x="640" y="1320" width="240" height="70" as="geometry" />
+404:         </mxCell>
+405: 
+406:         <!-- UC 5.3 -->
+407:         <mxCell id="uc_skills_capacity" value="Configurer les compétences &amp;amp; capacités&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Skills, capacité max, disponibilité)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#92400E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+408:           <mxGeometry x="960" y="1320" width="250" height="70" as="geometry" />
+409:         </mxCell>
+410: 
+411:         <!-- UC 5.4 -->
+412:         <mxCell id="uc_connect_whatsapp" value="Connecter le compte WhatsApp Business&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#166534;&quot;&gt;(Authentification Meta Cloud API)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#15803D;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+413:           <mxGeometry x="1270" y="1320" width="250" height="70" as="geometry" />
+414:         </mxCell>
+415: 
+416:         <!-- UC 5.5 : Tableaux de bord -->
+417:         <mxCell id="uc_analytics" value="Piloter les statistiques &amp;amp; performances SAV&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Taux de résolution, volume SLA)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#F59E0B;strokeWidth=2;fontColor=#92400E;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+418:           <mxGeometry x="490" y="1440" width="250" height="70" as="geometry" />
+419:         </mxCell>
+420: 
+421:         <!-- UC 5.6 : Audit -->
+422:         <mxCell id="uc_audit_logs" value="Consulter le journal d'audit &amp;amp; sécurité&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#475569;&quot;&gt;(Actions critiques, conformité)&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;fontColor=#334155;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+423:           <mxGeometry x="840" y="1440" width="250" height="70" as="geometry" />
+424:         </mxCell>
+425: 
+426:         <!-- LIENS ACTEURS -> ADMINISTRATION -->
+427:         <mxCell id="edge_admin_config" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#F59E0B;strokeWidth=2;" edge="1" parent="1" source="actor_admin" target="uc_config_ws">
+428:           <mxGeometry relative="1" as="geometry">
+429:             <Array as="points">
+430:               <mxPoint x="1850" y="1370" />
+431:               <mxPoint x="1850" y="1295" />
+432:               <mxPoint x="445" y="1295" />
+433:             </Array>
+434:           </mxGeometry>
+435:         </mxCell>
+436:         <mxCell id="edge_admin_members" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#F59E0B;strokeWidth=2;" edge="1" parent="1" source="actor_admin" target="uc_manage_members">
+437:           <mxGeometry relative="1" as="geometry">
+438:             <Array as="points">
+439:               <mxPoint x="1830" y="1390" />
+440:               <mxPoint x="1830" y="1355" />
+441:             </Array>
+442:           </mxGeometry>
+443:         </mxCell>
+444:         <mxCell id="edge_manager_skills" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F766E;strokeWidth=1.5;" edge="1" parent="1" source="actor_manager" target="uc_skills_capacity">
+445:           <mxGeometry relative="1" as="geometry">
+446:             <Array as="points">
+447:               <mxPoint x="1860" y="1120" />
+448:               <mxPoint x="1860" y="1340" />
+449:               <mxPoint x="1085" y="1340" />
+450:             </Array>
+451:           </mxGeometry>
+452:         </mxCell>
+453:         <mxCell id="edge_admin_wa" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#16A34A;strokeWidth=2;" edge="1" parent="1" source="actor_admin" target="uc_connect_whatsapp">
+454:           <mxGeometry relative="1" as="geometry">
+455:             <Array as="points">
+456:               <mxPoint x="1810" y="1410" />
+457:               <mxPoint x="1810" y="1355" />
+458:             </Array>
+459:           </mxGeometry>
+460:         </mxCell>
+461:         <mxCell id="edge_manager_analytics" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F766E;strokeWidth=2;" edge="1" parent="1" source="actor_manager" target="uc_analytics">
+462:           <mxGeometry relative="1" as="geometry">
+463:             <Array as="points">
+464:               <mxPoint x="1870" y="1140" />
+465:               <mxPoint x="1870" y="1475" />
+466:             </Array>
+467:           </mxGeometry>
+468:         </mxCell>
+469:         <mxCell id="edge_admin_audit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#64748B;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc_audit_logs">
+470:           <mxGeometry relative="1" as="geometry">
+471:             <Array as="points">
+472:               <mxPoint x="1820" y="1430" />
+473:               <mxPoint x="1820" y="1475" />
+474:             </Array>
+475:           </mxGeometry>
+476:         </mxCell>
+477: 
+478:       </root>
+479:     </mxGraphModel>
+480:   </diagram>
+481: </mxfile>

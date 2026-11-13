@@ -1,7 +1,5 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { WorkspaceProvider } from '@/components/workspace/WorkspaceContext';
-import { AppShell } from '@/components/workspace/AppShell';
 
 export const metadata: Metadata = {
   title: 'Espace Entreprise | Zadesk SAV',
@@ -13,9 +11,5 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <WorkspaceProvider>
-      <AppShell>{children}</AppShell>
-    </WorkspaceProvider>
-  );
+  return <>{children}</>;
 }

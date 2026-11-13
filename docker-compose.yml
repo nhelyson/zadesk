@@ -28,6 +28,10 @@ services:
       - NEXT_PUBLIC_APP_URL=http://localhost
       - NEXT_PUBLIC_API_URL=/api
       - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - NEXT_PUBLIC_META_APP_ID=${META_APP_ID:-}
+      - NEXT_PUBLIC_META_CONFIG_ID=${META_CONFIG_ID:-}
+      - NEXT_PUBLIC_TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+      - TURNSTILE_BYPASS_DEV=${TURNSTILE_BYPASS_DEV:-true}
     depends_on:
       - backend
     networks:
@@ -57,8 +61,46 @@ services:
       - OTP_EXPIRATION_MINUTES=${OTP_EXPIRATION_MINUTES:-15}
       - OTP_MAX_ATTEMPTS=${OTP_MAX_ATTEMPTS:-5}
       - OTP_RESEND_COOLDOWN_SECONDS=${OTP_RESEND_COOLDOWN_SECONDS:-60}
+      - META_APP_ID=${META_APP_ID:-}
+      - META_APP_SECRET=${META_APP_SECRET:-}
+      - META_CONFIG_ID=${META_CONFIG_ID:-}
+      - META_API_VERSION=${META_API_VERSION:-v21.0}
+      - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
+      - TURNSTILE_BYPASS_DEV=${TURNSTILE_BYPASS_DEV:-true}
     volumes:
       - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/tests:/app/tests
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - zadesk-network
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zadesk-worker
+    restart: unless-stopped
+    command: ["node", "src/workers/workerRunner.js"]
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-zadesk}:${POSTGRES_PASSWORD:-zadesk_password}@postgres:5432/${POSTGRES_DB:-zadesk}?schema=public
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - SESSION_SECRET=${SESSION_SECRET:-zadesk_session_secret_2026_congo}
+      - ZAVUDEV_API_KEY=${ZAVUDEV_API_KEY:-}
+      - ZAVU_FROM_EMAIL=${ZAVU_FROM_EMAIL:-zadesk@backup-sev.online}
+      - ZAVU_SENDER_ID=${ZAVU_SENDER_ID:-kd7a0za0kdsrc381rvnfp3nszd8ds0c6}
+      - TURNSTILE_BYPASS_DEV=${TURNSTILE_BYPASS_DEV:-true}
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/tests:/app/tests
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,7 +113,12 @@ services:
     image: redis:7-alpine
     container_name: zadesk-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: >
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --appendfsync everysec
     volumes:
       - redis_data:/data
     healthcheck:

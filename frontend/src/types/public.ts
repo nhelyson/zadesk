@@ -1,3 +1,5 @@
+import { Establishment } from "./workspace";
+
 export interface PublicCompany {
   id: string;
   name: string;
@@ -17,6 +19,10 @@ export interface PublicCompany {
   country: string | null;
   openingHours: string | null;
   supportCategories: string[] | null;
+  brandColor?: string | null;
+  brandPalette?: any | null;
+  businessHours?: any | null;
+  establishments?: Establishment[];
   createdAt: string;
 }
 

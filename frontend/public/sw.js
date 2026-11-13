@@ -3,7 +3,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = "zadesk-app-v1.0.0";
+const CACHE_NAME = "zadesk-app-v1.0.1";
 const OFFLINE_URL = "/offline";
 
 // Static App Shell assets to pre-cache on install
@@ -70,8 +70,15 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2. NEVER cache API requests (Auth, Sessions, Workspaces, Webhooks) - Network Only
-  if (url.pathname.startsWith("/api/")) {
+  // 2. NEVER cache API requests, auth pages or dynamic workspace app routes - Network Only
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/app") ||
+    url.pathname === "/login" ||
+    url.pathname === "/register" ||
+    url.pathname === "/forgot-password" ||
+    url.pathname.startsWith("/invite")
+  ) {
     return; // Standard network fetch
   }
 
@@ -141,21 +148,25 @@ self.addEventListener("fetch", (event) => {
         }
 
         // If not in cache, fetch from network and store
-        return fetch(request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return networkResponse;
-        });
+        return fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseClone);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(() => {
+            return new Response("", { status: 404, statusText: "Asset Not Found" });
+          });
       })
     );
     return;
   }
 
-  // 6. Default: Network with Cache Fallback
+  // 6. Default: Network with Cache Fallback (Never return undefined to respondWith)
   event.respondWith(
     fetch(request)
       .then((networkResponse) => {
@@ -167,6 +178,11 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       })
-      .catch(() => caches.match(request))
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        return new Response("", { status: 408, statusText: "Network Request Failed" });
+      })
   );
 });
+

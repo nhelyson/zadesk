@@ -83,12 +83,12 @@ export async function fetchPublicCategories(): Promise<PublicCategory[]> {
 }
 
 /**
- * Fetch single company by slug
+ * Fetch single company by slug (always fresh to immediately reflect workspace settings)
  */
 export async function fetchCompanyBySlug(slug: string): Promise<PublicCompany | null> {
   try {
     const res = await fetch(`${API_BASE}/companies/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     const json = await res.json();
     if (json.success) {
@@ -98,5 +98,69 @@ export async function fetchCompanyBySlug(slug: string): Promise<PublicCompany | 
   } catch (err) {
     console.error(`Failed to fetch company ${slug}:`, err);
     return null;
+  }
+}
+
+/**
+ * Send real chat message to company SAV desk from public portal
+ */
+export async function sendPublicChatMessage(
+  slug: string,
+  data: {
+    message: string;
+    conversationId?: string | null;
+    customerName?: string;
+    customerPhone?: string;
+    customerEmail?: string;
+    token?: string | null;
+  }
+): Promise<{ success: boolean; conversationId?: string; sessionToken?: string; customerName?: string; message?: any; error?: string }> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (data.token) {
+      headers["x-conversation-token"] = data.token;
+    }
+    const res = await fetch(`${API_BASE}/companies/${encodeURIComponent(slug)}/chat`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        message: data.message,
+        conversationId: data.conversationId,
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        customerEmail: data.customerEmail,
+      }),
+    });
+    return await res.json();
+  } catch (err: any) {
+    console.error(`Failed to send public chat message to ${slug}:`, err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Fetch real chat history from company SAV desk
+ */
+export async function fetchPublicChatMessages(
+  slug: string,
+  conversationId: string,
+  token?: string | null
+): Promise<{ success: boolean; messages?: any[]; conversation?: any; error?: string }> {
+  try {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["x-conversation-token"] = token;
+    }
+    const res = await fetch(
+      `${API_BASE}/companies/${encodeURIComponent(slug)}/chat/${encodeURIComponent(conversationId)}`,
+      {
+        cache: "no-store",
+        headers,
+      }
+    );
+    return await res.json();
+  } catch (err: any) {
+    console.error(`Failed to fetch public chat messages for ${slug}:`, err);
+    return { success: false, error: err.message };
   }
 }

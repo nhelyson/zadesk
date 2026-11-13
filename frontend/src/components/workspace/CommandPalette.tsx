@@ -32,7 +32,7 @@ interface CommandItem {
 }
 
 export const CommandPalette = () => {
-  const { commandPaletteOpen, setCommandPaletteOpen, setCreateModalOpen } = useWorkspace();
+  const { commandPaletteOpen, setCommandPaletteOpen } = useWorkspace();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -40,9 +40,14 @@ export const CommandPalette = () => {
 
   useEffect(() => {
     if (commandPaletteOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
       setQuery("");
       setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 50);
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
     }
   }, [commandPaletteOpen]);
 
@@ -86,15 +91,15 @@ export const CommandPalette = () => {
       title: "Agents & Équipe",
       subtitle: "Disponibilité et compétences SAV",
       icon: <UserCheck className="w-4 h-4 text-emerald-600" />,
-      path: "/workspace/agents",
+      path: "/app/agents",
     },
     {
       id: "nav-agencies",
       category: "Navigation",
-      title: "Agences Physiques",
-      subtitle: "Points de relais à Brazzaville & Pointe-Noire",
+      title: "Nos Établissements",
+      subtitle: "Boutiques, agences physiques et comptoirs SAV",
       icon: <Building2 className="w-4 h-4 text-amber-600" />,
-      path: "/workspace/agencies",
+      path: "/app/agencies",
     },
     {
       id: "nav-ai",
@@ -146,7 +151,7 @@ export const CommandPalette = () => {
       icon: <PlusCircle className="w-4 h-4 text-emerald-600" />,
       action: () => {
         setCommandPaletteOpen(false);
-        setCreateModalOpen(true);
+        router.push("/app/onboarding");
       },
     },
   ];
@@ -186,11 +191,12 @@ export const CommandPalette = () => {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[10000] bg-navy-950/60 backdrop-blur-sm flex items-start justify-center pt-20 sm:pt-28 px-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] bg-navy-950/60 backdrop-blur-sm flex items-start justify-center px-3 sm:px-4 animate-in fade-in duration-150"
+      style={{ paddingTop: 'max(2.5rem, calc(env(safe-area-inset-top, 0px) + 1rem))' }}
       onClick={() => setCommandPaletteOpen(false)}
     >
       <div
-        className="bg-white w-full max-w-xl rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+        className="bg-white w-full max-w-xl max-h-[85dvh] flex flex-col rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
@@ -217,7 +223,7 @@ export const CommandPalette = () => {
         </div>
 
         {/* Results List */}
-        <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+        <div className="max-h-80 overflow-y-auto overscroll-contain p-2 space-y-1">
           {filteredItems.length === 0 ? (
             <div className="py-8 text-center text-xs text-slate-500">
               Aucun résultat pour &ldquo;{query}&rdquo;.

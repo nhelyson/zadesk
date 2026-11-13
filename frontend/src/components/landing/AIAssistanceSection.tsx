@@ -29,9 +29,6 @@ export const AIAssistanceSection = () => {
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
-            ASSISTANCE INTELLIGENTE
-          </span>
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-navy-900 leading-tight">
             Une IA qui aide vos agents, pas une IA qui les remplace.
           </h2>

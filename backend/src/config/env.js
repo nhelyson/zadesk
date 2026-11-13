@@ -27,5 +27,17 @@ export const env = {
   OTP_EXPIRATION_MINUTES: parseInt(process.env.OTP_EXPIRATION_MINUTES || "15", 10),
   OTP_MAX_ATTEMPTS: parseInt(process.env.OTP_MAX_ATTEMPTS || "5", 10),
   OTP_RESEND_COOLDOWN_SECONDS: parseInt(process.env.OTP_RESEND_COOLDOWN_SECONDS || "60", 10),
+
+  // Meta & WhatsApp Cloud API Configuration
+  META_APP_ID: process.env.META_APP_ID || process.env.NEXT_PUBLIC_META_APP_ID || "",
+  META_APP_SECRET: process.env.META_APP_SECRET || "",
+  META_CONFIG_ID: process.env.META_CONFIG_ID || process.env.NEXT_PUBLIC_META_CONFIG_ID || "",
+  META_API_VERSION: process.env.META_API_VERSION || "v21.0",
+
+  // Cloudflare Turnstile Configuration
+  TURNSTILE_SITE_KEY: process.env.TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY || "",
+  TURNSTILE_BYPASS_DEV: process.env.TURNSTILE_BYPASS_DEV === "true" || process.env.NODE_ENV !== "production",
 };
+
 

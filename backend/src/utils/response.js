@@ -58,6 +58,9 @@ export const sendSuccess = (res, statusCode, message, data) => {
 };
 
 export const sendError = (res, statusCode, message, errors) => {
+  if (typeof statusCode === "string" && typeof message === "number") {
+    return errorResponse(res, statusCode, message, errors);
+  }
   return errorResponse(res, message, statusCode, errors);
 };
 
