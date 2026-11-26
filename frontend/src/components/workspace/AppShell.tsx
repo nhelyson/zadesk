@@ -193,7 +193,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 lg:px-8 sm:py-6 pb-24 md:pb-8">
+        <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 lg:px-8 sm:py-5 pb-24 md:pb-5">
           <div className="max-w-[1440px] mx-auto w-full">{children}</div>
         </main>
       </div>

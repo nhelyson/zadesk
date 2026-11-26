@@ -25,7 +25,7 @@ export const CustomerExperienceSection: React.FC = () => {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 75%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
         defaults: { ease: "power3.out" },
       });

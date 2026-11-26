@@ -170,11 +170,27 @@ export const Footer: React.FC<{ brandName?: string }> = ({ brandName = "Zadesk" 
                 </li>
                 <li>
                   <Link
+                    href="/tarifs"
+                    className="hover:text-white transition-colors duration-150 block"
+                  >
+                    Comparatif des offres
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/aide"
                     className="hover:text-white transition-colors duration-150 block"
                   >
                     Assistance utilisateurs
                   </Link>
+                </li>
+                <li>
+                  <a
+                    href="mailto:support@zadesk.com"
+                    className="hover:text-white transition-colors duration-150 block"
+                  >
+                    support@zadesk.com
+                  </a>
                 </li>
               </ul>
             </div>

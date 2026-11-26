@@ -39,7 +39,7 @@ export const ConversationNotTicketSection: React.FC = () => {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 75%",
-          toggleActions: "play none none reverse",
+          once: true,
         },
       });
 
@@ -84,7 +84,7 @@ export const ConversationNotTicketSection: React.FC = () => {
             scrollTrigger: {
               trigger: divider,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -103,7 +103,7 @@ export const ConversationNotTicketSection: React.FC = () => {
             scrollTrigger: {
               trigger: el,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -438,7 +438,7 @@ export const ConversationNotTicketSection: React.FC = () => {
                 Quand un client revient vers vous trois jours ou six mois plus tard, la conversation reprend là où elle s&apos;était arrêtée. Plus d&apos;identifiant de ticket à chercher, plus de répétition pénible.
               </p>
               <div className="pt-2 text-xs font-mono text-emerald-700 tracking-wider uppercase font-semibold">
-                ✓ Continuité totale • WhatsApp, Web &amp; E-mail
+                ✓ Continuité totale • Portail Web Direct &amp; Espace Équipe
               </div>
             </div>
 

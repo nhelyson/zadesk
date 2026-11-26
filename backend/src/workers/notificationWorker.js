@@ -153,24 +153,17 @@ async function processAgentMessageAlertJob(job) {
   if (assignedAgentId) {
     targetUserIds = [assignedAgentId];
   } else {
-    const activeProfiles = await prisma.agentProfile.findMany({
+    // Unassigned conversations are only visible to supervision roles in REST: never leak preview content to AGENTs
+    const supervisorMembers = await prisma.membership.findMany({
       where: {
         workspaceId,
-        availability: { in: ["AVAILABLE", "BUSY"] },
+        status: "ACTIVE",
+        role: { in: ["OWNER", "ADMIN", "MANAGER"] },
       },
       select: { userId: true },
-      take: 20,
+      take: 15,
     });
-    if (activeProfiles.length > 0) {
-      targetUserIds = activeProfiles.map((p) => p.userId);
-    } else {
-      const members = await prisma.membership.findMany({
-        where: { workspaceId, status: "ACTIVE" },
-        select: { userId: true },
-        take: 15,
-      });
-      targetUserIds = members.map((m) => m.userId);
-    }
+    targetUserIds = supervisorMembers.map((m) => m.userId);
   }
 
   if (targetUserIds.length === 0) {
@@ -187,7 +180,7 @@ async function processAgentMessageAlertJob(job) {
       select: { userId: true, notificationApp: true, notificationEmail: true },
     }),
     prisma.pushSubscription.findMany({
-      where: { recipientType: "AGENT", userId: { in: targetUserIds } },
+      where: { workspaceId, recipientType: "AGENT", userId: { in: targetUserIds } },
     }),
   ]);
 

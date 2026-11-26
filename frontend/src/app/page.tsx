@@ -1,6 +1,7 @@
 import React from "react";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
+import { ProductShowcaseOptionA } from "@/components/landing/ProductShowcaseOptionA";
 import { HumanConnectionSection } from "@/components/landing/HumanConnectionSection";
 import { ConversationNotTicketSection } from "@/components/landing/ConversationNotTicketSection";
 import { AfricanSectorsSection } from "@/components/landing/AfricanSectorsSection";
@@ -24,6 +25,9 @@ export default function Home() {
       <main className="flex-1">
         {/* 1. Hero: Pure Light Luxe */}
         <Hero />
+
+        {/* 1.5. Option A: Editorial 2.5D Motion Showcase */}
+        <ProductShowcaseOptionA />
 
         {/* 2. The Human Connection: Editorial Visual Experience */}
         <HumanConnectionSection />

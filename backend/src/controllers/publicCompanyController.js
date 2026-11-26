@@ -143,9 +143,9 @@ export async function sendPublicChatMessage(req, res, next) {
         },
       });
 
-      if (conversation && conversation.publicTokenHash) {
-        // Enforce cryptographic token verification on write
-        if (!verifyTokenHash(clientToken, conversation.publicTokenHash)) {
+      if (conversation) {
+        // Strict fail-closed cryptographic token verification (never allow unhashed/null legacy rows without token)
+        if (!conversation.publicTokenHash || !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
           return sendError(res, "Accès non autorisé à cette conversation.", 403);
         }
       }
@@ -210,14 +210,6 @@ export async function sendPublicChatMessage(req, res, next) {
       }
       if (customerEmail && customerEmail.trim() && !conversation.customerEmail) {
         updateData.customerEmail = customerEmail.trim();
-      }
-
-      // Backfill token for legacy conversation if missing
-      if (!conversation.publicTokenHash) {
-        const rawToken = clientToken || crypto.randomBytes(32).toString("hex");
-        const tokenHash = hashToken(rawToken);
-        sessionToken = rawToken;
-        updateData.publicTokenHash = tokenHash;
       }
 
       conversation = await prisma.conversation.update({
@@ -366,11 +358,9 @@ export async function getPublicChatMessages(req, res, next) {
       return sendError(res, "Session de conversation introuvable.", 404);
     }
 
-    // Enforce cryptographic token verification on read if token hash exists
-    if (conversation.publicTokenHash) {
-      if (!verifyTokenHash(clientToken, conversation.publicTokenHash)) {
-        return sendError(res, "Accès non autorisé à cette conversation.", 403);
-      }
+    // Strict fail-closed cryptographic token verification on read (blocks legacy null-token rows)
+    if (!conversation.publicTokenHash || !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
+      return sendError(res, "Accès non autorisé à cette conversation.", 403);
     }
 
     const messages = await prisma.conversationMessage.findMany({
@@ -453,7 +443,7 @@ export async function getPublicChatAttachment(req, res, next) {
       return sendError(res, "Session de conversation introuvable.", 404);
     }
 
-    if (conversation.publicTokenHash && !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
+    if (!conversation.publicTokenHash || !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
       return sendError(res, "Accès non autorisé à cette pièce jointe.", 403);
     }
 
@@ -496,7 +486,7 @@ async function authorizePublicConversation(slug, conversationId, clientToken) {
     return { error: "Session de conversation introuvable.", status: 404 };
   }
 
-  if (conversation.publicTokenHash && !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
+  if (!conversation.publicTokenHash || !verifyTokenHash(clientToken, conversation.publicTokenHash)) {
     return { error: "Accès non autorisé à cette conversation.", status: 403 };
   }
 

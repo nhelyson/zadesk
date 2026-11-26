@@ -210,7 +210,7 @@ export async function streamPulseEvents(req, res) {
   if (lastEventId) {
     const missed = getReplayEvents(workspaceId, lastEventId);
     for (const evt of missed) {
-      if (canAgentViewEvent(evt, userId, userRole, sharedConvIds)) {
+      if (await isAgentAuthorizedForPulseEvent(workspaceId, userId, userRole, evt)) {
         res.write(`id: ${evt.id}\nevent: ${evt.type}\ndata: ${JSON.stringify(evt)}\n\n`);
       }
     }
@@ -219,12 +219,14 @@ export async function streamPulseEvents(req, res) {
   // Subscribe to Redis channel for this workspace
   const channel = `zadesk:pulse:${workspaceId}`;
   const sub = getSubscriber();
+  let isClosed = false;
 
-  const onMessage = (chan, message) => {
-    if (chan !== channel) return;
+  const onMessage = async (chan, message) => {
+    if (chan !== channel || isClosed) return;
     try {
       const event = JSON.parse(message);
-      if (canAgentViewEvent(event, userId, userRole, sharedConvIds)) {
+      const allowed = await isAgentAuthorizedForPulseEvent(workspaceId, userId, userRole, event);
+      if (allowed && !isClosed && !res.writableEnded) {
         res.write(`id: ${event.id}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
       }
     } catch (err) {
@@ -240,7 +242,9 @@ export async function streamPulseEvents(req, res) {
 
   // Keepalive heartbeat ping every 15s to keep connection open through reverse proxies
   const heartbeatTimer = setInterval(() => {
-    res.write(`: ping\n\n`);
+    if (!isClosed && !res.writableEnded) {
+      res.write(`: ping\n\n`);
+    }
   }, 15000);
 
   // Periodically refresh shared conversation IDs (every 30s)
@@ -248,6 +252,7 @@ export async function streamPulseEvents(req, res) {
 
   // Clean cleanup on disconnect
   req.on("close", () => {
+    isClosed = true;
     clearInterval(heartbeatTimer);
     clearInterval(refreshSharesTimer);
     sub.removeListener("message", onMessage);
@@ -260,26 +265,49 @@ export async function streamPulseEvents(req, res) {
 }
 
 /**
- * Filter: verify if an agent has permission to see an event
+ * Live PostgreSQL authorization check for AGENT SSE delivery.
+ * Immediately reflects share revocations, additions, and reassignments without stale cache lag.
  */
-function canAgentViewEvent(event, userId, userRole, sharedConvIds) {
+async function isAgentAuthorizedForPulseEvent(workspaceId, userId, userRole, event) {
+  if ([ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(userRole)) {
+    return true;
+  }
+
+  if (!event || !event.conversationId || !userId) {
+    return false;
+  }
+
+  const authorizedConv = await prisma.conversation.findFirst({
+    where: {
+      id: event.conversationId,
+      workspaceId,
+      OR: [
+        { assignedAgentId: userId },
+        { shares: { some: { agentId: userId } } },
+      ],
+    },
+    select: { id: true },
+  });
+
+  return Boolean(authorizedConv);
+}
+
+/**
+ * Filter: verify if an agent has permission to see an event (aligned strictly with REST rules)
+ */
+export function canAgentViewEvent(event, userId, userRole, sharedConvIds) {
   // Supervisors, admins, and owners can view all workspace activity
   if ([ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(userRole)) {
     return true;
   }
 
   // If assigned directly to this agent
-  if (event.assignedAgentId && event.assignedAgentId === userId) {
+  if (event?.assignedAgentId && event.assignedAgentId === userId) {
     return true;
   }
 
   // If conversation is in the agent's shared conversations
-  if (event.conversationId && sharedConvIds && sharedConvIds.has(event.conversationId)) {
-    return true;
-  }
-
-  // New unassigned conversations waiting in queue if visible
-  if (!event.assignedAgentId && event.type === PULSE_EVENT_TYPES.CONVERSATION_CREATED) {
+  if (event?.conversationId && sharedConvIds && sharedConvIds.has(event.conversationId)) {
     return true;
   }
 

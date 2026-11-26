@@ -830,12 +830,140 @@ export async function reassignTicket(workspaceId, ticketId, currentUserId, userR
 }
 
 /**
+ * Centralized multi-tenant & role-based conversation authorization check.
+ * Enforces workspace membership, ownership, and ConversationShare access levels
+ * (READ_ONLY vs CONTRIBUTE).
+ */
+export async function authorizeConversationAccess(
+  workspaceId,
+  conversationId,
+  userId,
+  userRole = null,
+  { requireContribute = false, includeMessages = false } = {}
+) {
+  if (!workspaceId || !conversationId) {
+    const error = new Error("Conversation introuvable.");
+    error.status = 404;
+    throw error;
+  }
+
+  if (!userId) {
+    const error = new Error("Accès refusé à cette conversation.");
+    error.status = 403;
+    throw error;
+  }
+
+  const membership = await prisma.membership.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId,
+        workspaceId,
+      },
+    },
+    select: {
+      role: true,
+      status: true,
+    },
+  });
+
+  if (!membership || membership.status !== "ACTIVE") {
+    const error = new Error("Accès refusé à cette conversation.");
+    error.status = 403;
+    throw error;
+  }
+
+  const effectiveRole = membership.role || userRole;
+
+  const conversation = await prisma.conversation.findFirst({
+    where: { id: conversationId, workspaceId },
+    include: {
+      assignedAgent: {
+        select: { id: true, firstName: true, lastName: true, email: true },
+      },
+      shares: {
+        include: {
+          agent: { select: { id: true, firstName: true, lastName: true } },
+        },
+      },
+      tickets: {
+        select: { id: true, reference: true, title: true, status: true },
+      },
+      ...(includeMessages
+        ? {
+            messages: {
+              orderBy: { createdAt: "asc" },
+            },
+          }
+        : {}),
+    },
+  });
+
+  if (!conversation) {
+    const error = new Error("Conversation introuvable.");
+    error.status = 404;
+    throw error;
+  }
+
+  const isSupervisorOrAbove = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(effectiveRole);
+  const isAssigned = Boolean(conversation.assignedAgentId && conversation.assignedAgentId === userId);
+  const shareRecord = (conversation.shares || []).find(
+    (s) => s.agentId === userId || s.agent?.id === userId
+  );
+
+  const canRead = isSupervisorOrAbove || isAssigned || Boolean(shareRecord);
+  if (!canRead) {
+    const error = new Error("Accès refusé à cette conversation.");
+    error.status = 403;
+    throw error;
+  }
+
+  const canContribute =
+    isSupervisorOrAbove || isAssigned || shareRecord?.accessLevel === "CONTRIBUTE";
+
+  if (requireContribute && !canContribute) {
+    const error = new Error(
+      shareRecord?.accessLevel === "READ_ONLY"
+        ? "Action non autorisée. Votre accès sur cette conversation est en lecture seule."
+        : "Vous n'avez pas l'autorisation de participer à cette conversation."
+    );
+    error.status = 403;
+    throw error;
+  }
+
+  return {
+    conversation,
+    effectiveRole,
+    canRead,
+    canContribute,
+    isShared: !isSupervisorOrAbove && !isAssigned && Boolean(shareRecord),
+    myAccessLevel: isSupervisorOrAbove || isAssigned ? "CONTRIBUTE" : shareRecord?.accessLevel || null,
+  };
+}
+
+/**
  * Get conversations assigned or shared with current agent
  */
 export async function getMyConversations(workspaceId, userId, userRole, options = {}) {
   const { search = "", status, limit = 20, offset = 0 } = options;
 
-  const isSupervisorOrAbove = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(userRole);
+  const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+  const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
+
+  const membership = userId
+    ? await prisma.membership.findUnique({
+        where: { userId_workspaceId: { userId, workspaceId } },
+        select: { role: true, status: true },
+      })
+    : null;
+
+  if (!membership || membership.status !== "ACTIVE") {
+    const error = new Error("Accès refusé à cet espace de travail.");
+    error.status = 403;
+    throw error;
+  }
+
+  const effectiveRole = membership.role || userRole;
+  const isSupervisorOrAbove = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(effectiveRole);
 
   const where = {
     workspaceId,
@@ -863,7 +991,11 @@ export async function getMyConversations(workspaceId, userId, userRole, options 
       where,
       include: {
         assignedAgent: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        shares: {
+          where: { agentId: userId },
+          select: { accessLevel: true },
         },
         messages: {
           orderBy: { createdAt: "desc" },
@@ -871,15 +1003,29 @@ export async function getMyConversations(workspaceId, userId, userRole, options 
         },
       },
       orderBy: { lastMessageAt: "desc" },
-      skip: parseInt(offset, 10),
-      take: parseInt(limit, 10),
+      skip: parsedOffset,
+      take: parsedLimit,
     }),
   ]);
 
   const sanitizedConversations = conversations.map((conv) => {
-    if (!conv.messages || conv.messages.length === 0) return conv;
+    const isAssigned = conv.assignedAgentId === userId;
+    const share = (conv.shares || [])[0];
+    const isShared = !isSupervisorOrAbove && !isAssigned && Boolean(share);
+    const myAccessLevel = isSupervisorOrAbove || isAssigned ? "CONTRIBUTE" : share?.accessLevel || null;
+
+    if (!conv.messages || conv.messages.length === 0) {
+      return {
+        ...conv,
+        isShared,
+        myAccessLevel,
+      };
+    }
+
     return {
       ...conv,
+      isShared,
+      myAccessLevel,
       messages: conv.messages.map((m) => {
         const parsed = parseMessageWithAttachments(m.content);
         return {
@@ -890,48 +1036,20 @@ export async function getMyConversations(workspaceId, userId, userRole, options 
     };
   });
 
-  return { total, conversations: sanitizedConversations, limit, offset };
+  return { total, conversations: sanitizedConversations, limit: parsedLimit, offset: parsedOffset };
 }
 
 /**
  * Get conversation details and all message history (including internal notes)
  */
 export async function getConversationDetails(workspaceId, conversationId, userId, userRole) {
-  const conversation = await prisma.conversation.findFirst({
-    where: { id: conversationId, workspaceId },
-    include: {
-      assignedAgent: {
-        select: { id: true, firstName: true, lastName: true },
-      },
-      shares: {
-        include: {
-          agent: { select: { id: true, firstName: true, lastName: true } },
-        },
-      },
-      tickets: {
-        select: { id: true, reference: true, title: true, status: true },
-      },
-      messages: {
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
-
-  if (!conversation) {
-    const error = new Error("Conversation introuvable.");
-    error.status = 404;
-    throw error;
-  }
-
-  const isSupervisorOrAbove = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(userRole);
-  const isAssigned = conversation.assignedAgentId === userId;
-  const isShared = conversation.shares.some((s) => s.agent.id === userId);
-
-  if (!isSupervisorOrAbove && !isAssigned && !isShared) {
-    const error = new Error("Accès refusé à cette conversation.");
-    error.status = 403;
-    throw error;
-  }
+  const { conversation, isShared, myAccessLevel } = await authorizeConversationAccess(
+    workspaceId,
+    conversationId,
+    userId,
+    userRole,
+    { requireContribute: false, includeMessages: true }
+  );
 
   const buildAgentAttachmentUrl = (fileName) =>
     `/api/workspaces/${encodeURIComponent(workspaceId)}/agents/conversations/${encodeURIComponent(conversationId)}/attachments/${encodeURIComponent(fileName)}`;
@@ -947,6 +1065,8 @@ export async function getConversationDetails(workspaceId, conversationId, userId
 
   return {
     ...conversation,
+    isShared,
+    myAccessLevel,
     messages: hydratedMessages,
   };
 }
@@ -954,16 +1074,20 @@ export async function getConversationDetails(workspaceId, conversationId, userId
 /**
  * Send a message or internal note in a conversation (Operational without WhatsApp)
  */
-export async function sendConversationMessage(workspaceId, conversationId, userId, { content, isInternalNote = false }) {
-  const conversation = await prisma.conversation.findFirst({
-    where: { id: conversationId, workspaceId },
-  });
-
-  if (!conversation) {
-    const error = new Error("Conversation introuvable.");
-    error.status = 404;
-    throw error;
-  }
+export async function sendConversationMessage(
+  workspaceId,
+  conversationId,
+  userId,
+  { content, isInternalNote = false },
+  userRole = null
+) {
+  const { conversation } = await authorizeConversationAccess(
+    workspaceId,
+    conversationId,
+    userId,
+    userRole,
+    { requireContribute: true }
+  );
 
   const senderUser = await prisma.user.findUnique({
     where: { id: userId },
@@ -1022,16 +1146,20 @@ export async function sendConversationMessage(workspaceId, conversationId, userI
 /**
  * Enregistre un véritable message client entrant dans une conversation et diffuse le Pulse
  */
-export async function createCustomerMessage(workspaceId, conversationId, { content, customerName }) {
-  const conversation = await prisma.conversation.findFirst({
-    where: { id: conversationId, workspaceId },
-  });
-
-  if (!conversation) {
-    const error = new Error("Conversation introuvable.");
-    error.status = 404;
-    throw error;
-  }
+export async function createCustomerMessage(
+  workspaceId,
+  conversationId,
+  { content, customerName },
+  userId = null,
+  userRole = null
+) {
+  const { conversation } = await authorizeConversationAccess(
+    workspaceId,
+    conversationId,
+    userId,
+    userRole,
+    { requireContribute: true }
+  );
 
   const name = customerName || conversation.customerName || "Client";
 

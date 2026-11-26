@@ -66,6 +66,20 @@ export interface ConversationsViewProps {
   previewConversations?: AgentConversationItem[];
 }
 
+function getAssignedAgentDisplayName(
+  agent: AgentConversationItem['assignedAgent']
+): string | null {
+  if (!agent) return null;
+  const direct = [agent.firstName, agent.lastName].filter(Boolean).join(' ').trim();
+  if (direct) return direct;
+  if (agent.user) {
+    const nested = [agent.user.firstName, agent.user.lastName].filter(Boolean).join(' ').trim();
+    if (nested) return nested;
+    if (agent.user.email) return agent.user.email;
+  }
+  return agent.email || null;
+}
+
 export function ConversationsView({ previewConversations }: ConversationsViewProps = {}) {
   const {
     currentWorkspace,
@@ -988,6 +1002,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                           <span className="truncate">
                             {statusLabel}
                             {conv.category ? ` · ${conv.category}` : ''}
+                            {` · ${getAssignedAgentDisplayName(conv.assignedAgent) || 'Non assigné'}`}
                           </span>
                           {conv.ticket && (
                             <span className="font-mono text-slate-600 font-medium shrink-0 ml-2">
@@ -1312,9 +1327,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                         <div className="flex items-center gap-2 text-[#0D1B3D] font-semibold">
                           <UserCheck className="w-3.5 h-3.5 text-slate-400" />
                           <span>
-                            {activeConv.assignedAgent?.user
-                              ? `${activeConv.assignedAgent.user.firstName || ''} ${activeConv.assignedAgent.user.lastName || ''}`
-                              : 'Non assigné'}
+                            {getAssignedAgentDisplayName(activeConv.assignedAgent) || 'Non assigné'}
                           </span>
                         </div>
                       </div>
@@ -1422,9 +1435,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                   <div className="flex items-center gap-2 font-semibold text-[#0D1B3D]">
                     <UserCheck className="w-3.5 h-3.5 text-slate-400" />
                     <span>
-                      {activeConv.assignedAgent?.user
-                        ? `${activeConv.assignedAgent.user.firstName || ''} ${activeConv.assignedAgent.user.lastName || ''}`
-                        : 'Non assigné'}
+                      {getAssignedAgentDisplayName(activeConv.assignedAgent) || 'Non assigné'}
                     </span>
                   </div>
                 </div>

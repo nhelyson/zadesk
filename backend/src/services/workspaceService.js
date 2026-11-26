@@ -656,9 +656,15 @@ export async function getWorkspaceDashboardStats(workspaceId) {
 }
 
 /**
- * Get Workspace Conversations (Inbox)
+ * Get Workspace Conversations (Inbox — restricted to supervision roles)
  */
-export async function getWorkspaceConversations(workspaceId) {
+export async function getWorkspaceConversations(workspaceId, { userRole = null } = {}) {
+  if (userRole && ![ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER].includes(userRole)) {
+    const err = new Error("Permissions insuffisantes pour consulter toutes les conversations de l'entreprise.");
+    err.status = 403;
+    throw err;
+  }
+
   const cacheKey = `workspace:${workspaceId}:conversations`;
 
   return cacheService.wrap(
@@ -679,7 +685,7 @@ export async function getWorkspaceConversations(workspaceId) {
       });
 
       return conversations.map((c) => {
-        const lastMsg = c.messages[c.messages.length - 1];
+        const publicOrLatestMsg = [...c.messages].reverse().find((m) => !m.isInternalNote) || c.messages[c.messages.length - 1];
         const assignedName = c.assignedAgent
           ? [c.assignedAgent.firstName, c.assignedAgent.lastName].filter(Boolean).join(" ") || c.assignedAgent.email
           : "Non assigné";
@@ -690,8 +696,10 @@ export async function getWorkspaceConversations(workspaceId) {
           phone: c.customerPhone || null,
           avatar: (c.customerName || "V")[0].toUpperCase(),
           channel: c.channel || "PORTAL",
-          lastMessage: lastMsg?.content || "Conversation initiée",
-          lastMessageTime: lastMsg ? new Date(lastMsg.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "",
+          lastMessage: publicOrLatestMsg?.content || "Conversation initiée",
+          lastMessageTime: publicOrLatestMsg
+            ? new Date(publicOrLatestMsg.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+            : "",
           status: c.status,
           priority: c.priority,
           assignedAgent: assignedName,
@@ -700,6 +708,8 @@ export async function getWorkspaceConversations(workspaceId) {
           messages: c.messages.map((m) => ({
             id: m.id,
             sender: m.senderType === "CUSTOMER" ? "customer" : "agent",
+            senderType: m.senderType,
+            isInternalNote: Boolean(m.isInternalNote),
             text: m.content,
             time: new Date(m.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
           })),

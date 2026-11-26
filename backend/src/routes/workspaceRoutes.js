@@ -73,8 +73,8 @@ router.get("/:workspaceId", getWorkspace);
 router.patch("/:workspaceId", requireWorkspaceRole(["OWNER", "ADMIN"]), updateWorkspace);
 
 // Operational Dashboard, Inboxes & Customer Records
-router.get("/:workspaceId/dashboard", getDashboard);
-router.get("/:workspaceId/conversations", getConversations);
+router.get("/:workspaceId/dashboard", requireWorkspaceRole(["OWNER", "ADMIN", "MANAGER"]), getDashboard);
+router.get("/:workspaceId/conversations", requireWorkspaceRole(["OWNER", "ADMIN", "MANAGER"]), getConversations);
 router.get("/:workspaceId/tickets", getTickets);
 router.get("/:workspaceId/customers", getCustomers);
 

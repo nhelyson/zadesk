@@ -18,7 +18,7 @@ import {
 } from "../services/pushNotificationService.js";
 
 function getContext(req) {
-  const workspaceId = req.params.workspaceId || req.headers["x-workspace-id"];
+  const workspaceId = req.currentWorkspaceId || req.params.workspaceId || req.headers["x-workspace-id"];
   const userId = req.user.id;
   const userRole = req.currentMembership?.role || "AGENT";
   return { workspaceId, userId, userRole };
@@ -183,16 +183,22 @@ export async function createConversation(req, res, next) {
 
 export async function receiveCustomerMessage(req, res, next) {
   try {
-    const { workspaceId } = getContext(req);
+    const { workspaceId, userId, userRole } = getContext(req);
     const { conversationId } = req.params;
     const { content, customerName } = req.body;
     if (!content || !content.trim()) {
       return sendError(res, "Le contenu du message ne peut pas être vide.", 400);
     }
-    const message = await agentService.createCustomerMessage(workspaceId, conversationId, {
-      content,
-      customerName,
-    });
+    const message = await agentService.createCustomerMessage(
+      workspaceId,
+      conversationId,
+      {
+        content,
+        customerName,
+      },
+      userId,
+      userRole
+    );
     return sendSuccess(res, { message }, "Message client reçu et consigné avec succès.", 201);
   } catch (error) {
     if (error.status) {
@@ -245,7 +251,7 @@ export async function getConversationAttachment(req, res, next) {
 
 export async function sendConversationMessage(req, res, next) {
   try {
-    const { workspaceId, userId } = getContext(req);
+    const { workspaceId, userId, userRole } = getContext(req);
     const { conversationId } = req.params;
     const { content, isInternalNote } = req.body;
 
@@ -253,10 +259,16 @@ export async function sendConversationMessage(req, res, next) {
       return sendError(res, "Le contenu du message ne peut pas être vide.", 400);
     }
 
-    const message = await agentService.sendConversationMessage(workspaceId, conversationId, userId, {
-      content,
-      isInternalNote,
-    });
+    const message = await agentService.sendConversationMessage(
+      workspaceId,
+      conversationId,
+      userId,
+      {
+        content,
+        isInternalNote,
+      },
+      userRole
+    );
 
     return sendSuccess(res, { message }, isInternalNote ? "Note interne ajoutée." : "Message envoyé.");
   } catch (error) {
@@ -382,7 +394,7 @@ export async function getPushStatus(req, res, next) {
         select: { notificationApp: true, notificationEmail: true },
       }),
       prisma.pushSubscription.findMany({
-        where: { recipientType: "AGENT", userId },
+        where: { workspaceId, recipientType: "AGENT", userId },
         select: { id: true, endpoint: true },
       }),
     ]);
@@ -436,7 +448,7 @@ export async function unsubscribePush(req, res, next) {
       });
     } else {
       await prisma.pushSubscription.deleteMany({
-        where: { recipientType: "AGENT", userId },
+        where: { workspaceId, recipientType: "AGENT", userId },
       });
     }
 

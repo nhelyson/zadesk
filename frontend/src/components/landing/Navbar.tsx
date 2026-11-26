@@ -130,13 +130,10 @@ const THEME_STYLES: Record<NavTheme, ThemeStyles> = {
 export const Navbar = () => {
   const [currentTheme, setCurrentTheme] = useState<NavTheme>("transparent");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [isNavHidden, setIsNavHidden] = useState(false);
   const { isInstallable, isInstalled, promptInstall } = usePWA();
 
   useEffect(() => {
-    setMounted(true);
-
     const handleDiveState = (e: Event) => {
       const customEvent = e as CustomEvent<{ isEntered: boolean }>;
       if (customEvent.detail) {
@@ -195,9 +192,7 @@ export const Navbar = () => {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
         isTop ? "py-5" : "py-3.5 border-b"
       } ${styles.headerBg} ${styles.headerBorder} ${styles.headerShadow} ${
-        !mounted
-          ? "opacity-0 -translate-y-2"
-          : isNavHidden
+        isNavHidden
           ? "-translate-y-full opacity-0 pointer-events-none"
           : "opacity-100 translate-y-0"
       }`}

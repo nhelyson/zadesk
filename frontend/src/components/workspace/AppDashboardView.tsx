@@ -19,12 +19,8 @@ import { DashboardStats } from '@/types/workspace';
 import { MonolithMetric } from './design-system';
 import {
   normalizeDashboardStats,
-  IncidentBay,
-  DispatchTable,
-  TeamCapacityIndicator,
-  AgentRoster,
-  ActivityLedger,
   BrandNewWorkspaceGuide,
+  OverviewOperationsPanel,
 } from './dashboard';
 
 export interface DashboardAgentItem {
@@ -140,7 +136,12 @@ export function AppDashboardView({ previewStats, onNavigate }: AppDashboardViewP
 
   if (loading && !stats) {
     return (
-      <div className="space-y-6 pb-12 animate-pulse select-none" aria-busy="true">
+      <div
+        className={`space-y-6 select-none animate-pulse ${
+          previewStats ? '' : 'lg:min-h-[calc(100dvh-6.25rem)] lg:flex lg:flex-col'
+        }`}
+        aria-busy="true"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div className="lg:col-span-5 h-36 bg-white rounded-xl border border-[#E5E4DF]" />
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
@@ -149,16 +150,21 @@ export function AppDashboardView({ previewStats, onNavigate }: AppDashboardViewP
             <div className="h-36 bg-white rounded-xl border border-[#E5E4DF]" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 h-64 bg-white rounded-xl border border-[#E5E4DF]" />
-          <div className="lg:col-span-4 h-64 bg-white rounded-xl border border-[#E5E4DF]" />
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 min-h-[280px] bg-white rounded-2xl border border-[#E5E4DF]" />
+          <div className="lg:col-span-4 min-h-[280px] bg-white rounded-2xl border border-[#E5E4DF]" />
         </div>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="space-y-6 pb-12 select-none">
+    <div
+      ref={containerRef}
+      className={`space-y-6 select-none ${
+        previewStats ? '' : 'lg:min-h-[calc(100dvh-6.25rem)] lg:flex lg:flex-col'
+      }`}
+    >
       {error && (
         <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -320,78 +326,108 @@ export function AppDashboardView({ previewStats, onNavigate }: AppDashboardViewP
         </div>
       </div>
 
-      {/* Grille principale 8 / 4 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <section className="dashboard-plane lg:col-span-8 space-y-5 min-w-0">
+      {/* Grille principale 8 / 4 étirée jusqu'en bas sans aspect tassé */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <section className="dashboard-plane lg:col-span-8 flex flex-col min-w-0">
           {normalizedData.isBrandNew ? (
             <BrandNewWorkspaceGuide workspaceSlug={currentWorkspace?.slug} />
           ) : (
-            <>
-              <IncidentBay
-                incident={normalizedData.focalIncident}
-                isAgent={normalizedData.isAgent}
-              />
-              <DispatchTable
-                items={normalizedData.dispatchQueue}
-                totalTicketsCount={metrics.totalTickets}
-              />
-            </>
+            <OverviewOperationsPanel
+              incident={normalizedData.focalIncident}
+              queueItems={normalizedData.dispatchQueue}
+              agents={agents}
+              activities={normalizedData.recentActivity}
+              isAgent={normalizedData.isAgent}
+              onNavigate={onNavigate}
+            />
           )}
         </section>
 
-        <aside className="dashboard-plane lg:col-span-4 space-y-5 min-w-0">
-          {/* Carte opérationnelle Midnight Navy (Guichet public / Capacité, pas promo commerciale) */}
-          <div className="rounded-xl bg-[#0D1B3D] text-white p-5 border border-[#152C61] shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-300">
-              <span className="font-medium">Guichet SAV Public</span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                {currentWorkspace?.isPublic !== false ? 'En ligne' : 'Masqué'}
-              </span>
+        <aside className="dashboard-plane lg:col-span-4 flex flex-col min-w-0 lg:pt-10">
+          {/* Carte sombre aérée Midnight Navy (sans sous-boîtes imbriquées) */}
+          <div className="h-full rounded-2xl bg-[#0D1B3D] text-white p-6 sm:p-7 border border-[#152C61] shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] flex flex-col justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-slate-300">
+                <span className="font-medium">Guichet SAV Public</span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                  {currentWorkspace?.isPublic !== false ? 'En ligne' : 'Masqué'}
+                </span>
+              </div>
+
+              <h2 className="text-xl font-bold tracking-tight leading-snug">
+                {currentWorkspace?.name || 'Votre espace client'}
+              </h2>
+
+              <p className="text-xs text-slate-300/90 leading-relaxed">
+                {canManageBilling
+                  ? 'Vos clients vous écrivent directement sans inscription. Suivez l’équipe et vos dossiers en temps réel.'
+                  : 'Accédez à la file de conversations entrantes et traitez les demandes prioritaires.'}
+              </p>
             </div>
-            <h2 className="text-base font-bold tracking-tight leading-snug">
-              {currentWorkspace?.name || 'Votre espace client'}
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {canManageBilling
-                ? 'Vos clients vous écrivent directement sans inscription. Suivez l’équipe et vos quotas en temps réel.'
-                : 'Accédez à la file de conversations entrantes et traitez les demandes prioritaires.'}
-            </p>
-            <div className="pt-1 flex flex-wrap items-center gap-2">
-              {currentWorkspace?.slug && (
-                <a
-                  href={`/entreprises/${currentWorkspace.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 rounded-lg bg-white hover:bg-[#FAFAF8] text-[#0D1B3D] text-xs font-semibold transition-colors"
-                >
-                  <span>Ouvrir le guichet</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-              {canManageBilling ? (
-                <Link
-                  {...navLinkProps('/app/billing')}
-                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
-                >
-                  <span>Abonnement</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              ) : (
-                <Link
-                  {...navLinkProps('/app/conversations')}
-                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition-colors"
-                >
-                  <span>Conversations</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              )}
+
+            <div className="space-y-5">
+              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-300">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    teamCapacity.state === 'BUSY'
+                      ? 'bg-amber-400'
+                      : teamCapacity.state === 'NOMINAL'
+                      ? 'bg-[#22C55E]'
+                      : 'bg-slate-400'
+                  }`}
+                />
+                <span className="text-white font-semibold tabular-nums">
+                  {teamCapacity.availableOperationalCount}/{teamCapacity.totalOperationalCount || 1}
+                </span>
+                <span>conseillers dispo</span>
+                <span className="text-white/25">·</span>
+                <span className="text-white font-semibold tabular-nums">
+                  {teamCapacity.activeLoadCount}
+                </span>
+                <span>actifs</span>
+                {teamCapacity.waitingCount > 0 && (
+                  <>
+                    <span className="text-white/25">·</span>
+                    <span className="text-amber-300 font-medium tabular-nums">
+                      {teamCapacity.waitingCount} en attente
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {currentWorkspace?.slug && (
+                  <a
+                    href={`/entreprises/${currentWorkspace.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 min-h-[40px] px-5 rounded-xl bg-[#C8D9F0] hover:bg-white text-[#0D1B3D] text-xs font-semibold transition-colors"
+                  >
+                    <span>Ouvrir le guichet</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                {canManageBilling ? (
+                  <Link
+                    {...navLinkProps('/app/billing')}
+                    className="inline-flex items-center gap-1.5 min-h-[40px] px-2 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+                  >
+                    <span>Abonnement</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                ) : (
+                  <Link
+                    {...navLinkProps('/app/conversations')}
+                    className="inline-flex items-center gap-1.5 min-h-[40px] px-2 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+                  >
+                    <span>Conversations</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
-
-          <TeamCapacityIndicator summary={teamCapacity} />
-          <AgentRoster agents={agents} isAgent={normalizedData.isAgent} />
-          <ActivityLedger activities={normalizedData.recentActivity} />
         </aside>
       </div>
     </div>

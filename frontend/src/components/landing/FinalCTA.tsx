@@ -32,7 +32,7 @@ export const FinalCTA: React.FC = () => {
             scrollTrigger: {
               trigger: headlineRef.current,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -50,7 +50,7 @@ export const FinalCTA: React.FC = () => {
             scrollTrigger: {
               trigger: actionsRef.current,
               start: "top 80%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -68,7 +68,7 @@ export const FinalCTA: React.FC = () => {
             scrollTrigger: {
               trigger: principlesRef.current,
               start: "top 90%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -127,14 +127,12 @@ export const FinalCTA: React.FC = () => {
                 <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
                   Créez l&apos;espace de votre entreprise, invitez vos agents et organisez vos conversations client sur une plateforme unifiée.
                 </p>
-                <Link href="/register" className="block pt-1">
-                  <button
-                    type="button"
-                    className="w-full h-12 sm:h-13 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2.5 transition-all duration-150 active:scale-[0.99] cursor-pointer shadow-xs"
-                  >
-                    <span>Créer mon espace</span>
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
+                <Link
+                  href="/register"
+                  className="mt-1 w-full h-12 sm:h-13 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2.5 transition-all duration-150 active:scale-[0.99] cursor-pointer shadow-xs"
+                >
+                  <span>Créer mon espace</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </div>
 
@@ -159,14 +157,12 @@ export const FinalCTA: React.FC = () => {
                 <p className="text-xs sm:text-sm text-slate-400 font-normal leading-relaxed">
                   Recherchez un établissement vérifié et échangez directement avec son équipe en ligne, sans créer de compte.
                 </p>
-                <Link href="/entreprises" className="block pt-1">
-                  <button
-                    type="button"
-                    className="w-full h-11 rounded-xl border border-slate-700/90 hover:border-slate-500 text-slate-200 hover:text-white hover:bg-slate-800/50 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.99] cursor-pointer"
-                  >
-                    <span>Contacter une entreprise</span>
-                    <ArrowRight className="w-4 h-4 opacity-70" />
-                  </button>
+                <Link
+                  href="/entreprises"
+                  className="mt-1 w-full h-11 rounded-xl border border-slate-700/90 hover:border-slate-500 text-slate-200 hover:text-white hover:bg-slate-800/50 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.99] cursor-pointer"
+                >
+                  <span>Contacter une entreprise</span>
+                  <ArrowRight className="w-4 h-4 opacity-70" />
                 </Link>
               </div>
 

@@ -42,7 +42,7 @@ export const FAQSection: React.FC = () => {
             scrollTrigger: {
               trigger: leftColRef.current,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -60,7 +60,7 @@ export const FAQSection: React.FC = () => {
             scrollTrigger: {
               trigger: rightColRef.current,
               start: "top 80%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -96,15 +96,15 @@ export const FAQSection: React.FC = () => {
       categoryLabel: "Grand Public",
       question: "Dois-je installer une application spécifique sur mon smartphone ?",
       answer:
-        "Aucune application supplémentaire n'est requise. Tout se déroule directement dans votre navigateur web habituel. Si votre demande nécessite une visite au guichet, vous recevez directement dans votre fil de discussion un récapitulatif avec référence et QR code.",
+        "Aucune application supplémentaire n'est requise. Tout se déroule directement dans votre navigateur web habituel, avec la possibilité d'envoyer des pièces jointes et de suivre les réponses en temps réel depuis la même session sécurisée.",
     },
     {
       id: "faq-4",
       category: "public",
       categoryLabel: "Grand Public",
-      question: "Comment se déroule la continuité si un passage en agence physique est nécessaire ?",
+      question: "Comment se déroule la continuité si ma demande demande un suivi approfondi ?",
       answer:
-        "Si votre problème ne peut être résolu à distance (ex: diagnostic technique, échange de pièce ou formalité guichet), un dossier officiel est créé avec une référence unique (ex: ZDK-48291). En agence, le conseiller scanne votre QR code et accède immédiatement à tout l'historique sans vous faire répéter.",
+        "Votre conversation conserve tout son historique dans un fil continu. Si le traitement exige une intervention technique ou plusieurs échanges dans la durée, l'équipe peut partager le dossier en interne avec le bon spécialiste sans jamais vous faire répéter.",
     },
 
     // ================================================================
@@ -130,9 +130,9 @@ export const FAQSection: React.FC = () => {
       id: "faq-7",
       category: "pro",
       categoryLabel: "Entreprises",
-      question: "Comment fonctionne l'assistance IA de première ligne ?",
+      question: "Comment l'équipe gagne-t-elle du temps sur les réponses récurrentes ?",
       answer:
-        "Vous importez votre documentation vérifiée (FAQ, fiches techniques, conditions de retour). L'IA s'appuie strictement sur ces documents pour apporter des réponses immédiates et précises aux interrogations récurrentes. Si la demande nécessite une expertise humaine, elle est réorientée vers l'agent qualifié avec tout son contexte.",
+        "Chaque espace dispose de réponses prédéfinies, de notes internes confidentielles entre collègues, du routage par compétences et du partage sécurisé de conversations. L'assistance IA connectée à votre base documentaire (prévue sur Starter et Pro) viendra compléter ces outils automatiquement.",
     },
     {
       id: "faq-8",
@@ -140,7 +140,7 @@ export const FAQSection: React.FC = () => {
       categoryLabel: "Entreprises",
       question: "Comment les clients découvrent-ils le service de mon entreprise ?",
       answer:
-        "Dès l'activation de votre espace, votre entreprise bénéficie d'une page publique sur le répertoire Zadesk. Vous pouvez également intégrer votre lien direct ou QR code sur vos supports commerciaux, votre site internet, vos emballages et dans vos points de vente physiques.",
+        "Dès l'activation de votre espace, votre entreprise bénéficie d'une page publique sur le répertoire Zadesk. Vous pouvez également partager votre lien direct sur votre site web, vos réseaux sociaux ou vos supports commerciaux.",
     },
   ];
 

@@ -177,7 +177,7 @@ export const Hero = () => {
     <section 
       ref={sectionRef}
       data-nav-theme="light" 
-      className="relative w-full overflow-hidden bg-[#FAFAF8] text-slate-900 selection:bg-emerald-600 selection:text-white pt-20 pb-14 sm:pt-24 sm:pb-18 lg:pt-28 lg:pb-20 min-h-[calc(100svh-4rem)] flex items-center"
+      className="relative w-full overflow-hidden bg-[#FAFAF8] text-slate-900 selection:bg-emerald-600 selection:text-white pt-20 pb-14 sm:pt-24 sm:pb-18 lg:pt-28 lg:pb-20 min-h-[100svh] flex items-center"
       style={{
         WebkitTapHighlightColor: "transparent",
       }}
@@ -298,26 +298,20 @@ export const Hero = () => {
               ref={ctaRef}
               className="pt-2"
             >
-              <Link 
-                href="/register" 
-                className="inline-block w-full sm:w-auto"
+              <Link
+                href="/register"
                 style={{
                   touchAction: "manipulation",
                   userSelect: "none",
                   WebkitUserSelect: "none",
-                  WebkitTouchCallout: "none"
+                  WebkitTouchCallout: "none",
                 }}
+                className="group relative w-full sm:w-auto h-[48px] px-7 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.98] transition-all duration-150 ease-out shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_14px_rgba(15,23,42,0.12)] inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer touch-manipulation"
               >
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className="group relative w-full sm:w-auto h-[48px] px-7 rounded-xl bg-slate-950 hover:bg-slate-900 active:scale-[0.98] transition-all duration-150 ease-out shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_14px_rgba(15,23,42,0.12)] inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer touch-manipulation"
-                >
-                  <span className="text-[14px] sm:text-[15px] font-semibold text-white tracking-[-0.01em]">
-                    Créer mon espace
-                  </span>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-150 shrink-0" />
-                </div>
+                <span className="text-[14px] sm:text-[15px] font-semibold text-white tracking-[-0.01em]">
+                  Créer mon espace
+                </span>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-150 shrink-0" />
               </Link>
             </div>
 
@@ -441,7 +435,7 @@ export const Hero = () => {
               {/* -------------------------------------------------------- */}
               <div 
                 ref={subjectTopRef}
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[410px] sm:w-[330px] h-[440px] lg:w-[350px] lg:h-[465px] pointer-events-none z-20"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[410px] sm:w-[330px] sm:h-[440px] lg:w-[350px] lg:h-[465px] pointer-events-none z-20"
                 style={{
                   clipPath: "inset(0 0 37% 0)",
                 }}

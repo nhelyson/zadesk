@@ -346,6 +346,9 @@ export interface AgentConversationItem {
   } | null;
   assignedAgent?: {
     id: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
     user?: {
       firstName?: string;
       lastName?: string;

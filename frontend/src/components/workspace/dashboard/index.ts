@@ -8,3 +8,4 @@ export * from './AgentRoster';
 export * from './AIGovernanceNotice';
 export * from './ActivityLedger';
 export * from './BrandNewWorkspaceGuide';
+export * from './OverviewOperationsPanel';

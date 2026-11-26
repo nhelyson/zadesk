@@ -134,7 +134,7 @@ export async function getWorkspace(req, res, next) {
 
 export async function getDashboard(req, res, next) {
   try {
-    const { workspaceId } = req.params;
+    const workspaceId = req.currentWorkspaceId || req.params.workspaceId;
     const stats = await getWorkspaceDashboardStats(workspaceId);
     return sendSuccess(res, stats);
   } catch (error) {
@@ -144,10 +144,14 @@ export async function getDashboard(req, res, next) {
 
 export async function getConversations(req, res, next) {
   try {
-    const { workspaceId } = req.params;
-    const conversations = await getWorkspaceConversations(workspaceId);
+    const workspaceId = req.currentWorkspaceId || req.params.workspaceId;
+    const userRole = req.currentMembership?.role;
+    const conversations = await getWorkspaceConversations(workspaceId, { userRole });
     return sendSuccess(res, { conversations });
   } catch (error) {
+    if (error.status) {
+      return sendError(res, error.message, error.status);
+    }
     next(error);
   }
 }

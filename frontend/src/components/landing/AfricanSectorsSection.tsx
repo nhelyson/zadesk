@@ -18,7 +18,7 @@ import { ZadeskPulseGlobe, SectorData } from "./ZadeskPulseGlobe";
 
 export const AfricanSectorsSection: React.FC = () => {
   const [activeSector, setActiveSector] = useState(0);
-  const sectorRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectorRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const sectors: SectorData[] = [
     {
@@ -252,14 +252,16 @@ export const AfricanSectorsSection: React.FC = () => {
             {sectors.map((s, idx) => {
               const isActive = activeSector === idx;
               return (
-                <div
+                <button
                   key={idx}
+                  type="button"
+                  aria-pressed={isActive}
                   ref={(el) => {
                     sectorRefs.current[idx] = el;
                   }}
                   data-sector-index={idx}
                   onClick={() => setActiveSector(idx)}
-                  className={`group relative p-6 sm:p-7 rounded-2xl border transition-all duration-300 cursor-pointer scroll-mt-28 ${
+                  className={`w-full text-left group relative p-6 sm:p-7 rounded-2xl border transition-all duration-300 cursor-pointer scroll-mt-28 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                     isActive
                       ? "bg-slate-50/80 border-slate-300/90 shadow-sm"
                       : "bg-transparent border-transparent hover:border-slate-200/60 opacity-60 hover:opacity-100"
@@ -311,7 +313,7 @@ export const AfricanSectorsSection: React.FC = () => {
                       <span className="truncate tracking-wide">{s.metrics}</span>
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

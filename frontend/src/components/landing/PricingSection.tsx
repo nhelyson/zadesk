@@ -32,7 +32,7 @@ export const PricingSection: React.FC = () => {
             scrollTrigger: {
               trigger: headlineRef.current,
               start: "top 85%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -50,7 +50,7 @@ export const PricingSection: React.FC = () => {
             scrollTrigger: {
               trigger: gridRef.current,
               start: "top 80%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -68,7 +68,7 @@ export const PricingSection: React.FC = () => {
             scrollTrigger: {
               trigger: commitmentsRef.current,
               start: "top 90%",
-              toggleActions: "play none none reverse",
+              once: true,
             },
           }
         );
@@ -287,18 +287,13 @@ export const PricingSection: React.FC = () => {
 
                     {/* CTA Button */}
                     <div className="pt-6 border-t border-slate-800">
-                      <Link 
-                        href={plan.href} 
-                        className="block w-full"
+                      <Link
+                        href={plan.href}
                         style={{ touchAction: "manipulation" }}
+                        className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 active:scale-[0.98] cursor-pointer"
                       >
-                        <button
-                          type="button"
-                          className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 active:scale-[0.98] cursor-pointer"
-                        >
-                          <span>{plan.cta}</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
+                        <span>{plan.cta}</span>
+                        <ArrowRight className="w-4 h-4" />
                       </Link>
                       <p className="text-center text-[11px] text-slate-400 mt-2.5 font-normal">
                         {plan.footerNote}
@@ -381,18 +376,13 @@ export const PricingSection: React.FC = () => {
 
                   {/* CTA Button */}
                   <div className="pt-6 border-t border-slate-100">
-                    <Link 
-                      href={plan.href} 
-                      className="block w-full"
+                    <Link
+                      href={plan.href}
                       style={{ touchAction: "manipulation" }}
+                      className="w-full h-12 rounded-xl border border-slate-300 hover:border-[#0D1B3D] text-[#0D1B3D] hover:bg-slate-50 font-bold text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] cursor-pointer"
                     >
-                      <button
-                        type="button"
-                        className="w-full h-12 rounded-xl border border-slate-300 hover:border-[#0D1B3D] text-[#0D1B3D] hover:bg-slate-50 font-bold text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                      >
-                        <span>{plan.cta}</span>
-                        <ArrowRight className="w-4 h-4 opacity-70" />
-                      </button>
+                      <span>{plan.cta}</span>
+                      <ArrowRight className="w-4 h-4 opacity-70" />
                     </Link>
                     <p className="text-center text-[11px] text-slate-500 mt-2.5 font-normal">
                       {plan.footerNote}
