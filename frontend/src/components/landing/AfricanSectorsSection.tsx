@@ -233,10 +233,10 @@ export const AfricanSectorsSection: React.FC = () => {
         {/* Section Header — Pure Editorial Typography without Artificial Badges */}
         <RevealOnScroll direction="up">
           <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20 space-y-4">
-            <h2 className="apple-display-title text-3xl sm:text-5xl font-black text-slate-900 leading-[1.12] tracking-tight">
-              Pensé pour les réalités des entreprises locales.
+            <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-black text-[#0D1B3D] leading-[1.08] tracking-[-0.035em]">
+              Pensé pour les réalités des entreprises locales
             </h2>
-            <p className="apple-body-relaxed text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
               Quel que soit votre secteur, Zadesk apporte l&apos;organisation nécessaire pour satisfaire vos clients au quotidien.
             </p>
           </div>
@@ -279,12 +279,12 @@ export const AfricanSectorsSection: React.FC = () => {
                     <div className="flex items-center justify-between gap-3">
                       <span
                         className={`text-2xl sm:text-3xl font-light font-mono transition-colors duration-300 ${
-                          isActive ? "text-emerald-600 font-normal" : "text-slate-300"
+                          isActive ? "text-emerald-700 font-normal" : "text-slate-400"
                         }`}
                       >
                         0{idx + 1}
                       </span>
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                      <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-slate-500 font-semibold">
                         {s.badge}
                       </span>
                     </div>

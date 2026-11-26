@@ -111,13 +111,13 @@ export const CustomerExperienceSection: React.FC = () => {
         {/* 1. EN-TÊTE ÉDITORIALE DE LA SECTION                     */}
         {/* ======================================================== */}
         <div ref={headlineRef} className="max-w-3xl space-y-4 mb-14 sm:mb-16 lg:mb-20">
-          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-emerald-600 block">
+          <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 block">
             L&apos;expérience côté client
           </span>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0D1B3D] tracking-tight leading-[1.1]">
+          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-black text-[#0D1B3D] tracking-[-0.035em] leading-[1.08]">
             Une entreprise à contacter ?<br />
-            Tout commence ici.
+            Tout commence ici
           </h2>
 
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal pt-1">

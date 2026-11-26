@@ -170,36 +170,36 @@ export const ConversationNotTicketSection: React.FC = () => {
         {/* ============================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-end pb-20 sm:pb-28 lg:pb-36">
           
-          {/* Monumental Swiss-inspired typography (8 cols) */}
+          {/* Monumental unified Swiss-poster typography (8 cols) */}
           <div className="lg:col-span-8 space-y-1 sm:space-y-2">
             <span
               ref={headlineLine1Ref}
-              className="block text-5xl sm:text-7xl lg:text-8xl xl:text-[7.25rem] font-black text-[#0D1B3D] tracking-[-0.045em] leading-[0.96] uppercase"
+              className="block text-[clamp(2.5rem,6.4vw,6.75rem)] font-black text-[#0D1B3D] tracking-[-0.045em] leading-[0.94] uppercase"
             >
               Une conversation
             </span>
 
             <span
               ref={headlineLine2Ref}
-              className="block text-5xl sm:text-7xl lg:text-8xl xl:text-[7.25rem] font-black text-[#0D1B3D] tracking-[-0.045em] leading-[0.96] uppercase"
+              className="block text-[clamp(2.5rem,6.4vw,6.75rem)] font-black text-[#0D1B3D] tracking-[-0.045em] leading-[0.94] uppercase"
             >
               n&apos;est pas un
             </span>
 
             {/* Word "ticket" with refined architectural accent */}
-            <div className="relative inline-block mt-2">
+            <div className="relative inline-block mt-1">
               <span
                 ref={headlineLine3Ref}
-                className="block text-5xl sm:text-7xl lg:text-8xl xl:text-[7.25rem] font-black tracking-[-0.045em] leading-[0.96] uppercase text-emerald-600"
+                className="block text-[clamp(2.5rem,6.4vw,6.75rem)] font-black tracking-[-0.045em] leading-[0.94] uppercase text-emerald-700"
               >
-                ticket.
+                ticket
               </span>
               
-              {/* Fine editorial line striking through with surgical elegance */}
+              {/* Fine editorial line striking through with architectural tilt */}
               <div
                 ref={strikeLineRef}
                 aria-hidden="true"
-                className="absolute top-1/2 left-0 right-0 h-[3px] sm:h-[4px] lg:h-[5px] bg-[#0D1B3D] origin-left pointer-events-none"
+                className="absolute top-1/2 left-0 right-0 h-[3px] sm:h-[4px] lg:h-[5px] bg-[#0D1B3D] -rotate-[1.5deg] origin-left pointer-events-none"
               />
             </div>
           </div>
@@ -232,10 +232,10 @@ export const ConversationNotTicketSection: React.FC = () => {
             >
               <div ref={divider1Ref} className="w-full h-[1px] bg-stone-200" />
               <div className="flex items-baseline justify-between pt-2">
-                <span className="text-3xl sm:text-4xl font-light text-slate-300 font-mono tracking-tight">
+                <span className="text-3xl sm:text-4xl font-light text-slate-400 font-mono tracking-tight">
                   01
                 </span>
-                <span className="text-[11px] font-mono tracking-widest uppercase text-emerald-700">
+                <span className="text-[11px] font-mono tracking-[0.18em] font-bold uppercase text-emerald-700">
                   Accès Direct
                 </span>
               </div>
@@ -256,10 +256,10 @@ export const ConversationNotTicketSection: React.FC = () => {
             >
               <div ref={divider2Ref} className="w-full h-[1px] bg-stone-200" />
               <div className="flex items-baseline justify-between pt-2">
-                <span className="text-3xl sm:text-4xl font-light text-slate-300 font-mono tracking-tight">
+                <span className="text-3xl sm:text-4xl font-light text-slate-400 font-mono tracking-tight">
                   02
                 </span>
-                <span className="text-[11px] font-mono tracking-widest uppercase text-emerald-700">
+                <span className="text-[11px] font-mono tracking-[0.18em] font-bold uppercase text-emerald-700">
                   Dialogue
                 </span>
               </div>
@@ -280,10 +280,10 @@ export const ConversationNotTicketSection: React.FC = () => {
             >
               <div ref={divider3Ref} className="w-full h-[1px] bg-stone-200" />
               <div className="flex items-baseline justify-between pt-2">
-                <span className="text-3xl sm:text-4xl font-light text-slate-300 font-mono tracking-tight">
+                <span className="text-3xl sm:text-4xl font-light text-slate-400 font-mono tracking-tight">
                   03
                 </span>
-                <span className="text-[11px] font-mono tracking-widest uppercase text-emerald-700">
+                <span className="text-[11px] font-mono tracking-[0.18em] font-bold uppercase text-emerald-700">
                   Continuité
                 </span>
               </div>

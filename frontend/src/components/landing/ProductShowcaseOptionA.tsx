@@ -217,10 +217,10 @@ export const ProductShowcaseOptionA: React.FC = () => {
             ref={headlineRef}
             className="relative z-10 text-center select-none pb-6 sm:pb-8 lg:pb-2 will-change-transform"
           >
-            <h2 className="text-[2.5rem] sm:text-6xl lg:text-[5.2rem] xl:text-[6rem] font-black tracking-[-0.045em] leading-[0.94] text-[#0D1B3D]">
-              Votre client écrit.
-              <span className="block text-slate-400 font-extrabold">
-                Votre équipe répond.
+            <h2 className="text-[clamp(2.4rem,5.6vw,5.75rem)] font-black tracking-[-0.045em] leading-[0.94] text-[#0D1B3D]">
+              Votre client écrit
+              <span className="block text-slate-400 font-semibold">
+                Votre équipe répond
               </span>
             </h2>
           </div>

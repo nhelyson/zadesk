@@ -97,10 +97,10 @@ export const FinalCTA: React.FC = () => {
           <div ref={headlineRef} className="lg:col-span-7 space-y-6">
 
             {/* Titre monumental en 3 plans */}
-            <h2 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-[-0.045em] leading-[0.96] uppercase">
+            <h2 className="text-[clamp(2.5rem,5.8vw,5.75rem)] font-black text-white tracking-[-0.045em] leading-[0.95] uppercase">
               Chaque relation<br />
-              <span className="text-slate-400 font-normal">commence par</span><br />
-              <span className="text-emerald-400">un échange.</span>
+              <span className="text-slate-400 font-medium">commence par</span><br />
+              <span className="text-emerald-400">un échange</span>
             </h2>
 
             {/* Paragraphe manifeste sobre */}

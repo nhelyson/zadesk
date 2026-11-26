@@ -170,7 +170,7 @@ export const PricingSection: React.FC = () => {
           
           {/* Label discret épuré */}
           <div className="mb-4">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-emerald-600 block">
+            <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 block">
               Tarifs &amp; Abonnements
             </span>
           </div>
@@ -179,9 +179,9 @@ export const PricingSection: React.FC = () => {
             
             {/* Monumental Title */}
             <div className="lg:col-span-8">
-              <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-[#0D1B3D] tracking-[-0.04em] leading-[0.98] uppercase">
-                Des forfaits clairs.<br />
-                <span className="text-slate-400 font-normal">Sans coût caché.</span>
+              <h2 className="text-[clamp(2.4rem,5.4vw,4.75rem)] font-black text-[#0D1B3D] tracking-[-0.04em] leading-[0.96] uppercase">
+                Des forfaits clairs<br />
+                <span className="text-slate-400 font-medium">Sans coût caché</span>
               </h2>
               <p className="mt-5 text-base sm:text-lg text-slate-600 font-normal max-w-2xl leading-relaxed">
                 Des abonnements mensuels sans engagement. Démarrez immédiatement avec l&apos;offre Découverte, sans carte bancaire requise.
@@ -315,7 +315,7 @@ export const PricingSection: React.FC = () => {
                   <div>
                     {/* Top Meta */}
                     <div className="flex items-center justify-between pb-6 border-b border-slate-100">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                         Forfait {plan.name}
                       </span>
                       <span className="font-mono text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
@@ -353,7 +353,7 @@ export const PricingSection: React.FC = () => {
 
                     {/* Specifications List */}
                     <div className="pt-8 pb-10">
-                      <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-4">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-slate-500 font-semibold mb-4">
                         Inclus dans l&apos;offre :
                       </div>
                       <ul className="space-y-3.5 text-xs sm:text-sm">

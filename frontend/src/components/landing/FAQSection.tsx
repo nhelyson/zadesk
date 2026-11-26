@@ -174,15 +174,15 @@ export const FAQSection: React.FC = () => {
             {/* Label discret épuré */}
             <div>
               <div className="mb-4">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-emerald-600 block">
+                <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 block">
                   Questions fréquentes
                 </span>
               </div>
 
               {/* Titre monumental */}
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0D1B3D] tracking-[-0.04em] leading-[1.0] uppercase">
+              <h2 className="text-[clamp(2.4rem,4.4vw,4rem)] font-black text-[#0D1B3D] tracking-[-0.04em] leading-[0.98] uppercase">
                 Comprendre<br />
-                <span className="text-slate-400 font-normal">Zadesk.</span>
+                <span className="text-slate-400 font-medium">Zadesk</span>
               </h2>
 
               <p className="mt-5 text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
@@ -192,7 +192,7 @@ export const FAQSection: React.FC = () => {
 
             {/* Sélecteur d'audience éditorial */}
             <div className="pt-2">
-              <span className="font-mono text-[11px] uppercase tracking-wider text-slate-400 font-semibold block mb-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 font-semibold block mb-3">
                 Filtrer par préoccupation :
               </span>
               <div
@@ -310,7 +310,7 @@ export const FAQSection: React.FC = () => {
 
                           <div className="space-y-1">
                             {/* Catégorie discrète */}
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 block font-semibold">
                               {faq.categoryLabel}
                             </span>
                             {/* Question text */}
