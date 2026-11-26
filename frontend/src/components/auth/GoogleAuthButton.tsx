@@ -15,6 +15,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 
 interface GoogleAuthButtonProps {
   mode?: "login" | "register";
+  shape?: "rectangular" | "pill" | "circle";
   onSuccess?: (user: UserProfile, result?: AuthResponse) => void;
   onError?: (error: string) => void;
   className?: string;
@@ -31,6 +32,7 @@ declare global {
 
 export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   mode = "login",
+  shape = "rectangular",
   onSuccess,
   onError,
   className = "",
@@ -212,7 +214,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         theme: "outline",
         size: "large",
         text: mode === "register" ? "signup_with" : "continue_with",
-        shape: "rectangular",
+        shape: shape,
         logo_alignment: "left",
         width: computedWidth,
         locale: "fr",
@@ -220,7 +222,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     } catch (e) {
       console.error("Google button render error:", e);
     }
-  }, [isSdkReady, clientId, mode]);
+  }, [isSdkReady, clientId, mode, shape]);
 
   return (
     <div className={`w-full flex flex-col items-center justify-center ${className}`}>
@@ -237,7 +239,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 
         {/* Skeleton placeholder while SDK or Client ID is loading */}
         {!isSdkReady && (
-          <div className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white flex items-center justify-center gap-3 text-slate-600 text-xs font-semibold shadow-xs animate-pulse">
+          <div className={`w-full py-2.5 px-4 ${shape === "pill" ? "rounded-full" : "rounded-xl"} border border-slate-200 bg-white flex items-center justify-center gap-3 text-slate-600 text-xs font-semibold shadow-xs animate-pulse`}>
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"

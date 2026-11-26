@@ -1,8 +1,21 @@
 import * as agentService from "../services/agentService.js";
+import { getWorkspaceAgents } from "../services/workspaceService.js";
 import { ensureWorkspaceAgentSeed } from "../services/agentSeedService.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import { prisma } from "../lib/prisma.js";
 import { streamPulseEvents } from "../services/pulseEventService.js";
+import { resolveChatAttachmentFile } from "../utils/chatAttachments.js";
+import {
+  recordHeartbeat,
+  leavePresence,
+  getUserPresence,
+  getPresenceConfig,
+} from "../services/presenceService.js";
+import {
+  getPublicVapidKey,
+  upsertPushSubscription,
+  removePushSubscription,
+} from "../services/pushNotificationService.js";
 
 function getContext(req) {
   const workspaceId = req.params.workspaceId || req.headers["x-workspace-id"];
@@ -203,6 +216,33 @@ export async function getConversation(req, res, next) {
   }
 }
 
+export async function getConversationAttachment(req, res, next) {
+  try {
+    const { workspaceId, userId, userRole } = getContext(req);
+    const { conversationId, fileName } = req.params;
+    await agentService.getConversationDetails(workspaceId, conversationId, userId, userRole);
+
+    const fileInfo = await resolveChatAttachmentFile(conversationId, fileName);
+    if (!fileInfo) {
+      return sendError(res, "Pièce jointe introuvable.", 404);
+    }
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    res.setHeader("Content-Type", fileInfo.mimeType);
+    res.setHeader(
+      "Content-Disposition",
+      `${fileInfo.isImage ? "inline" : "attachment"}; filename="${fileInfo.fileName}"`
+    );
+    return res.sendFile(fileInfo.fullPath);
+  } catch (error) {
+    if (error.status) {
+      return sendError(res, error.message, error.status);
+    }
+    next(error);
+  }
+}
+
 export async function sendConversationMessage(req, res, next) {
   try {
     const { workspaceId, userId } = getContext(req);
@@ -251,6 +291,63 @@ export async function updateProfile(req, res, next) {
     const updated = await agentService.updateAgentProfile(workspaceId, userId, req.body);
     return sendSuccess(res, { profile: updated }, "Profil mis à jour avec succès.");
   } catch (error) {
+    if (error.status) {
+      return sendError(res, error.message, error.status);
+    }
+    next(error);
+  }
+}
+
+export async function heartbeatPresence(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    const { tabId, idleMs } = req.body || {};
+    const presence = await recordHeartbeat({
+      workspaceId,
+      userId,
+      sessionToken: req.sessionToken,
+      tabId: typeof tabId === "string" && tabId.trim() ? tabId.trim() : "default",
+      idleMs: Number(idleMs) || 0,
+    });
+    return sendSuccess(res, { presence, config: getPresenceConfig() });
+  } catch (error) {
+    if (error.status) {
+      return sendError(res, error.message, error.status);
+    }
+    next(error);
+  }
+}
+
+export async function leavePresenceController(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    let body = req.body || {};
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        body = {};
+      }
+    }
+    const tabId = typeof body.tabId === "string" && body.tabId.trim() ? body.tabId.trim() : "default";
+    await leavePresence({
+      workspaceId,
+      userId,
+      sessionToken: req.sessionToken,
+      tabId,
+    });
+    return sendSuccess(res, { left: true });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getMyPresence(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    const presence = await getUserPresence({ workspaceId, userId });
+    return sendSuccess(res, { presence, config: getPresenceConfig() });
+  } catch (error) {
     next(error);
   }
 }
@@ -258,65 +355,92 @@ export async function updateProfile(req, res, next) {
 export async function listTeamMembers(req, res, next) {
   try {
     const { workspaceId } = getContext(req);
-    const members = await prisma.membership.findMany({
-      where: { workspaceId },
-      include: {
-        user: {
-          select: { id: true, firstName: true, lastName: true, email: true, avatarUrl: true, createdAt: true },
-        },
-      },
-      orderBy: { createdAt: "asc" },
-    });
-
-    const profiles = await prisma.agentProfile.findMany({
-      where: { workspaceId },
-      include: {
-        skills: {
-          include: {
-            skill: true,
-          },
-        },
-      },
-    });
-
-    const result = members.map((m) => {
-      const p = profiles.find((prof) => prof.userId === m.userId);
-      const skills = (p?.skills || []).map((s) => ({
-        id: s.skill.id,
-        name: s.skill.name,
-        description: s.skill.description,
-        validatedAt: s.validatedAt,
-      }));
-      const specialties = skills.map((s) => s.name);
-
-      return {
-        id: m.user.id,
-        membershipId: m.id,
-        firstName: m.user.firstName,
-        lastName: m.user.lastName,
-        name: `${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() || m.user.email.split('@')[0],
-        email: m.user.email,
-        avatarUrl: m.user.avatarUrl,
-        role: m.role,
-        membershipStatus: m.status || 'ACTIVE',
-        isSuspended: m.status === 'SUSPENDED',
-        suspendedAt: m.suspendedAt || null,
-        suspendedReason: m.suspendedReason || null,
-        joinedAt: m.createdAt,
-        hasAgentProfile: Boolean(p),
-        profileId: p?.id || null,
-        title: p?.title || (m.role === 'OWNER' ? 'Propriétaire' : m.role === 'ADMIN' ? 'Administrateur' : m.role === 'MANAGER' ? 'Superviseur SAV' : 'Conseiller SAV'),
-        phone: p?.phone || '',
-        status: p?.availability || 'AVAILABLE',
-        availability: p ? p.availability : null,
-        maxCapacity: p?.maxCapacity || null,
-        autoAssignmentEnabled: p ? p.autoAssignmentEnabled : null,
-        skills,
-        specialties,
-      };
-    });
-
+    const result = await getWorkspaceAgents(workspaceId);
     return sendSuccess(res, { team: result, members: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPushVapidKey(req, res, next) {
+  try {
+    const publicKey = await getPublicVapidKey();
+    return sendSuccess(res, { publicKey });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getPushStatus(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    const endpoint = typeof req.query?.endpoint === "string" ? req.query.endpoint.trim() : "";
+
+    const [profile, subscriptions] = await Promise.all([
+      prisma.agentProfile.findUnique({
+        where: { workspaceId_userId: { workspaceId, userId } },
+        select: { notificationApp: true, notificationEmail: true },
+      }),
+      prisma.pushSubscription.findMany({
+        where: { recipientType: "AGENT", userId },
+        select: { id: true, endpoint: true },
+      }),
+    ]);
+
+    const currentDeviceSubscribed = endpoint
+      ? subscriptions.some((s) => s.endpoint === endpoint)
+      : subscriptions.length > 0;
+
+    return sendSuccess(res, {
+      subscribed: currentDeviceSubscribed,
+      deviceCount: subscriptions.length,
+      notificationApp: profile ? profile.notificationApp : true,
+      notificationEmail: profile ? profile.notificationEmail : true,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function subscribePush(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    const { subscription } = req.body || {};
+
+    await upsertPushSubscription({
+      recipientType: "AGENT",
+      workspaceId,
+      userId,
+      subscription,
+      userAgent: req.headers["user-agent"],
+    });
+
+    return sendSuccess(res, { subscribed: true }, "Alertes bureau activées sur cet appareil.");
+  } catch (error) {
+    if (error.status) return sendError(res, error.message, error.status);
+    next(error);
+  }
+}
+
+export async function unsubscribePush(req, res, next) {
+  try {
+    const { workspaceId, userId } = getContext(req);
+    const { endpoint } = req.body || {};
+
+    if (endpoint) {
+      await removePushSubscription({
+        recipientType: "AGENT",
+        workspaceId,
+        userId,
+        endpoint,
+      });
+    } else {
+      await prisma.pushSubscription.deleteMany({
+        where: { recipientType: "AGENT", userId },
+      });
+    }
+
+    return sendSuccess(res, { subscribed: false }, "Alertes bureau désactivées.");
   } catch (error) {
     next(error);
   }

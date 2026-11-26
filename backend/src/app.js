@@ -45,7 +45,15 @@ app.use(
 );
 
 // Request parsing (supports up to 10mb for base64 encoded logos/covers without HTTP 413)
-app.use(express.json({ limit: "10mb" }));
+// Retains exact rawBody buffer for HMAC-SHA256 cryptographic webhook signature verification
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser(env.SESSION_SECRET));
 

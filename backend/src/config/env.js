@@ -38,6 +38,22 @@ export const env = {
   TURNSTILE_SITE_KEY: process.env.TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
   TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY || "",
   TURNSTILE_BYPASS_DEV: process.env.TURNSTILE_BYPASS_DEV === "true" || process.env.NODE_ENV !== "production",
+
+  // SasPay Official Configuration (Phase D.2)
+  SASPAY_API_KEY: process.env.SASPAY_API_KEY || "",
+  SASPAY_WEBHOOK_SECRET: process.env.SASPAY_WEBHOOK_SECRET || "",
+  APP_URL: process.env.APP_URL || process.env.FRONTEND_URL || "http://localhost",
+  SASPAY_API_BASE_URL: process.env.SASPAY_API_BASE_URL || "https://api.saspay.me/api/v1",
+
+  // Web Push (VAPID) Configuration
+  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || "",
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || "",
+  VAPID_SUBJECT: process.env.VAPID_SUBJECT || "mailto:support@zalisk.com",
+
+  // Agent Presence Configuration (Heartbeat / Idle / Expiration)
+  PRESENCE_HEARTBEAT_INTERVAL_SEC: parseInt(process.env.PRESENCE_HEARTBEAT_INTERVAL_SEC || "30", 10),
+  PRESENCE_TTL_SEC: parseInt(process.env.PRESENCE_TTL_SEC || "75", 10),
+  PRESENCE_AWAY_AFTER_SEC: parseInt(process.env.PRESENCE_AWAY_AFTER_SEC || "300", 10),
 };
 
 

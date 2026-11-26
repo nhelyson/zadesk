@@ -298,7 +298,7 @@ export default function WhatsAppPage() {
             <span>Configuration Meta Requise</span>
           </div>
           <p className="text-amber-700 text-[11px]">
-            L'application Meta de Zadesk n'a pas encore été configurée dans l'environnement serveur (`META_APP_ID` et `META_CONFIG_ID`).
+            L'application Meta de Zalisk n'a pas encore été configurée dans l'environnement serveur (`META_APP_ID` et `META_CONFIG_ID`).
             Configurez ces variables dans votre fichier `.env` pour lancer l'Embedded Signup officiel.
           </p>
         </div>
@@ -320,7 +320,7 @@ export default function WhatsAppPage() {
           <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-100">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
                   <Smartphone className="w-7 h-7" />
                 </div>
                 <div>
@@ -349,7 +349,7 @@ export default function WhatsAppPage() {
                   href="https://business.facebook.com/wa/manage/phone-numbers/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 shadow-2xs"
+                  className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 shadow-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                   <span>Gérer sur Meta</span>
@@ -358,7 +358,7 @@ export default function WhatsAppPage() {
                 <button
                   type="button"
                   onClick={() => setIsDisconnectModalOpen(true)}
-                  className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <LogOut className="w-3.5 h-3.5 text-rose-500" />
                   <span>Déconnecter</span>
@@ -412,7 +412,7 @@ export default function WhatsAppPage() {
                 <span>Intégration Officielle Meta</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Connectez le WhatsApp Business de votre entreprise à Zadesk
+                Connectez le WhatsApp Business de votre entreprise à Zalisk
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Associez votre compte WhatsApp en quelques secondes. Choisissez l&apos;option qui correspond à votre situation :
@@ -424,7 +424,7 @@ export default function WhatsAppPage() {
               {/* Option 1: Connect Existing */}
               <div className="p-6 rounded-3xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all flex flex-col justify-between space-y-5">
                 <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center shadow-xs">
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center shadow-sm">
                     <Layers className="w-6 h-6" />
                   </div>
                   <div>
@@ -441,7 +441,7 @@ export default function WhatsAppPage() {
                   onClick={() => launchMetaEmbeddedSignup('connect_existing')}
                   disabled={actionLoading}
                   variant="primary"
-                  className="w-full justify-center !py-2.5 text-xs font-bold shadow-xs cursor-pointer"
+                  className="w-full justify-center !py-2.5 text-xs font-bold shadow-sm cursor-pointer"
                   leftIcon={actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : undefined}
                 >
                   {actionLoading ? 'Connexion en cours...' : 'Connecter un compte existant'}
@@ -451,7 +451,7 @@ export default function WhatsAppPage() {
               {/* Option 2: Create / Setup New */}
               <div className="p-6 rounded-3xl bg-emerald-50/40 border border-emerald-200/90 hover:border-emerald-400 hover:bg-emerald-50/60 transition-all flex flex-col justify-between space-y-5">
                 <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-xs">
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-sm">
                     <PlusCircle className="w-6 h-6" />
                   </div>
                   <div>
@@ -497,7 +497,7 @@ export default function WhatsAppPage() {
 
       {/* Disconnection Confirmation Modal */}
       {isDisconnectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
               <LogOut className="w-6 h-6" />
@@ -508,7 +508,7 @@ export default function WhatsAppPage() {
                 Déconnecter WhatsApp Business ?
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Cette action supprime uniquement l&apos;association entre ce numéro et votre espace Zadesk.
+                Cette action supprime uniquement l&apos;association entre ce numéro et votre espace Zalisk.
                 Votre compte WhatsApp Business et vos données chez Meta restent inchangés.
               </p>
             </div>

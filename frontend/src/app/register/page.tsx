@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Mail, Lock, User } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { registerApi, UserProfile, AuthResponse } from "@/lib/auth";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
@@ -20,6 +20,10 @@ export default function RegisterPage() {
   const desktopTitleRef = useRef<HTMLHeadingElement>(null);
   const desktopManifestoRef = useRef<HTMLDivElement>(null);
   const desktopFormRef = useRef<HTMLDivElement>(null);
+
+  // Mobile animation refs
+  const mobileHeaderRef = useRef<HTMLDivElement>(null);
+  const mobileCardRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -63,42 +67,61 @@ export default function RegisterPage() {
     }
   }, []);
 
-  // Snappy GSAP Timeline exclusively for Desktop (respecting prefers-reduced-motion)
+  // Snappy GSAP Timeline for Desktop and Mobile (respecting prefers-reduced-motion)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isDesktop = window.innerWidth >= 1024;
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!isDesktop || prefersReduced) return;
+    if (prefersReduced) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
-      
-      if (desktopHeaderRef.current) {
-        tl.fromTo(desktopHeaderRef.current, { opacity: 0 }, { opacity: 1, duration: 0.35 });
-      }
-      if (desktopTitleRef.current) {
-        tl.fromTo(
-          desktopTitleRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.45 },
-          "-=0.2"
-        );
-      }
-      if (desktopManifestoRef.current) {
-        tl.fromTo(
-          desktopManifestoRef.current,
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.35 },
-          "-=0.25"
-        );
-      }
-      if (desktopFormRef.current) {
-        tl.fromTo(
-          desktopFormRef.current,
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.4 },
-          "-=0.25"
-        );
+
+      if (isDesktop) {
+        if (desktopHeaderRef.current) {
+          tl.fromTo(desktopHeaderRef.current, { opacity: 0 }, { opacity: 1, duration: 0.35 });
+        }
+        if (desktopTitleRef.current) {
+          tl.fromTo(
+            desktopTitleRef.current,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.45 },
+            "-=0.2"
+          );
+        }
+        if (desktopManifestoRef.current) {
+          tl.fromTo(
+            desktopManifestoRef.current,
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.35 },
+            "-=0.25"
+          );
+        }
+        if (desktopFormRef.current) {
+          tl.fromTo(
+            desktopFormRef.current,
+            { opacity: 0, y: 16 },
+            { opacity: 1, y: 0, duration: 0.4 },
+            "-=0.25"
+          );
+        }
+      } else {
+        // Mobile Animation: Snappy, smooth, subtle native feel
+        if (mobileHeaderRef.current) {
+          tl.fromTo(
+            mobileHeaderRef.current,
+            { opacity: 0, y: -8 },
+            { opacity: 1, y: 0, duration: 0.35 }
+          );
+        }
+        if (mobileCardRef.current) {
+          tl.fromTo(
+            mobileCardRef.current,
+            { opacity: 0, y: 24 },
+            { opacity: 1, y: 0, duration: 0.4 },
+            "-=0.15"
+          );
+        }
       }
     }, pageRef);
 
@@ -231,49 +254,34 @@ export default function RegisterPage() {
       className="min-h-[100dvh] bg-white text-slate-900 font-sans selection:bg-emerald-500 selection:text-white flex flex-col justify-between overflow-x-hidden"
     >
       {/* ============================================================ */}
-      {/* 1. VUE MOBILE NATIVE : STRICTEMENT VEROUILLÉE & INTACTE      */}
+      {/* 1. VUE MOBILE NATIVE : ÉCRIN STATUTAIRE & FORMULAIRE ÉPURÉ   */}
       {/* ============================================================ */}
       <div className="w-full min-h-[100dvh] flex flex-col lg:hidden bg-white">
         
-        {/* Bandeau haut — Identité Architecturale Zadesk (Hauteur affirmée ~340px) */}
-        <div className="relative w-full min-h-[340px] pt-[max(1.25rem,env(safe-area-inset-top))] pb-12 px-6 bg-gradient-to-b from-[#060B18] via-[#0D1B3D] to-[#152C61] overflow-hidden flex flex-col justify-between">
+        {/* Bandeau haut — Identité Architecturale Zadesk (Écrin de marque aéré & formes asymétriques) */}
+        <div 
+          ref={mobileHeaderRef}
+          className="relative w-full h-[32dvh] min-h-[240px] max-h-[280px] pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 px-6 bg-gradient-to-b from-[#050A17] via-[#0D1B3D] to-[#12234D] overflow-hidden flex items-center justify-center shrink-0"
+        >
+          {/* Formes asymétriques architecturales & lueurs de profondeur */}
+          <div className="absolute -top-10 -right-12 w-64 h-64 rounded-3xl bg-gradient-to-br from-emerald-500/20 via-cyan-500/10 to-transparent border border-white/10 -rotate-12 pointer-events-none" />
+          <div className="absolute -bottom-16 -left-10 w-56 h-56 rounded-full border border-emerald-400/25 bg-emerald-500/10 blur-[1px] pointer-events-none" />
+          <div className="absolute top-1/4 -left-6 w-32 h-32 rounded-2xl bg-cyan-500/15 blur-xl -rotate-45 pointer-events-none" />
+          <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-emerald-400/20 to-transparent rotate-[28deg] pointer-events-none" />
 
-          {/* Ondes douces & subtiles lueurs émeraude de marque */}
-          <div className="absolute -top-12 -right-8 w-60 h-60 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none" />
-          <div className="absolute bottom-4 -left-10 w-48 h-48 rounded-full bg-emerald-400/10 blur-xl pointer-events-none" />
-
-          {/* Bouton bascule — coin supérieur droit */}
-          <div className="relative z-10 flex items-center justify-end">
-            <Link
-              href="/login"
-              className="text-xs font-semibold text-white/90 hover:text-white bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 active:scale-95 transition-all select-none shadow-xs"
-            >
-              Se connecter
-            </Link>
-          </div>
-
-          {/* Logo Zadesk centré en majesté — statutaire et universel */}
-          <div className="relative z-10 flex flex-col items-center justify-center py-4">
+          {/* Logo Zadesk centré en majesté unique — sobre, statutaire et épuré */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
             <Link href="/" className="inline-flex items-center active:scale-95 transition-transform">
               <Logo size="lg" isDark={true} />
             </Link>
           </div>
-
-          {/* Titre & sous-titre */}
-          <div className="relative z-10 text-center space-y-1.5 pb-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight uppercase">
-              Créer votre espace
-            </h1>
-            <p className="text-xs text-slate-300 font-normal">
-              Forfait Découverte gratuit pour commencer • Évoluez à votre rythme
-            </p>
-          </div>
         </div>
 
-        {/* Feuille blanche ergonomique Android/iOS : calée naturellement sans vide */}
-        <div className="-mt-5 relative z-20 flex-1 bg-white rounded-t-3xl shadow-xl px-6 pt-3 pb-[max(2rem,env(safe-area-inset-bottom))] flex flex-col justify-start">
-          {/* Poignée tactile native (Sheet Handle) */}
-          <div className="w-10 h-1 rounded-full bg-slate-300/80 mx-auto mb-5 shrink-0" />
+        {/* Feuille blanche ergonomique : flux vertical compact sans grand vide */}
+        <div 
+          ref={mobileCardRef}
+          className="-mt-6 relative z-20 flex-1 bg-white rounded-t-[36px] shadow-2xl px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col justify-start"
+        >
           {otpChallenge ? (
             <div className="space-y-6">
               <button
@@ -293,147 +301,182 @@ export default function RegisterPage() {
               />
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-3.5 w-full flex flex-col">
               
-              {/* Rappel éditorial de la formule choisie */}
-              {selectedPlan && (
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-xs animate-in fade-in duration-200">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="font-semibold text-[#0D1B3D]">
-                      Formule {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}
-                      {selectedPlan === "starter" && " • 10 000 FCFA/mois"}
-                      {selectedPlan === "pro" && " • 45 000 FCFA/mois"}
-                      {selectedPlan === "entreprise" && " • 150 000 FCFA/mois"}
-                      {selectedPlan === "decouverte" && " • 0 FCFA permanent"}
-                    </span>
+              <div className="space-y-2.5">
+                {/* Titre sobre & élégant ancrant le formulaire */}
+                <div className="text-left space-y-0.5 pb-0.5">
+                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                    Créer votre espace
+                  </h1>
+                  <p className="text-xs text-slate-500">
+                    Forfait Découverte gratuit pour commencer • Évoluez à votre rythme
+                  </p>
+                </div>
+
+                {/* Rappel éditorial de la formule choisie */}
+                {selectedPlan && (
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="font-semibold text-[#0D1B3D]">
+                        Formule {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}
+                        {selectedPlan === "starter" && " • 10 000 FCFA/mois"}
+                        {selectedPlan === "pro" && " • 45 000 FCFA/mois"}
+                        {selectedPlan === "entreprise" && " • 150 000 FCFA/mois"}
+                        {selectedPlan === "decouverte" && " • 0 FCFA permanent"}
+                      </span>
+                    </div>
+                    <Link href="/tarifs" className="text-emerald-700 hover:text-emerald-800 font-semibold underline text-[11px] shrink-0">
+                      Changer
+                    </Link>
                   </div>
-                  <Link href="/tarifs" className="text-emerald-700 hover:text-emerald-800 font-semibold underline text-[11px] shrink-0">
-                    Changer
-                  </Link>
-                </div>
-              )}
+                )}
 
-              {/* Bouton Google Pill au sommet de la carte */}
-              <div className="w-full">
-                <GoogleAuthButton
-                  mode="register"
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                />
-              </div>
-
-              {/* Séparateur fin */}
-              <div className="relative py-1 text-center">
-                <div className="h-px bg-slate-200 w-full" />
-                <span className="relative -top-2.5 bg-white px-3 text-[11px] font-medium text-slate-400">
-                  ou avec votre adresse e-mail
-                </span>
-              </div>
-
-              {/* Alertes d'erreur */}
-              <AuthFeedback
-                error={error}
-                success={successMsg}
-                onClearError={() => setError(null)}
-                onClearSuccess={() => setSuccessMsg(null)}
-              />
-
-              {/* Formulaire mobile aux inputs doux */}
-              <form onSubmit={handleSubmit} className="space-y-3.5">
-                {/* Prénom & Nom */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <input
-                    name="firstName"
-                    type="text"
-                    autoComplete="given-name"
-                    placeholder="Prénom"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-200/80 px-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
-                  />
-                  <input
-                    name="lastName"
-                    type="text"
-                    autoComplete="family-name"
-                    placeholder="Nom"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-200/80 px-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
-                  />
-                </div>
-
-                {/* Email */}
-                <input
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="Adresse email professionnelle"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-200/80 px-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
+                {/* Alertes d'erreur */}
+                <AuthFeedback
+                  error={error}
+                  success={successMsg}
+                  onClearError={() => setError(null)}
+                  onClearSuccess={() => setSuccessMsg(null)}
                 />
 
-                {/* Mot de passe avec œil */}
-                <div className="relative">
-                  <input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    placeholder="Mot de passe (min. 8 car.)"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-200/80 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 w-12 h-12 flex items-center justify-center text-slate-400 hover:text-slate-700"
-                    aria-label={showPassword ? "Masquer" : "Afficher"}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                {/* Formulaire mobile précis style shadcn/ui */}
+                <form onSubmit={handleSubmit} className="space-y-2.5">
+                  {/* Prénom & Nom */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0D1B3D] transition-colors">
+                        <User className="w-3.5 h-3.5" />
+                      </div>
+                      <input
+                        name="firstName"
+                        type="text"
+                        autoComplete="given-name"
+                        placeholder="Prénom"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                        className="w-full h-11 rounded-2xl bg-slate-50 border border-slate-200/90 pl-9 pr-3 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
+                      />
+                    </div>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0D1B3D] transition-colors">
+                        <User className="w-3.5 h-3.5" />
+                      </div>
+                      <input
+                        name="lastName"
+                        type="text"
+                        autoComplete="family-name"
+                        placeholder="Nom"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                        className="w-full h-11 rounded-2xl bg-slate-50 border border-slate-200/90 pl-9 pr-3 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
+                      />
+                    </div>
+                  </div>
 
-                {/* Conditions Générales */}
-                <div className="pt-1">
-                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                  {/* Email */}
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0D1B3D] transition-colors">
+                      <Mail className="w-4 h-4" />
+                    </div>
                     <input
-                      type="checkbox"
-                      id="register-accept-terms-mobile"
-                      checked={formData.acceptTerms}
-                      onChange={(e) =>
-                        setFormData({ ...formData, acceptTerms: e.target.checked })
-                      }
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="Adresse email professionnelle"
+                      value={formData.email}
+                      onChange={handleChange}
                       required
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 cursor-pointer accent-emerald-500"
+                      className="w-full h-11 rounded-2xl bg-slate-50 border border-slate-200/90 pl-10 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
                     />
-                    <span className="leading-snug text-[11px] text-slate-500">
-                      J&apos;accepte les <Link href="#" className="font-semibold underline text-slate-800">Conditions Générales</Link> et la <Link href="#" className="font-semibold underline text-slate-800">Confidentialité</Link>.
-                    </span>
-                  </label>
+                  </div>
+
+                  {/* Mot de passe avec œil */}
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0D1B3D] transition-colors">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder="Mot de passe (min. 8 car.)"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-11 rounded-2xl bg-slate-50 border border-slate-200/90 pl-10 pr-11 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#0D1B3D] focus:ring-2 focus:ring-[#0D1B3D]/10 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 active:scale-90 transition-transform"
+                      aria-label={showPassword ? "Masquer" : "Afficher"}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {/* Conditions Générales */}
+                  <div className="pt-0.5">
+                    <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        id="register-accept-terms-mobile"
+                        checked={formData.acceptTerms}
+                        onChange={(e) =>
+                          setFormData({ ...formData, acceptTerms: e.target.checked })
+                        }
+                        required
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#0D1B3D] accent-[#0D1B3D] cursor-pointer"
+                      />
+                      <span className="leading-snug text-[11px] text-slate-500">
+                        J&apos;accepte les <Link href="#" className="font-semibold underline text-slate-800">Conditions</Link> et la <Link href="#" className="font-semibold underline text-slate-800">Confidentialité</Link>.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Bouton principal tactile Zadesk Bleu Nuit */}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-12 rounded-full bg-[#0D1B3D] hover:bg-[#152C61] active:scale-[0.985] text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 select-none group"
+                  >
+                    {isLoading ? (
+                      <span>Création en cours...</span>
+                    ) : (
+                      <>
+                        <span>Créer mon compte</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Séparateur minimal */}
+                <div className="relative py-0.5 flex items-center justify-center">
+                  <div className="h-px bg-slate-200/90 w-full" />
+                  <span className="absolute bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                    ou
+                  </span>
                 </div>
 
-                {/* Bouton dominant pilule Zadesk Bleu Nuit */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-12 rounded-full bg-[#0D1B3D] hover:bg-[#152C61] active:scale-[0.985] text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 select-none"
-                >
-                  {isLoading ? <span>Création en cours...</span> : <span>Créer mon compte</span>}
-                </button>
-              </form>
+                {/* Bouton Google en format Pill doux */}
+                <div className="w-full flex justify-center">
+                  <GoogleAuthButton
+                    mode="register"
+                    shape="pill"
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                  />
+                </div>
+              </div>
 
               {/* Liens bas de page */}
-              <div className="pt-2 text-center space-y-2">
-                <p className="text-[11px] text-slate-400">
-                  En créant un compte, vous acceptez nos Conditions et notre Politique de Confidentialité.
-                </p>
-                <p className="text-xs text-slate-600 font-medium pt-1">
+              <div className="pt-2 pb-1 text-center space-y-1">
+                <p className="text-xs text-slate-600 font-medium">
                   Vous avez déjà un compte ?{" "}
                   <Link 
                     href={selectedPlan ? `/login?plan=${selectedPlan}` : "/login"} 
@@ -441,6 +484,9 @@ export default function RegisterPage() {
                   >
                     Se connecter
                   </Link>
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  En créant un compte, vous acceptez nos Conditions.
                 </p>
               </div>
 

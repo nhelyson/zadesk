@@ -6,14 +6,14 @@ import { Logo } from "@/components/ui/Logo";
 import { usePWA } from "@/components/pwa/PWAProvider";
 import { Download, ArrowUpRight } from "lucide-react";
 
-export const Footer: React.FC = () => {
+export const Footer: React.FC<{ brandName?: string }> = ({ brandName = "Zadesk" }) => {
   const { isInstallable, isInstalled, promptInstall } = usePWA();
   const currentYear = new Date().getFullYear();
 
   return (
     <footer
       data-nav-theme="navy"
-      aria-label="Pied de page Zadesk"
+      aria-label={`Pied de page ${brandName}`}
       className="relative w-full bg-[#080E21] text-slate-400 text-xs border-t border-slate-800/90 py-16 sm:py-20 lg:py-24"
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
@@ -28,8 +28,8 @@ export const Footer: React.FC = () => {
           {/* ========================================================== */}
           <div className="lg:col-span-5 space-y-6">
             
-            <Link href="/" className="inline-block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-sm">
-              <Logo isDark={true} size="md" />
+            <Link href="/" className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-sm">
+              <Logo isDark={true} size="md" brandName={brandName} />
             </Link>
 
             {/* Phrase de mission éditoriale */}
@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
 
             {/* Présentation concise */}
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-md font-normal">
-              Zadesk structure les échanges entre les entreprises et leurs clients : du premier message direct en ligne jusqu&apos;à la prise en charge au guichet physique.
+              {brandName} structure les échanges entre les entreprises et leurs clients : du premier message direct en ligne jusqu&apos;à la prise en charge au guichet physique.
             </p>
 
 
@@ -187,7 +187,7 @@ export const Footer: React.FC = () => {
         {/* BANDEAU INFÉRIEUR : COPYRIGHT & RAPPEL DES PARCOURS          */}
         {/* ============================================================ */}
         <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-normal">
-          <p>© {currentYear} Zadesk. Tous droits réservés.</p>
+          <p>© {currentYear} {brandName}. Tous droits réservés.</p>
           
           <div className="flex items-center gap-6 text-xs">
             <Link

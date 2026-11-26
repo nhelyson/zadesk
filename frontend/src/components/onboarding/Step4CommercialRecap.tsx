@@ -9,17 +9,18 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Info, 
-  Clock, 
-  Sparkles,
-  Building2,
-  Lock
+  Loader2,
+  Lock,
+  AlertCircle
 } from "lucide-react";
+import { apiRequest } from "@/lib/api";
 
 export interface Step4CommercialRecapProps {
   companyName: string;
   planId: string;
   planName: string;
   priceXaf: number;
+  workspaceId?: string;
   workspaceSlug?: string;
   onContinueToWorkspace: () => void;
 }
@@ -29,17 +30,67 @@ export const Step4CommercialRecap: React.FC<Step4CommercialRecapProps> = ({
   planId,
   planName,
   priceXaf,
+  workspaceId,
   workspaceSlug,
   onContinueToWorkspace,
 }) => {
   const router = useRouter();
-  const [showGatewayPreparedModal, setShowGatewayPreparedModal] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formattedPrice = new Intl.NumberFormat("fr-FR").format(priceXaf);
 
+  const handleProceedToSasPay = async () => {
+    setErrorMessage(null);
+    setIsRedirecting(true);
+
+    try {
+      // Résolution du workspaceId actif si non passé directement
+      const resolvedWorkspaceId =
+        workspaceId ||
+        (typeof window !== "undefined"
+          ? localStorage.getItem("zadesk_active_workspace")
+          : null);
+
+      if (!resolvedWorkspaceId) {
+        throw new Error(
+          "Identifiant de l'espace de travail introuvable. Veuillez actualiser ou accéder à votre espace."
+        );
+      }
+
+      const returnUrl = `${window.location.origin}/app/billing?session_id={CHECKOUT_SESSION_ID}&from=onboarding&plan=${planId.toLowerCase()}`;
+
+      const res = await apiRequest("/commercial/upgrade/checkout-session", {
+        method: "POST",
+        body: JSON.stringify({
+          workspaceId: resolvedWorkspaceId,
+          targetPlanId: planId.toUpperCase(),
+          returnUrl,
+        }),
+      });
+
+      const checkoutUrl = res.data?.checkoutUrl || (res as any).checkoutUrl;
+
+      if (res.success && checkoutUrl) {
+        // Redirection sécurisée vers la page de paiement hébergée par SasPay
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error(
+          res.message || "Impossible d'initialiser la session de paiement SasPay."
+        );
+      }
+    } catch (err: any) {
+      console.error("SasPay checkout initialization failed:", err);
+      setErrorMessage(
+        err.message ||
+          "La passerelle de paiement SasPay est momentanément inaccessible. Votre espace reste disponible en Découverte."
+      );
+      setIsRedirecting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      
       {/* 1. Bannière de succès immédiat : Espace créé et Découverte active */}
       <div className="p-5 rounded-3xl bg-emerald-50/80 border border-emerald-200/90 text-emerald-950 flex items-start gap-4 shadow-xs">
         <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
@@ -54,6 +105,17 @@ export const Step4CommercialRecap: React.FC<Step4CommercialRecapProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Message d'erreur éventuel */}
+      {errorMessage && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-semibold">Paiement en ligne non disponible</div>
+            <p className="text-rose-700">{errorMessage}</p>
+          </div>
+        </div>
+      )}
 
       {/* 2. Fiche Récapitulative Commerciale Contractuelle */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden divide-y divide-slate-100">
@@ -118,11 +180,11 @@ export const Step4CommercialRecap: React.FC<Step4CommercialRecapProps> = ({
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
             <div className="px-3 py-2 rounded-xl bg-white border border-slate-200/90 font-medium inline-flex items-center gap-2">
               <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Airtel Money</span>
+              <span>Airtel Money Congo</span>
             </div>
             <div className="px-3 py-2 rounded-xl bg-white border border-slate-200/90 font-medium inline-flex items-center gap-2">
               <Smartphone className="w-3.5 h-3.5 text-amber-500" />
-              <span>MTN Mobile Money</span>
+              <span>MTN Mobile Money Congo</span>
             </div>
             <div className="px-3 py-2 rounded-xl bg-white border border-slate-200/90 font-medium inline-flex items-center gap-2">
               <CreditCard className="w-3.5 h-3.5 text-[#0D1B3D]" />
@@ -130,7 +192,7 @@ export const Step4CommercialRecap: React.FC<Step4CommercialRecapProps> = ({
             </div>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Paiement sécurisé par SasPay CEMAC. Vos fonds sont traités directement sans conservation de coordonnées bancaires.
+            Paiement sécurisé par SasPay CEMAC. Vos fonds sont traités directement sans conservation de coordonnées bancaires sur Zadesk.
           </p>
         </div>
 
@@ -146,82 +208,39 @@ export const Step4CommercialRecap: React.FC<Step4CommercialRecapProps> = ({
 
       {/* 4. Actions Explicites */}
       <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-        
         {/* Action Secondaire : Découverte immédiate sans payer */}
         <button
           type="button"
           onClick={onContinueToWorkspace}
+          disabled={isRedirecting}
           style={{ touchAction: "manipulation" }}
-          className="w-full sm:w-auto order-2 sm:order-1 h-12 px-5 rounded-xl border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-950 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer"
+          className="w-full sm:w-auto order-2 sm:order-1 h-12 px-5 rounded-xl border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-950 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
         >
           <span>Accéder à mon espace en Découverte</span>
         </button>
 
-        {/* Action Principale : Passer au paiement */}
+        {/* Action Principale : Passer au paiement SasPay réel */}
         <button
           type="button"
-          onClick={() => setShowGatewayPreparedModal(true)}
+          onClick={handleProceedToSasPay}
+          disabled={isRedirecting}
           style={{ touchAction: "manipulation" }}
-          className="w-full sm:w-auto order-1 sm:order-2 h-12 px-7 rounded-xl bg-[#0D1B3D] hover:bg-slate-900 active:scale-[0.98] text-white font-bold text-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-slate-900/10"
+          className="w-full sm:w-auto order-1 sm:order-2 h-12 px-7 rounded-xl bg-[#0D1B3D] hover:bg-slate-900 active:scale-[0.98] text-white font-bold text-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-slate-900/10 disabled:opacity-50"
         >
-          <Lock className="w-4 h-4 text-emerald-400" />
-          <span>Procéder au paiement ({formattedPrice} FCFA)</span>
-          <ArrowRight className="w-4 h-4 text-slate-300" />
+          {isRedirecting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Initialisation SasPay sécurisée...</span>
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4 text-emerald-400" />
+              <span>Procéder au paiement ({formattedPrice} FCFA)</span>
+              <ArrowRight className="w-4 h-4 text-slate-300" />
+            </>
+          )}
         </button>
-
       </div>
-
-      {/* MODAL : État de préparation de la passerelle SasPay */}
-      {showGatewayPreparedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
-            
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl font-extrabold text-[#0D1B3D]">
-                Passerelle SasPay Préparée
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Le raccordement technique de facturation SasPay pour votre intention <span className="font-semibold text-slate-900">« {planName} »</span> ({formattedPrice} FCFA/mois) est validé côté serveur.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1.5 leading-relaxed">
-              <div className="font-bold text-slate-900">État du parcours commercial :</div>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>Votre espace entreprise est créé.</li>
-                <li>L&apos;offre Découverte permanente est active sans limite.</li>
-                <li>Votre intention de souscription est enregistrée.</li>
-                <li>Les appels de paiement réels SasPay seront ouverts lors de la Phase D.</li>
-              </ul>
-            </div>
-
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setShowGatewayPreparedModal(false)}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Fermer
-              </button>
-              <button
-                type="button"
-                onClick={onContinueToWorkspace}
-                className="w-full sm:w-auto h-11 px-6 rounded-xl bg-[#0D1B3D] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-slate-900 transition-all shadow-xs"
-              >
-                <span>Accéder à mon espace</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
-

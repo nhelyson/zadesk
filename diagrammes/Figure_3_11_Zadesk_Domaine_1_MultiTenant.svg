@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 880" width="1450" height="880">
+<defs>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap');
+    </style>
+    <marker id="comp-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#0F172A" stroke="#0F172A" stroke-width="1"/>
+    </marker>
+    <marker id="aggr-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#FFFFFF" stroke="#0F172A" stroke-width="2"/>
+    </marker>
+    <marker id="nav-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polygon points="1,2 10,6 1,10" fill="#2563EB"/>
+    </marker>
+    <marker id="dep-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polyline points="2,2 10,6 2,10" fill="none" stroke="#475569" stroke-width="2"/>
+    </marker>
+</defs>
+<rect width="1450" height="880" fill="#FAFAFA"/>
+<polyline points="440,262.5 540,220.0" fill="none" stroke="#0F172A" stroke-width="2"  marker-start="url(#comp-diamond)" />
+<rect x="411.0" y="219.25" width="158.0" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="490.0" y="233.25" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">contient (1 .. 0..*)</text>
+<polyline points="250.0,445 250.0,510" fill="none" stroke="#0F172A" stroke-width="2"  marker-start="url(#comp-diamond)" />
+<rect x="174.6" y="455.5" width="150.8" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="250.0" y="469.5" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">possède (1 .. 0..*)</text>
+<polyline points="1020,242.5 920,220.0" fill="none" stroke="#2563EB" stroke-width="2"   />
+<rect x="898.2" y="209.25" width="143.6" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="970.0" y="223.25" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">adhère (1 .. 0..*)</text>
+<polyline points="1210.0,405 1210.0,440 790.0,440 790.0,480" fill="none" stroke="#2563EB" stroke-width="2"   />
+<rect x="928.2" y="418.0" width="143.6" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="1000.0" y="432.0" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">invite (1 .. 0..*)</text>
+<polyline points="250.0,445 310.0,480 540,480 540,635.0" fill="none" stroke="#0F172A" stroke-width="2"  marker-start="url(#comp-diamond)" />
+<rect x="360.4" y="458.0" width="129.2" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="425.0" y="472.0" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">émet (1 .. 0..*)</text>
+<g id="card-workspace">
+  <rect x="60" y="80" width="380" height="365" rx="8" ry="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="250.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#3B82F6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="250.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#1D4ED8" text-anchor="middle">Workspace</text>
+  <line x1="60" y1="140" x2="440" y2="140" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="76" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="76" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ slug : text [UQ]</text>
+  <text x="76" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ name : text</text>
+  <text x="76" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ category : text</text>
+  <text x="76" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ supportEmail : text?</text>
+  <text x="76" y="284" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ supportPhone : text?</text>
+  <text x="76" y="308" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ isPublic : boolean = true</text>
+  <text x="76" y="332" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ verified : boolean = false</text>
+  <line x1="60" y1="356" x2="440" y2="356" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="76" y="380" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ createTicket() : Ticket</text>
+  <text x="76" y="404" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ addMember() : Membership</text>
+  <text x="76" y="428" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ getCapacityMetrics() : Metrics</text>
+</g>
+<g id="card-establishment">
+  <rect x="60" y="510" width="380" height="320" rx="8" ry="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="250.0" y="536" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#3B82F6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="250.0" y="560" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#1D4ED8" text-anchor="middle">Establishment</text>
+  <line x1="60" y1="570" x2="440" y2="570" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="76" y="594" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="76" y="618" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ workspaceId : text [FK]</text>
+  <text x="76" y="642" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ name : text</text>
+  <text x="76" y="666" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ type : EstablishmentType</text>
+  <text x="76" y="690" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ city : text?</text>
+  <text x="76" y="714" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ isMain : boolean = false</text>
+  <text x="76" y="738" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ isActive : boolean = true</text>
+  <line x1="60" y1="762" x2="440" y2="762" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="76" y="786" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ updateDetails() : void</text>
+  <text x="76" y="810" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ toggleStatus() : void</text>
+</g>
+<g id="card-membership">
+  <rect x="540" y="80" width="380" height="280" rx="8" ry="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="730.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#3B82F6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="730.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#1D4ED8" text-anchor="middle">Membership</text>
+  <line x1="540" y1="140" x2="920" y2="140" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="556" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="556" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ userId : text [FK]</text>
+  <text x="556" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ workspaceId : text [FK]</text>
+  <text x="556" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ role : Role = AGENT</text>
+  <text x="556" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ status : MembershipStatus</text>
+  <line x1="540" y1="284" x2="920" y2="284" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="556" y="308" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ changeRole(role) : void</text>
+  <text x="556" y="332" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ hasPermission() : boolean</text>
+</g>
+<g id="card-workspaceinvitation">
+  <rect x="540" y="480" width="380" height="310" rx="8" ry="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="730.0" y="506" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#3B82F6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="730.0" y="530" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#1D4ED8" text-anchor="middle">WorkspaceInvitation</text>
+  <line x1="540" y1="540" x2="920" y2="540" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="556" y="564" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="556" y="588" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ workspaceId : text [FK]</text>
+  <text x="556" y="612" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ email : text</text>
+  <text x="556" y="636" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ invitedById : text [FK]</text>
+  <text x="556" y="660" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ token : text [UQ]</text>
+  <text x="556" y="684" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ role : Role = AGENT</text>
+  <text x="556" y="708" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ expiresAt : timestamp</text>
+  <line x1="540" y1="732" x2="920" y2="732" stroke="#93C5FD" stroke-width="1.8"/>
+  <text x="556" y="756" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ accept() : Membership</text>
+  <text x="556" y="780" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ isExpired() : boolean</text>
+</g>
+<g id="card-user">
+  <rect x="1020" y="80" width="380" height="325" rx="8" ry="8" fill="#ECFDF5" stroke="#059669" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="1210.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#10B981" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="1210.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#047857" text-anchor="middle">User</text>
+  <line x1="1020" y1="140" x2="1400" y2="140" stroke="#6EE7B7" stroke-width="1.8"/>
+  <text x="1036" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="1036" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ email : text [UQ]</text>
+  <text x="1036" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ firstName : text</text>
+  <text x="1036" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ lastName : text</text>
+  <text x="1036" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ passwordHash : text?</text>
+  <text x="1036" y="284" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ emailVerified : boolean</text>
+  <text x="1036" y="308" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ googleId : text [UQ]?</text>
+  <line x1="1020" y1="332" x2="1400" y2="332" stroke="#6EE7B7" stroke-width="1.8"/>
+  <text x="1036" y="356" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ getFullName() : text</text>
+  <text x="1036" y="380" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ verifyPassword() : boolean</text>
+</g>
+</svg>

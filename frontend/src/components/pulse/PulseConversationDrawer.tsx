@@ -1,34 +1,41 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import {
   X,
   Send,
   Lock,
   Zap,
-  Info,
-  CheckCheck,
   Bot,
-  User,
-  Phone,
-  Mail,
   FolderKanban,
-  ExternalLink,
-  Clock,
-  Sparkles,
-  CheckCircle2,
-  Calendar,
   Plus,
+  ArrowLeft,
+  Paperclip,
+  ExternalLink,
+  UserCheck,
+  Search,
+  RefreshCw,
 } from 'lucide-react';
 import { AgentConversationItem } from '@/types/workspace';
+import { StatusPill } from '@/components/workspace/design-system';
 
 interface PulseConversationDrawerProps {
   conversation: AgentConversationItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSendMessage: (text: string, isInternalNote: boolean) => Promise<void>;
+  onSendMessage: (text: string, isInternalNote: boolean) => Promise<boolean | void>;
   sendingMessage: boolean;
-  cannedResponses?: Array<{ id: string; title: string; category: string; content: string; shortcut?: string }>;
+  loadingThread?: boolean;
+  feedback?: { type: 'success' | 'error'; text: string } | null;
+  onDismissFeedback?: () => void;
+  cannedResponses?: Array<{
+    id: string;
+    title: string;
+    category: string;
+    content: string;
+    shortcut?: string;
+  }>;
   onOpenLinkTicketModal?: () => void;
 }
 
@@ -38,39 +45,33 @@ export const PulseConversationDrawer: React.FC<PulseConversationDrawerProps> = (
   onClose,
   onSendMessage,
   sendingMessage,
+  loadingThread = false,
+  feedback = null,
+  onDismissFeedback,
   cannedResponses = [],
   onOpenLinkTicketModal,
 }) => {
   const [replyText, setReplyText] = useState('');
   const [isInternalNote, setIsInternalNote] = useState(false);
+  const [showDossier, setShowDossier] = useState(false);
   const [cannedModalOpen, setCannedModalOpen] = useState(false);
   const [cannedSearch, setCannedSearch] = useState('');
   const [cannedCategory, setCannedCategory] = useState('ALL');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom of thread when messages change or drawer opens
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [conversation?.messages, isOpen]);
+  }, [conversation?.id, conversation?.messages?.length, isOpen]);
 
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
-
-  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         if (cannedModalOpen) {
           setCannedModalOpen(false);
+        } else if (showDossier) {
+          setShowDossier(false);
         } else {
           onClose();
         }
@@ -78,7 +79,7 @@ export const PulseConversationDrawer: React.FC<PulseConversationDrawerProps> = (
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, cannedModalOpen, onClose]);
+  }, [isOpen, cannedModalOpen, showDossier, onClose]);
 
   if (!isOpen || !conversation) return null;
 
@@ -88,28 +89,32 @@ export const PulseConversationDrawer: React.FC<PulseConversationDrawerProps> = (
       title: 'Prise en charge immédiate',
       category: 'Accueil',
       shortcut: '/bonjour',
-      content: "Bonjour, votre demande a bien été reçue par notre équipe SAV. Nous l'examinons actuellement et revenons vers vous dans les plus brefs délais.",
+      content:
+        "Bonjour, votre demande a bien été reçue par notre équipe SAV. Nous l'examinons actuellement et revenons vers vous dans les plus brefs délais.",
     },
     {
       id: 'cr-2',
       title: 'Demande de précision / photo',
       category: 'Suivi',
       shortcut: '/details',
-      content: "Afin de traiter votre dossier au plus vite, pourriez-vous nous transmettre une photo ou une description détaillée du problème rencontré ?",
+      content:
+        'Afin de traiter votre dossier au plus vite, pourriez-vous nous transmettre une photo ou une description détaillée du problème rencontré ?',
     },
     {
       id: 'cr-3',
       title: 'Délais de traitement SAV',
       category: 'Délais',
       shortcut: '/delais',
-      content: "Nos techniciens interviennent sous 24h à 48h ouvrées. Vous recevrez une notification par message dès que l'intervention est planifiée.",
+      content:
+        "Nos techniciens interviennent sous 24h à 48h ouvrées. Vous recevrez une notification par message dès que l'intervention est planifiée.",
     },
     {
       id: 'cr-4',
       title: 'Clôture et résolution',
       category: 'Clôture',
       shortcut: '/cloture',
-      content: "Votre demande a été traitée avec succès par notre équipe. Restons à votre entière disposition. Excellente journée !",
+      content:
+        'Votre demande a été traitée avec succès par notre équipe. Restons à votre entière disposition. Excellente journée !',
     },
   ];
 
@@ -137,345 +142,428 @@ export const PulseConversationDrawer: React.FC<PulseConversationDrawerProps> = (
     e.preventDefault();
     if (!replyText.trim() || sendingMessage) return;
     const textToSend = replyText.trim();
-    setReplyText('');
-    await onSendMessage(textToSend, isInternalNote);
+    const result = await onSendMessage(textToSend, isInternalNote);
+    if (result !== false) {
+      setReplyText('');
+    }
   };
+
+  const rawAgent = conversation.assignedAgent as any;
+  const assignedAgentName = rawAgent?.user
+    ? `${rawAgent.user.firstName || ''} ${rawAgent.user.lastName || ''}`.trim()
+    : rawAgent?.firstName || rawAgent?.lastName
+    ? `${rawAgent.firstName || ''} ${rawAgent.lastName || ''}`.trim()
+    : '';
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity animate-fade-in"
+        aria-hidden="true"
+        className="fixed inset-0 z-40 bg-[#0D1B3D]/15 md:hidden"
       />
-
-      {/* Drawer Panel */}
       <aside
-        className="fixed top-0 right-0 bottom-0 w-full sm:w-[500px] md:w-[580px] bg-[#0B1528] border-l border-slate-800 text-white z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-250 select-none"
-        style={{
-          boxShadow: '-20px 0 50px rgba(0, 0, 0, 0.7)',
-          paddingLeft: 'env(safe-area-inset-left, 0px)',
-          paddingRight: 'env(safe-area-inset-right, 0px)',
-        }}
+        role="dialog"
+        aria-label={`Conversation avec ${conversation.customerName}`}
+        className="fixed inset-y-0 right-0 z-50 w-full sm:w-[430px] lg:w-[460px] bg-white sm:border-l border-[#E5E4DF] flex flex-col min-h-0 h-[100dvh] shadow-2xl select-none"
       >
-        {/* Header */}
-        <header
-          className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-800 bg-[#070D1E]/90 backdrop-blur-md flex items-center justify-between shrink-0"
-          style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-              {conversation.customerName.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white truncate">
-                  {conversation.customerName}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  {conversation.externalChannel || 'PORTAIL'}
+      {/* En-tête unifié Zalisk */}
+      <header className="px-4 h-14 border-b border-[#E5E4DF] bg-white flex items-center justify-between gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="md:hidden w-8 h-8 -ml-1 rounded-lg text-slate-500 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] flex items-center justify-center cursor-pointer shrink-0"
+            title="Retour à la cartographie"
+            aria-label="Retour à la cartographie"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+
+          <div className="w-8 h-8 rounded-lg bg-[#0D1B3D] text-white flex items-center justify-center font-bold text-xs shrink-0">
+            {conversation.customerName.charAt(0).toUpperCase()}
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm font-bold text-[#0D1B3D] truncate">
+                {conversation.customerName}
+              </h2>
+              {conversation.category && (
+                <span className="hidden sm:inline text-[11px] text-slate-400 truncate">
+                  · {conversation.category}
                 </span>
-              </div>
-              <p className="text-[11px] text-slate-400 truncate flex items-center gap-2 mt-0.5">
-                {conversation.customerPhone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-3 h-3 text-slate-500" />
-                    {conversation.customerPhone}
-                  </span>
-                )}
-                {conversation.category && (
-                  <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 text-[10px]">
-                    {conversation.category}
-                  </span>
-                )}
-              </p>
+              )}
             </div>
+            <p className="text-[11px] text-slate-500 truncate flex items-center gap-1.5">
+              {conversation.customerPhone && (
+                <span className="font-mono text-slate-600">{conversation.customerPhone}</span>
+              )}
+              {!conversation.customerPhone && conversation.customerEmail && (
+                <span>{conversation.customerEmail}</span>
+              )}
+            </p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <span
-              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-[11px] sm:text-xs font-bold ${
-                conversation.status === 'RESOLVED'
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  : conversation.status === 'WAITING_CUSTOMER'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-              }`}
-            >
-              {conversation.status}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <StatusPill status={conversation.status} size="sm" />
+
+          <button
+            type="button"
+            onClick={() => setShowDossier(!showDossier)}
+            className={`h-8 px-2 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer border ${
+              showDossier
+                ? 'bg-[#F4F3EF] text-[#0D1B3D] border-[#0D1B3D]/25 font-semibold'
+                : 'bg-white text-slate-600 border-[#E5E4DF] hover:text-[#0D1B3D]'
+            }`}
+            title="Fiche client et ticket"
+          >
+            <FolderKanban className="w-3.5 h-3.5 text-slate-400" />
+            <span className="hidden xl:inline">Dossier</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="hidden md:flex w-8 h-8 rounded-lg text-slate-400 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] items-center justify-center transition-colors cursor-pointer"
+            title="Fermer le volet (Échap)"
+            aria-label="Fermer le volet conversation"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* Bandeau ticket lié */}
+      {conversation.ticket ? (
+        <Link
+          href={`/app/tickets?ticketId=${conversation.ticket.id}`}
+          className="px-4 py-2 bg-[#FAFAF8] border-b border-[#E5E4DF] flex items-center justify-between text-xs hover:bg-[#F4F3EF]/70 transition-colors shrink-0"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <FolderKanban className="w-3.5 h-3.5 text-[#0D1B3D] shrink-0" />
+            <span className="font-bold font-mono text-[#0D1B3D]">
+              {conversation.ticket.reference}
             </span>
+            <span className="text-slate-300">·</span>
+            <span className="truncate text-slate-600">{conversation.ticket.title}</span>
+          </div>
+          <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1 shrink-0 ml-2">
+            <span>{conversation.ticket.status}</span>
+            <ExternalLink className="w-3 h-3" />
+          </span>
+        </Link>
+      ) : onOpenLinkTicketModal ? (
+        <div className="px-4 py-1.5 bg-[#FAFAF8] border-b border-[#E5E4DF] flex items-center justify-between text-xs text-slate-500 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <FolderKanban className="w-3.5 h-3.5 text-slate-400" />
+            <span>Aucun ticket relié</span>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenLinkTicketModal}
+            className="px-2.5 py-1 rounded-md bg-white hover:bg-[#F4F3EF] text-[#0D1B3D] border border-[#E5E4DF] text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Créer un ticket</span>
+          </button>
+        </div>
+      ) : null}
 
+      {/* Fiche client dépliable */}
+      {showDossier && (
+        <div className="px-4 py-3 bg-[#FAFAF8] border-b border-[#E5E4DF] space-y-2 text-xs shrink-0">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-[#0D1B3D]">Informations dossier</span>
             <button
-              onClick={onClose}
-              className="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer active:scale-95"
-              title="Fermer (Échap)"
-              aria-label="Fermer le panneau"
+              type="button"
+              onClick={() => setShowDossier(false)}
+              className="text-slate-400 hover:text-[#0D1B3D] cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        </header>
-
-        {/* Linked Ticket Banner (if available) or create action */}
-        {conversation.ticket ? (
-          <div className="px-5 py-2.5 bg-emerald-950/40 border-b border-emerald-500/20 flex items-center justify-between text-xs text-emerald-300 shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <FolderKanban className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="font-bold font-mono">{conversation.ticket.reference}</span>
-              <span className="text-slate-400">•</span>
-              <span className="truncate text-slate-300">{conversation.ticket.title}</span>
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span className="text-slate-400 block">Responsable</span>
+              <span className="font-medium text-[#0D1B3D] flex items-center gap-1 mt-0.5">
+                <UserCheck className="w-3 h-3 text-slate-400" />
+                {assignedAgentName || 'Non assigné'}
+              </span>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 shrink-0">
-              {conversation.ticket.status}
-            </span>
+            <div>
+              <span className="text-slate-400 block">Contact</span>
+              <span className="font-mono text-slate-700 block mt-0.5 truncate">
+                {conversation.customerPhone || conversation.customerEmail || 'Non renseigné'}
+              </span>
+            </div>
           </div>
-        ) : onOpenLinkTicketModal ? (
-          <div className="px-5 py-2 bg-slate-900/60 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0">
-            <div className="flex items-center gap-2">
-              <FolderKanban className="w-3.5 h-3.5 text-slate-500" />
-              <span>Aucun ticket relié</span>
-            </div>
+        </div>
+      )}
+
+      {/* Bandeau feedback envoi / erreur */}
+      {feedback && (
+        <div
+          className={`px-4 py-2 text-xs font-medium flex items-center justify-between border-b shrink-0 ${
+            feedback.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-100'
+              : 'bg-rose-50 text-rose-800 border-rose-100'
+          }`}
+        >
+          <span className="truncate">{feedback.text}</span>
+          {onDismissFeedback && (
             <button
-              onClick={onOpenLinkTicketModal}
-              className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              type="button"
+              onClick={onDismissFeedback}
+              className="p-0.5 hover:opacity-70 cursor-pointer shrink-0 ml-2"
+              aria-label="Fermer le message"
             >
-              <Plus className="w-3 h-3" />
-              <span>Créer un ticket</span>
+              <X className="w-3.5 h-3.5" />
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Fil de discussion sur Canvas Lin #FAFAF8 */}
+      <div className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-3.5 bg-[#FAFAF8] select-text">
+        {loadingThread && (!conversation.messages || conversation.messages.length <= 1) ? (
+          <div className="py-16 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-[#0D1B3D]" />
+            <span>Chargement des messages…</span>
           </div>
-        ) : null}
-
-        {/* Messages Feed */}
-        <div className="flex-1 p-4 sm:p-5 overflow-y-auto overscroll-contain space-y-4 bg-[#070D1E]/40 scrollbar-thin scrollbar-thumb-slate-800 select-text">
-          <div className="flex items-center justify-center my-2">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-0.5 rounded-full">
-              Historique en direct
-            </span>
-          </div>
-
-          {conversation.messages && conversation.messages.length > 0 ? (
-            conversation.messages.map((m) => {
-              if (m.isInternalNote) {
-                return (
-                  <div key={m.id} className="flex justify-center my-3">
-                    <div className="w-full max-w-[94%] p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-amber-200 shadow-lg space-y-1">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-amber-400">
-                        <span className="flex items-center gap-1.5">
-                          <Lock className="w-3.5 h-3.5 text-amber-400" />
-                          <span>NOTE INTERNE (Confidentielle)</span>
-                        </span>
-                        <span className="text-[10px] text-amber-500 font-normal">
-                          {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-xs leading-relaxed whitespace-pre-wrap text-amber-100">{m.content}</p>
-                      <p className="text-[10px] text-amber-400/80">
-                        Auteur : {m.senderName || 'Agent SAV'}
-                      </p>
-                    </div>
-                  </div>
-                );
-              }
-
-              const isCustomer = m.senderType === 'CUSTOMER';
-              const isAi = m.senderType === 'AI';
-
+        ) : conversation.messages && conversation.messages.length > 0 ? (
+          conversation.messages.map((m) => {
+            if (m.isInternalNote) {
               return (
-                <div
-                  key={m.id}
-                  className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1 text-[10px] text-slate-400 px-1 font-medium">
-                    {isAi && <Bot className="w-3 h-3 text-cyan-400" />}
-                    <span>{m.senderName || (isCustomer ? 'Client' : 'Agent SAV')}</span>
-                    <span>•</span>
-                    <span>
-                      {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-
-                  <div
-                    className={`max-w-[88%] sm:max-w-[85%] p-3 sm:p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${
-                      isCustomer
-                        ? 'bg-slate-800/90 text-white rounded-tl-xs border border-slate-700/80'
-                        : isAi
-                        ? 'bg-cyan-950/50 text-cyan-100 rounded-tr-xs border border-cyan-500/40'
-                        : 'bg-emerald-600 text-white rounded-tr-xs'
-                    }`}
-                  >
-                    <p className="whitespace-pre-line break-words">{m.content}</p>
-                    {!isCustomer && (
-                      <div className="flex items-center justify-end gap-1 mt-1.5 text-[9px] text-white/80">
-                        <CheckCheck className="w-3.5 h-3.5 text-emerald-200" />
-                      </div>
-                    )}
+                <div key={m.id} className="flex justify-center my-2">
+                  <div className="w-full p-3 rounded-lg bg-[#FDF8EC] border border-[#F2E2B8] border-l-[3px] border-l-amber-600 text-amber-950 space-y-1">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-amber-900">
+                      <span className="flex items-center gap-1.5">
+                        <Lock className="w-3 h-3 text-amber-700" />
+                        <span>Note interne · {m.senderName || 'Équipe SAV'}</span>
+                      </span>
+                      <span className="text-[11px] text-amber-700/75 tabular-nums font-normal">
+                        {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-xs leading-relaxed whitespace-pre-wrap">{m.content}</p>
                   </div>
                 </div>
               );
-            })
-          ) : (
-            <div className="py-16 text-center text-xs text-slate-500">
-              Aucun message consigné pour cette conversation.
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            }
 
-        {/* Reply & Internal Note Form */}
-        <form
-          onSubmit={handleSubmit}
-          className={`p-3.5 sm:p-4 border-t border-slate-800 bg-[#070D1E]/95 space-y-3 shrink-0 ${
-            isInternalNote ? 'bg-amber-950/20 border-t-amber-500/30' : ''
-          }`}
-          style={{
-            paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom, 0px))',
-          }}
-        >
-          {/* Action buttons bar */}
-          <div className="flex items-center justify-between text-xs gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => setIsInternalNote(false)}
-                className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 ${
-                  !isInternalNote
-                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+            const isCustomer = m.senderType === 'CUSTOMER';
+            const isAi = m.senderType === 'AI';
+
+            return (
+              <div
+                key={m.id}
+                className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
               >
-                Réponse Client
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsInternalNote(true)}
-                className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                  isInternalNote
-                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                <Lock className="w-3 h-3" />
-                <span>Note Interne</span>
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {isInternalNote && (
-                <span className="text-[11px] font-semibold text-amber-400 flex items-center gap-1 mr-1">
-                  <Info className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden sm:inline">Invisible client</span>
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => setCannedModalOpen(true)}
-                className="px-2.5 py-1.5 sm:py-1 rounded-lg text-xs font-bold bg-slate-800 text-emerald-400 border border-emerald-500/30 hover:bg-slate-700/80 flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
-                title="Insérer une réponse type enregistrée"
-              >
-                <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden xs:inline">Réponses types</span>
-                <span className="xs:hidden">Types</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Input field */}
-          <div className="relative">
-            <input
-              type="text"
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder={
-                isInternalNote
-                  ? 'Ajouter une note interne confidentielle...'
-                  : 'Rédiger une réponse client consignée dans Zadesk...'
-              }
-              className={`w-full pl-4 pr-12 py-3 text-xs sm:text-sm rounded-2xl focus:outline-none transition-all placeholder:text-slate-500 ${
-                isInternalNote
-                  ? 'bg-amber-950/30 border border-amber-500/50 text-amber-100 focus:border-amber-400'
-                  : 'bg-slate-900 border border-slate-700 text-white focus:border-emerald-500'
-              }`}
-            />
-            <button
-              type="submit"
-              disabled={!replyText.trim() || sendingMessage}
-              className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-2.5 rounded-xl text-slate-950 disabled:opacity-30 transition-all cursor-pointer active:scale-95 ${
-                isInternalNote
-                  ? 'bg-amber-500 hover:bg-amber-400'
-                  : 'bg-emerald-500 hover:bg-emerald-400'
-              }`}
-              title={isInternalNote ? 'Enregistrer la note interne' : 'Envoyer le message'}
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-        </form>
-
-        {/* Canned Responses Overlay Modal */}
-        {cannedModalOpen && (
-          <div
-            className="absolute inset-0 bg-[#070D1E]/95 backdrop-blur-md z-30 p-4 sm:p-5 flex flex-col animate-fade-in"
-            style={{
-              paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))',
-              paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))',
-            }}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold text-white">Réponses types préenregistrées</h3>
-              </div>
-              <button
-                onClick={() => setCannedModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-                aria-label="Fermer les réponses types"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-3">
-              <input
-                type="text"
-                value={cannedSearch}
-                onChange={(e) => setCannedSearch(e.target.value)}
-                placeholder="Rechercher par mot-clé ou raccourci (/bonjour, /delais)..."
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-
-            <div className="flex-1 overflow-y-auto overscroll-contain space-y-2 py-2 scrollbar-thin scrollbar-thumb-slate-800">
-              {filteredCanned.map((cr) => (
-                <div
-                  key={cr.id}
-                  onClick={() => handleSelectCanned(cr.content)}
-                  className="p-3 sm:p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group active:scale-[0.99]"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs sm:text-sm font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">
-                      {cr.title}
-                    </span>
-                    {cr.shortcut && (
-                      <span className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-slate-800 text-emerald-400 border border-emerald-500/30">
-                        {cr.shortcut}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {cr.content}
-                  </p>
+                <div className="flex items-center gap-1.5 mb-1 text-[11px] text-slate-400 px-1">
+                  {isAi && <Bot className="w-3 h-3 text-slate-500" />}
+                  <span>{m.senderName || (isCustomer ? 'Client' : 'Agent SAV')}</span>
+                  <span>·</span>
+                  <span className="tabular-nums">
+                    {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
                 </div>
-              ))}
-            </div>
+
+                <div
+                  className={`max-w-[86%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed ${
+                    isCustomer
+                      ? 'bg-white text-[#0D1B3D] rounded-bl-sm border border-[#E5E4DF]'
+                      : isAi
+                      ? 'bg-[#F4F3EF] text-[#0D1B3D] rounded-br-sm border border-[#E5E4DF]'
+                      : 'bg-[#0D1B3D] text-white rounded-br-sm'
+                  }`}
+                >
+                  {m.content && <p className="whitespace-pre-line break-words">{m.content}</p>}
+                  {Array.isArray((m as any).attachments) && (m as any).attachments.length > 0 && (
+                    <div className={`${m.content ? 'mt-2' : ''} space-y-2`}>
+                      {(m as any).attachments.map((att: any) =>
+                        att.isImage && att.url ? (
+                          <a
+                            key={att.id || att.fileName}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block rounded-lg overflow-hidden border border-[#E5E4DF] max-w-[220px]"
+                          >
+                            <img
+                              src={att.url}
+                              alt={att.name || 'Pièce jointe'}
+                              className="w-full h-auto max-h-44 object-cover"
+                            />
+                          </a>
+                        ) : (
+                          <a
+                            key={att.id || att.fileName}
+                            href={att.url || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                              isCustomer || isAi
+                                ? 'bg-[#FAFAF8] text-[#0D1B3D] border-[#E5E4DF] hover:bg-[#F4F3EF]'
+                                : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
+                            }`}
+                          >
+                            <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{att.name || 'Document joint'}</span>
+                          </a>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="py-16 text-center text-xs text-slate-400">
+            Aucun message consigné pour cette conversation.
           </div>
         )}
-      </aside>
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Formulaire de réponse unifié */}
+      <form
+        onSubmit={handleSubmit}
+        className={`p-3 border-t border-[#E5E4DF] space-y-2 shrink-0 ${
+          isInternalNote ? 'bg-[#FFFCF5]' : 'bg-white'
+        }`}
+        style={{
+          paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
+        }}
+      >
+        <div className="flex items-center justify-between text-xs gap-2">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setIsInternalNote(false)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                !isInternalNote
+                  ? 'bg-[#F4F3EF] text-[#0D1B3D] font-semibold'
+                  : 'text-slate-500 hover:text-[#0D1B3D]'
+              }`}
+            >
+              Réponse client
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsInternalNote(true)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+                isInternalNote
+                  ? 'bg-amber-100 text-amber-950 font-semibold'
+                  : 'text-slate-500 hover:text-[#0D1B3D]'
+              }`}
+            >
+              <Lock className="w-3 h-3" />
+              <span>Note interne</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCannedModalOpen(true)}
+            className="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            title="Insérer une réponse type enregistrée"
+          >
+            <Zap className="w-3.5 h-3.5 text-slate-400" />
+            <span>Réponses types</span>
+          </button>
+        </div>
+
+        <div className="relative">
+          <input
+            type="text"
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder={
+              isInternalNote
+                ? "Ajouter une note confidentielle pour l'équipe…"
+                : 'Écrire une réponse au client…'
+            }
+            className={`w-full pl-3.5 pr-12 py-2.5 text-base sm:text-xs rounded-lg focus:outline-none transition-colors ${
+              isInternalNote
+                ? 'bg-white border border-amber-300 text-amber-950 focus:border-amber-600'
+                : 'bg-[#FAFAF8] border border-[#E5E4DF] text-[#0D1B3D] focus:border-[#0D1B3D] focus:bg-white'
+            }`}
+          />
+          <button
+            type="submit"
+            disabled={!replyText.trim() || sendingMessage}
+            className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md text-white disabled:opacity-30 transition-all cursor-pointer flex items-center justify-center ${
+              isInternalNote ? 'bg-amber-700 hover:bg-amber-800' : 'bg-[#0D1B3D] hover:bg-[#152C61]'
+            }`}
+            title={isInternalNote ? 'Enregistrer la note interne' : 'Envoyer le message'}
+            aria-label="Envoyer"
+          >
+            <Send className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </form>
+
+      {/* Sélecteur de réponses types intégré (thème clair Zalisk) */}
+      {cannedModalOpen && (
+        <div className="absolute inset-0 bg-white z-30 p-4 flex flex-col">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E5E4DF]">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#0D1B3D]" />
+              <h3 className="text-sm font-bold text-[#0D1B3D]">Réponses enregistrées</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCannedModalOpen(false)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] transition-colors cursor-pointer"
+              aria-label="Fermer les réponses types"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="py-3 relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={cannedSearch}
+              onChange={(e) => setCannedSearch(e.target.value)}
+              placeholder="Rechercher par mot-clé ou raccourci (/bonjour)…"
+              className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] placeholder:text-slate-400 focus:outline-none focus:border-[#0D1B3D]"
+              autoFocus
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto overscroll-contain space-y-2 py-1">
+            {filteredCanned.map((cr) => (
+              <div
+                key={cr.id}
+                onClick={() => handleSelectCanned(cr.content)}
+                className="p-3 rounded-lg bg-white border border-[#E5E4DF] hover:border-[#0D1B3D]/30 hover:bg-[#FAFAF8] transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <span className="text-xs font-bold text-[#0D1B3D]">{cr.title}</span>
+                  {cr.shortcut && (
+                    <span className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-[#F4F3EF] text-slate-600 border border-[#E5E4DF]">
+                      {cr.shortcut}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{cr.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </aside>
     </>
   );
 };

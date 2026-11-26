@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { getWorkspacePresenceMap, PRESENCE_STATES } from "./presenceService.js";
 
 const PRIORITY_WEIGHTS = {
   URGENT: 3,
@@ -58,6 +59,7 @@ export async function autoAssignTicket({
       skills: {
         where: {
           validatedAt: { not: null },
+          skill: { isActive: true },
         },
         include: {
           skill: true,
@@ -107,7 +109,16 @@ export async function autoAssignTicket({
     }
   }
 
-  // 4. Calculate weighted load for each eligible candidate
+  // 4. Fetch live presence & calculate weighted load for each eligible candidate
+  const presenceMap = await getWorkspacePresenceMap({
+    workspaceId,
+    userIds: eligibleProfiles.map((p) => p.userId),
+  });
+  const presenceRank = {
+    [PRESENCE_STATES.ONLINE]: 0,
+    [PRESENCE_STATES.AWAY]: 1,
+    [PRESENCE_STATES.OFFLINE]: 2,
+  };
   const candidateScores = [];
 
   for (const profile of eligibleProfiles) {
@@ -131,9 +142,13 @@ export async function autoAssignTicket({
       return acc + weight;
     }, 0);
 
+    const pState = presenceMap.get(profile.userId)?.state || PRESENCE_STATES.OFFLINE;
+
     candidateScores.push({
       userId: profile.userId,
       profileId: profile.id,
+      presenceState: pState,
+      presenceOrder: presenceRank[pState] ?? 2,
       ticketCount: activeTickets.length,
       weightedLoad,
       maxCapacity: profile.maxCapacity,
@@ -166,9 +181,11 @@ export async function autoAssignTicket({
     };
   }
 
-  // 5. Pick the candidate with lowest weighted load
-  // Deterministic sort: 1) weightedLoad ascending, 2) ticketCount ascending, 3) userId alphabetically (tie-breaker)
+  // 5. Pick the candidate with best presence (ONLINE > AWAY > OFFLINE), then lowest weighted load
   candidateScores.sort((a, b) => {
+    if (a.presenceOrder !== b.presenceOrder) {
+      return a.presenceOrder - b.presenceOrder;
+    }
     if (a.weightedLoad !== b.weightedLoad) {
       return a.weightedLoad - b.weightedLoad;
     }

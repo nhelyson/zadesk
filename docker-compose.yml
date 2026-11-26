@@ -68,6 +68,12 @@ services:
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
       - TURNSTILE_BYPASS_DEV=${TURNSTILE_BYPASS_DEV:-true}
+      - SASPAY_API_KEY=${SASPAY_API_KEY:-}
+      - SASPAY_WEBHOOK_SECRET=${SASPAY_WEBHOOK_SECRET:-}
+      - SASPAY_API_BASE_URL=${SASPAY_API_BASE_URL:-https://api.saspay.me/api/v1}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+      - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:support@zalisk.com}
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma
@@ -97,6 +103,12 @@ services:
       - ZAVU_FROM_EMAIL=${ZAVU_FROM_EMAIL:-zadesk@backup-sev.online}
       - ZAVU_SENDER_ID=${ZAVU_SENDER_ID:-kd7a0za0kdsrc381rvnfp3nszd8ds0c6}
       - TURNSTILE_BYPASS_DEV=${TURNSTILE_BYPASS_DEV:-true}
+      - SASPAY_API_KEY=${SASPAY_API_KEY:-}
+      - SASPAY_WEBHOOK_SECRET=${SASPAY_WEBHOOK_SECRET:-}
+      - SASPAY_API_BASE_URL=${SASPAY_API_BASE_URL:-https://api.saspay.me/api/v1}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+      - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:support@zalisk.com}
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma

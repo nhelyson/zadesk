@@ -2,6 +2,10 @@ import { prisma } from "../lib/prisma.js";
 import { autoAssignTicket } from "./assignmentEngine.js";
 import { ROLES, PERMISSIONS, hasPermission } from "../security/permissions.js";
 import { dispatchTicketNotificationJob, TICKET_JOB_TYPES } from "../jobs/ticketJobs.js";
+import {
+  dispatchCustomerReplyAlertJob,
+  dispatchAgentMessageAlertJob,
+} from "../jobs/notificationJobs.js";
 import { dispatchMetricsRefreshJob } from "../jobs/metricsJobs.js";
 import { createOutboxEvent, dispatchOutboxEvents } from "../outbox/outboxDispatcher.js";
 import { QUEUE_NAMES } from "../queues/queueManager.js";
@@ -11,6 +15,10 @@ import {
   publishPulseConversationEvent,
   PULSE_EVENT_TYPES,
 } from "./pulseEventService.js";
+import { invalidateWorkspaceDataCache } from "./workspaceService.js";
+import { cacheService } from "../cache/cacheService.js";
+import { parseMessageWithAttachments } from "../utils/chatAttachments.js";
+import { getUserPresence, normalizeAvailability } from "./presenceService.js";
 
 /**
  * Ensure an agent profile exists for a user in a workspace
@@ -70,7 +78,25 @@ export async function getOrCreateAgentProfile(workspaceId, userId) {
     });
   }
 
-  return profile;
+  const [presenceInfo, membership] = await Promise.all([
+    getUserPresence({ workspaceId, userId }),
+    prisma.membership.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+      select: { status: true, role: true },
+    }),
+  ]);
+
+  const activeSkills = (profile.skills || []).filter((s) => s.skill && s.skill.isActive !== false);
+
+  return {
+    ...profile,
+    skills: activeSkills,
+    availability: normalizeAvailability(profile.availability),
+    presence: presenceInfo.state,
+    presenceInfo,
+    accountStatus: membership?.status || "ACTIVE",
+    role: membership?.role || "AGENT",
+  };
 }
 
 /**
@@ -519,6 +545,8 @@ export async function createTicket(workspaceId, createdById, ticketData) {
     triggeredBy: "ticket_created",
   }).catch((e) => console.warn("[Queue:Error]", e.message));
 
+  invalidateWorkspaceDataCache(workspaceId).catch(() => {});
+
   return prisma.ticket.findUnique({
     where: { id: ticket.id },
     include: {
@@ -586,10 +614,12 @@ export async function updateTicket(workspaceId, ticketId, userId, userRole, upda
   }
 
   if (Object.keys(updates).length > 0) {
-    return prisma.ticket.update({
+    const updated = await prisma.ticket.update({
       where: { id: ticketId },
       data: updates,
     });
+    invalidateWorkspaceDataCache(workspaceId).catch(() => {});
+    return updated;
   }
 
   return ticket;
@@ -794,6 +824,8 @@ export async function reassignTicket(workspaceId, ticketId, currentUserId, userR
     triggeredBy: "ticket_reassigned",
   }).catch((e) => console.warn("[Queue:Error]", e.message));
 
+  invalidateWorkspaceDataCache(workspaceId).catch(() => {});
+
   return result;
 }
 
@@ -844,7 +876,21 @@ export async function getMyConversations(workspaceId, userId, userRole, options 
     }),
   ]);
 
-  return { total, conversations, limit, offset };
+  const sanitizedConversations = conversations.map((conv) => {
+    if (!conv.messages || conv.messages.length === 0) return conv;
+    return {
+      ...conv,
+      messages: conv.messages.map((m) => {
+        const parsed = parseMessageWithAttachments(m.content);
+        return {
+          ...m,
+          content: parsed.content || (parsed.attachments.length > 0 ? `📎 ${parsed.attachments.length} pièce(s) jointe(s)` : ""),
+        };
+      }),
+    };
+  });
+
+  return { total, conversations: sanitizedConversations, limit, offset };
 }
 
 /**
@@ -887,7 +933,22 @@ export async function getConversationDetails(workspaceId, conversationId, userId
     throw error;
   }
 
-  return conversation;
+  const buildAgentAttachmentUrl = (fileName) =>
+    `/api/workspaces/${encodeURIComponent(workspaceId)}/agents/conversations/${encodeURIComponent(conversationId)}/attachments/${encodeURIComponent(fileName)}`;
+
+  const hydratedMessages = (conversation.messages || []).map((m) => {
+    const parsed = parseMessageWithAttachments(m.content, buildAgentAttachmentUrl);
+    return {
+      ...m,
+      content: parsed.content,
+      attachments: parsed.attachments,
+    };
+  });
+
+  return {
+    ...conversation,
+    messages: hydratedMessages,
+  };
 }
 
 /**
@@ -943,6 +1004,18 @@ export async function sendConversationMessage(workspaceId, conversationId, userI
     category: conversation.category || "Général",
   }).catch((e) => logger.warn(`[Pulse] Échec diffusion message: ${e.message}`));
 
+  if (!isInternalNote) {
+    dispatchCustomerReplyAlertJob({
+      workspaceId,
+      conversationId,
+      messageId: message.id,
+      senderName: message.senderName,
+      contentPreview: message.content,
+    }).catch(() => {});
+  }
+
+  invalidateWorkspaceDataCache(workspaceId).catch(() => {});
+
   return message;
 }
 
@@ -991,6 +1064,18 @@ export async function createCustomerMessage(workspaceId, conversationId, { conte
     customerName: name,
     category: conversation.category || "Général",
   }).catch((e) => logger.warn(`[Pulse] Échec diffusion message client: ${e.message}`));
+
+  dispatchAgentMessageAlertJob({
+    workspaceId,
+    conversationId,
+    messageId: message.id,
+    customerName: name,
+    assignedAgentId: conversation.assignedAgentId,
+    contentPreview: message.content,
+    isNewConversation: false,
+  }).catch(() => {});
+
+  invalidateWorkspaceDataCache(workspaceId).catch(() => {});
 
   return message;
 }
@@ -1042,18 +1127,40 @@ export async function createAgentConversation(workspaceId, userId, conversationD
     assignedAgentId: conversation.assignedAgentId,
   }).catch((e) => logger.warn(`[Pulse] Échec diffusion nouvelle conversation: ${e.message}`));
 
+  invalidateWorkspaceDataCache(workspaceId).catch(() => {});
+
   return conversation;
 }
 
 /**
- * Update Agent Profile (availability, capacity, phone)
+ * Update Agent Profile (advisor-only availability, capacity, notifications, phone)
  */
-export async function updateAgentProfile(workspaceId, userId, profileData) {
-  const { availability, phone, title, notificationEmail, notificationApp } = profileData;
+export async function updateAgentProfile(workspaceId, userId, profileData = {}) {
+  const { availability, presence, maxCapacity, phone, title, notificationEmail, notificationApp } = profileData;
+
+  if (presence !== undefined) {
+    const err = new Error("La présence est détectée automatiquement par Zalisk et ne peut pas être modifiée manuellement.");
+    err.status = 403;
+    throw err;
+  }
 
   const data = {};
-  if (availability && ["AVAILABLE", "BUSY", "AWAY", "OFFLINE"].includes(availability)) {
+  if (availability !== undefined) {
+    if (!["AVAILABLE", "BUSY", "DND"].includes(availability)) {
+      const err = new Error("Statut de disponibilité invalide (AVAILABLE, BUSY ou DND attendu).");
+      err.status = 400;
+      throw err;
+    }
     data.availability = availability;
+  }
+  if (maxCapacity !== undefined) {
+    const parsedCap = Number(maxCapacity);
+    if (!Number.isFinite(parsedCap) || parsedCap < 1 || parsedCap > 30) {
+      const err = new Error("La capacité maximale doit être comprise entre 1 et 30 dossiers.");
+      err.status = 400;
+      throw err;
+    }
+    data.maxCapacity = Math.round(parsedCap);
   }
   if (typeof phone === "string") {
     data.phone = phone.trim();
@@ -1068,7 +1175,7 @@ export async function updateAgentProfile(workspaceId, userId, profileData) {
     data.notificationApp = notificationApp;
   }
 
-  return prisma.agentProfile.upsert({
+  const updated = await prisma.agentProfile.upsert({
     where: {
       workspaceId_userId: { workspaceId, userId },
     },
@@ -1079,9 +1186,38 @@ export async function updateAgentProfile(workspaceId, userId, profileData) {
     },
     update: data,
     include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatarUrl: true,
+        },
+      },
       skills: {
         include: { skill: true },
       },
     },
   });
+
+  await cacheService.del(`workspace:${workspaceId}:agents`).catch(() => {});
+
+  const [presenceInfo, membership] = await Promise.all([
+    getUserPresence({ workspaceId, userId }),
+    prisma.membership.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+      select: { status: true, role: true },
+    }),
+  ]);
+
+  return {
+    ...updated,
+    skills: (updated.skills || []).filter((s) => s.skill && s.skill.isActive !== false),
+    availability: normalizeAvailability(updated.availability),
+    presence: presenceInfo.state,
+    presenceInfo,
+    accountStatus: membership?.status || "ACTIVE",
+    role: membership?.role || "AGENT",
+  };
 }

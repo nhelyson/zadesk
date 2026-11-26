@@ -22,6 +22,8 @@ import {
   Share2,
   ArrowRightLeft,
   Info,
+  LayoutList,
+  Columns3,
 } from 'lucide-react';
 import { useWorkspace } from '@/components/workspace/WorkspaceContext';
 import { agentApi, workspaceApi } from '@/lib/api';
@@ -36,6 +38,7 @@ export default function TicketsPage() {
   const initialTicketId = searchParams.get('ticketId') || null;
 
   const [activeTab, setActiveTab] = useState<'my' | 'shared' | 'history'>(initialTab);
+  const [viewMode, setViewMode] = useState<'list' | 'board'>('board');
   const [tickets, setTickets] = useState<AgentTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -94,25 +97,26 @@ export default function TicketsPage() {
     setActionMessage(null);
     try {
       if (activeTab === 'my') {
+        const pageLimit = viewMode === 'board' ? 50 : 10;
         const res = await agentApi.getMyTickets(currentWorkspace.id, {
           search: searchTerm || undefined,
           priority: filterPriority !== 'ALL' ? filterPriority : undefined,
           status: filterStatus !== 'ALL' ? filterStatus : undefined,
           page,
-          limit: 10,
+          limit: pageLimit,
         });
-        setTickets(res.tickets || []);
-        setTotalCount(res.total || 0);
-        setTotalPages(res.totalPages || 1);
+        setTickets(res.tickets);
+        setTotalCount(res.total);
+        setTotalPages(Math.max(1, Math.ceil(res.total / pageLimit)));
       } else if (activeTab === 'shared') {
         const shared = await agentApi.getSharedTickets(currentWorkspace.id);
-        setTickets(shared || []);
-        setTotalCount(shared?.length || 0);
+        setTickets(shared);
+        setTotalCount(shared.length);
         setTotalPages(1);
       } else if (activeTab === 'history') {
         const history = await agentApi.getHistoryTickets(currentWorkspace.id);
-        setTickets(history || []);
-        setTotalCount(history?.length || 0);
+        setTickets(history);
+        setTotalCount(history.length);
         setTotalPages(1);
       }
     } catch (err: any) {
@@ -125,7 +129,7 @@ export default function TicketsPage() {
 
   useEffect(() => {
     fetchTickets();
-  }, [currentWorkspace?.id, activeTab, filterPriority, filterStatus, page]);
+  }, [currentWorkspace?.id, activeTab, filterPriority, filterStatus, page, viewMode]);
 
   // Load team agents for reassign/share
   useEffect(() => {
@@ -284,93 +288,106 @@ export default function TicketsPage() {
         </div>
       )}
 
-      {/* Header with Title and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Moteur SAV Zadesk
-            </span>
-            <span className="text-xs text-slate-400">• Total : <strong>{totalCount}</strong></span>
+      {/* Barre d'outils sobre (onglets soulignés + switcher Liste/Tableau + action) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[#E5E4DF] pb-3">
+        <div className="flex items-center gap-5 overflow-x-auto scrollbar-none text-xs">
+          {[
+            { id: 'my' as const, label: 'Mes tickets' },
+            { id: 'shared' as const, label: 'Partagés' },
+            { id: 'history' as const, label: 'Historique' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.id);
+                setPage(1);
+              }}
+              className={`pb-2 border-b-2 whitespace-nowrap cursor-pointer transition-colors ${
+                activeTab === tab.id
+                  ? 'border-[#0D1B3D] text-[#0D1B3D] font-semibold'
+                  : 'border-transparent text-slate-500 hover:text-[#0D1B3D] font-medium'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+          <span className="text-slate-400 pb-2 tabular-nums shrink-0">
+            Total : <strong className="text-[#0D1B3D]">{totalCount}</strong>
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div
+            role="group"
+            aria-label="Mode d'affichage"
+            className="inline-flex items-center p-0.5 rounded-lg bg-[#F4F3EF] border border-[#E5E4DF]"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('list');
+                setPage(1);
+              }}
+              className={`min-h-[34px] px-3 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation ${
+                viewMode === 'list'
+                  ? 'bg-white text-[#0D1B3D] font-semibold shadow-sm'
+                  : 'text-slate-600 hover:text-[#0D1B3D]'
+              }`}
+            >
+              <LayoutList className="w-3.5 h-3.5" />
+              <span>Liste</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('board');
+                setPage(1);
+              }}
+              className={`min-h-[34px] px-3 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation ${
+                viewMode === 'board'
+                  ? 'bg-white text-[#0D1B3D] font-semibold shadow-sm'
+                  : 'text-slate-600 hover:text-[#0D1B3D]'
+              }`}
+            >
+              <Columns3 className="w-3.5 h-3.5" />
+              <span>Tableau</span>
+            </button>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Gestion des Dossiers & Tickets SAV
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
-            Suivi des réclamations, attributions déterministes par compétences et continuité des dossiers clients.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2.5">
           <button
+            type="button"
             onClick={() => fetchTickets()}
-            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            className="w-9 h-9 rounded-lg bg-white hover:bg-[#F4F3EF] text-slate-600 border border-[#E5E4DF] transition-colors flex items-center justify-center cursor-pointer active:scale-95"
             title="Actualiser la liste"
+            aria-label="Actualiser la liste"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#0D1B3D]' : ''}`} />
           </button>
 
           <button
+            type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer"
+            className="min-h-[36px] px-3.5 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
-            <Plus className="w-4 h-4" />
-            <span>Nouveau Dossier SAV</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Nouveau dossier</span>
           </button>
         </div>
-      </div>
-
-      {/* Tabs navigation: Mes Tickets / Tickets Partagés / Historique */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-        <button
-          onClick={() => { setActiveTab('my'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === 'my'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <FolderKanban className="w-3.5 h-3.5" />
-          <span>Mes tickets attribués</span>
-        </button>
-
-        <button
-          onClick={() => { setActiveTab('shared'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === 'shared'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5" />
-          <span>Tickets partagés avec moi</span>
-        </button>
-
-        <button
-          onClick={() => { setActiveTab('history'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === 'history'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Historique & Résolus</span>
-        </button>
       </div>
 
       {/* Search & Filters (Shown on 'my' tab) */}
       {activeTab === 'my' && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-white border border-[#E5E4DF]">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Rechercher par référence (ex: TK-1001), client ou objet..."
+              placeholder="Rechercher par référence (ex: TK-1001), client ou objet…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchTickets()}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-slate-800"
+              className="w-full h-9 pl-9 pr-4 bg-[#FAFAF8] border border-[#E5E4DF] rounded-lg text-xs focus:outline-none focus:border-[#0D1B3D] focus:bg-white transition-colors text-[#0D1B3D]"
             />
           </div>
 
@@ -405,8 +422,128 @@ export default function TicketsPage() {
         </div>
       )}
 
-      {/* Tickets List */}
-      <div className="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden">
+      {/* Tickets Content: Kanban Board (Clarity) or List */}
+      {viewMode === 'board' && !loading && tickets.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+          {[
+            {
+              key: 'OPEN',
+              title: 'À traiter',
+              dot: 'bg-[#7C3AED]',
+              match: (s: string) => s === 'OPEN' || !['IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED'].includes(s),
+            },
+            {
+              key: 'IN_PROGRESS',
+              title: 'En cours',
+              dot: 'bg-sky-500',
+              match: (s: string) => s === 'IN_PROGRESS',
+            },
+            {
+              key: 'WAITING_CUSTOMER',
+              title: 'Attente client',
+              dot: 'bg-amber-500',
+              match: (s: string) => s === 'WAITING_CUSTOMER',
+            },
+            {
+              key: 'RESOLVED',
+              title: 'Résolus & Clôturés',
+              dot: 'bg-emerald-500',
+              match: (s: string) => s === 'RESOLVED' || s === 'CLOSED',
+            },
+          ].map((col) => {
+            const colTickets = tickets.filter((t) => col.match(t.status));
+            return (
+              <div
+                key={col.key}
+                className="rounded-xl bg-[#F4F3EF] border border-[#E5E4DF] p-3 space-y-2.5 min-h-[220px]"
+              >
+                <div className="flex items-center justify-between px-1 pt-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0D1B3D]" />
+                    <h3 className="text-xs font-bold text-[#0D1B3D]">
+                      {col.title}
+                    </h3>
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-500 tabular-nums">
+                    {colTickets.length}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {colTickets.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-[#DCDAD3] bg-white/60 p-5 text-center text-xs text-slate-400">
+                      Aucun dossier
+                    </div>
+                  ) : (
+                    colTickets.map((t) => (
+                      <div
+                        key={t.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openTicketDetails(t.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openTicketDetails(t.id);
+                          }
+                        }}
+                        className="rounded-lg bg-white border border-[#E5E4DF] p-3.5 hover:border-[#0D1B3D]/30 transition-colors cursor-pointer active:scale-[0.98] space-y-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D]/30"
+                      >
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                          <span className="text-slate-500 font-medium truncate">
+                            {t.category || 'Général'}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-md font-medium shrink-0 ${
+                              t.priority === 'URGENT'
+                                ? 'bg-rose-50 text-rose-800 border border-rose-200'
+                                : t.priority === 'HIGH'
+                                ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                                : 'bg-[#F4F3EF] text-slate-600'
+                            }`}
+                          >
+                            {t.priority === 'URGENT'
+                              ? 'Urgent'
+                              : t.priority === 'HIGH'
+                              ? 'Élevée'
+                              : t.priority === 'MEDIUM'
+                              ? 'Moyenne'
+                              : 'Basse'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="text-[13px] font-semibold text-[#0D1B3D] leading-snug line-clamp-2">
+                            {t.title}
+                          </h4>
+                          <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                            {t.description}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-[#F0EFEA] text-[11px] text-slate-500">
+                          <div className="inline-flex items-center gap-1.5 min-w-0">
+                            <div className="w-5 h-5 rounded-full bg-[#F4F3EF] text-[#0D1B3D] text-[10px] font-bold flex items-center justify-center shrink-0">
+                              {t.customerName ? t.customerName.charAt(0).toUpperCase() : 'C'}
+                            </div>
+                            <span className="truncate font-medium text-[#0D1B3D] max-w-[110px]">
+                              {t.customerName}
+                            </span>
+                          </div>
+                          <span className="font-mono text-[11px] text-slate-400 shrink-0">
+                            {t.reference}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-2xl bg-white border border-slate-200/85 shadow-sm overflow-hidden">
         {loading ? (
           <div className="py-16 text-center text-xs text-slate-400">
             <RefreshCw className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
@@ -432,7 +569,7 @@ export default function TicketsPage() {
               <div
                 key={t.id}
                 onClick={() => openTicketDetails(t.id)}
-                className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors cursor-pointer group"
               >
                 <div className="space-y-1.5 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -476,33 +613,36 @@ export default function TicketsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2.5 shrink-0">
                   {/* Priority Badge */}
                   {t.priority === 'URGENT' && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                       Urgent
                     </span>
                   )}
                   {t.priority === 'HIGH' && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
                       Élevée
                     </span>
                   )}
                   {t.priority === 'MEDIUM' && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                       Moyenne
                     </span>
                   )}
                   {t.priority === 'LOW' && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                       Basse
                     </span>
                   )}
 
                   {/* Status Badge */}
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                       t.status === 'RESOLVED' || t.status === 'CLOSED'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : t.status === 'IN_PROGRESS'
@@ -512,15 +652,28 @@ export default function TicketsPage() {
                         : 'bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
-                    {t.status === 'IN_PROGRESS'
-                      ? 'En cours'
-                      : t.status === 'WAITING_CUSTOMER'
-                      ? 'Attente client'
-                      : t.status === 'RESOLVED'
-                      ? 'Résolu'
-                      : t.status === 'CLOSED'
-                      ? 'Clôturé'
-                      : 'Ouvert'}
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        t.status === 'RESOLVED' || t.status === 'CLOSED'
+                          ? 'bg-emerald-500'
+                          : t.status === 'IN_PROGRESS'
+                          ? 'bg-sky-500'
+                          : t.status === 'WAITING_CUSTOMER'
+                          ? 'bg-amber-500'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                    <span>
+                      {t.status === 'IN_PROGRESS'
+                        ? 'En cours'
+                        : t.status === 'WAITING_CUSTOMER'
+                        ? 'Attente client'
+                        : t.status === 'RESOLVED'
+                        ? 'Résolu'
+                        : t.status === 'CLOSED'
+                        ? 'Clôturé'
+                        : 'Ouvert'}
+                    </span>
                   </span>
 
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition-colors" />
@@ -538,14 +691,14 @@ export default function TicketsPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
+                className="px-3 min-h-[36px] rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
               >
                 Précédent
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(page + 1)}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
+                className="px-3 min-h-[36px] rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 cursor-pointer"
               >
                 Suivant
               </button>
@@ -553,12 +706,13 @@ export default function TicketsPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* ========================================================= */}
       {/* MODAL / DRAWER : DÉTAILS DU TICKET SAV                     */}
       {/* ========================================================= */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-end animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-end">
           <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-slide-in-right">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex items-start justify-between bg-slate-50/50">
@@ -698,7 +852,7 @@ export default function TicketsPage() {
                   {!isReadOnly && (
                     <button
                       onClick={() => setIsShareModalOpen(true)}
-                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
                       <Share2 className="w-3.5 h-3.5 text-indigo-600" />
                       <span>Partager</span>
@@ -708,7 +862,7 @@ export default function TicketsPage() {
                   {canReassign && (
                     <button
                       onClick={() => setIsReassignModalOpen(true)}
-                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
                       <ArrowRightLeft className="w-3.5 h-3.5 text-amber-600" />
                       <span>Réaffecter</span>
@@ -786,7 +940,7 @@ export default function TicketsPage() {
       {/* MODAL : CRÉER UN NOUVEAU TICKET SAV                        */}
       {/* ========================================================= */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
@@ -922,7 +1076,7 @@ export default function TicketsPage() {
       {/* MODAL : PARTAGER LE TICKET AVEC UN COLLÈGUE               */}
       {/* ========================================================= */}
       {isShareModalOpen && selectedTicket && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
@@ -1012,7 +1166,7 @@ export default function TicketsPage() {
       {/* MODAL : RÉAFFECTER LE TICKET (SUPERVISEUR)                */}
       {/* ========================================================= */}
       {isReassignModalOpen && selectedTicket && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>

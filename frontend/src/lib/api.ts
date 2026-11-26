@@ -1,3 +1,5 @@
+import { AgentTicket } from "@/types/workspace";
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -154,7 +156,7 @@ export const workspaceApi = {
   updateAgentStatus: async (
     workspaceId: string,
     agentId: string,
-    data: { availability?: string; maxCapacity?: number; autoAssignmentEnabled?: boolean; title?: string; phone?: string }
+    data: { maxCapacity?: number; autoAssignmentEnabled?: boolean; title?: string; phone?: string }
   ) => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agents/${agentId}/status`, {
       method: 'PATCH',
@@ -163,14 +165,27 @@ export const workspaceApi = {
     return res.profile;
   },
 
-  getSkills: async (workspaceId: string) => {
-    const res = await apiRequest(`/workspaces/${workspaceId}/skills`);
+  getSkills: async (workspaceId: string, includeInactive = false) => {
+    const qs = includeInactive ? '?includeInactive=true' : '';
+    const res = await apiRequest(`/workspaces/${workspaceId}/skills${qs}`);
     return res.skills || [];
   },
 
   createSkill: async (workspaceId: string, data: { name: string; description?: string }) => {
     const res = await apiRequest(`/workspaces/${workspaceId}/skills`, {
       method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.skill;
+  },
+
+  updateSkill: async (
+    workspaceId: string,
+    skillId: string,
+    data: { name?: string; description?: string | null; isActive?: boolean }
+  ) => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/skills/${skillId}`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
     return res.skill;
@@ -301,6 +316,13 @@ export const workspaceApi = {
 };
 
 // Agent Space API service
+export interface AgentTicketsResult {
+  total: number;
+  tickets: AgentTicket[];
+  limit: number;
+  offset: number;
+}
+
 export const agentApi = {
   getDashboardStats: async (workspaceId: string) => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/dashboard`);
@@ -310,7 +332,7 @@ export const agentApi = {
   getMyTickets: async (
     workspaceId: string,
     params?: { status?: string; priority?: string; search?: string; page?: number; limit?: number }
-  ) => {
+  ): Promise<AgentTicketsResult> => {
     const query = new URLSearchParams();
     if (params?.status) query.set('status', params.status);
     if (params?.priority) query.set('priority', params.priority);
@@ -319,17 +341,37 @@ export const agentApi = {
     if (params?.limit) query.set('limit', String(params.limit));
     const qs = query.toString();
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/tickets${qs ? `?${qs}` : ''}`);
-    return res.data;
+    const tickets = Array.isArray(res.tickets)
+      ? res.tickets
+      : Array.isArray(res.data?.tickets)
+      ? res.data.tickets
+      : Array.isArray(res.data)
+      ? res.data
+      : [];
+    const total = typeof res.total === 'number'
+      ? res.total
+      : typeof res.data?.total === 'number'
+      ? res.data.total
+      : tickets.length;
+    const limit = typeof res.limit === 'number' ? res.limit : 20;
+    const offset = typeof res.offset === 'number' ? res.offset : 0;
+    return { total, tickets, limit, offset };
   },
 
-  getSharedTickets: async (workspaceId: string) => {
+  getSharedTickets: async (workspaceId: string): Promise<AgentTicket[]> => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/tickets/shared`);
-    return res.data || [];
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.tickets)) return res.tickets;
+    if (Array.isArray(res.shares)) return res.shares.map((s: any) => s.ticket || s);
+    return [];
   },
 
-  getHistoryTickets: async (workspaceId: string) => {
+  getHistoryTickets: async (workspaceId: string): Promise<AgentTicket[]> => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/tickets/history`);
-    return res.data || [];
+    if (Array.isArray(res.tickets)) return res.tickets;
+    if (Array.isArray(res.data?.tickets)) return res.data.tickets;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
   },
 
   getTicketDetails: async (workspaceId: string, ticketId: string) => {
@@ -469,18 +511,65 @@ export const agentApi = {
 
   getProfile: async (workspaceId: string) => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/profile`);
-    return res.data;
+    return res.profile || res.data?.profile || res.data;
   },
 
   updateProfile: async (
     workspaceId: string,
-    data: { availability?: string; maxCapacity?: number; notificationPreferences?: any }
+    data: {
+      availability?: 'AVAILABLE' | 'BUSY' | 'DND';
+      maxCapacity?: number;
+      phone?: string;
+      title?: string;
+      notificationEmail?: boolean;
+      notificationApp?: boolean;
+    }
   ) => {
     const res = await apiRequest(`/workspaces/${workspaceId}/agent/profile`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
-    return res.data;
+    return res.profile ? { profile: res.profile } : res.data || res;
+  },
+
+  getPresence: async (workspaceId: string) => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/presence`);
+    return res.data || res;
+  },
+
+  sendPresenceHeartbeat: async (workspaceId: string, data: { tabId: string; idleMs: number }) => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/presence/heartbeat`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data || res;
+  },
+
+  getPushVapidKey: async (workspaceId: string): Promise<string | null> => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/push/vapid-key`);
+    return res.data?.publicKey || res.publicKey || null;
+  },
+
+  getPushStatus: async (workspaceId: string, endpoint?: string) => {
+    const qs = endpoint ? `?endpoint=${encodeURIComponent(endpoint)}` : '';
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/push/status${qs}`);
+    return res.data || res;
+  },
+
+  subscribePush: async (workspaceId: string, subscription: PushSubscriptionJSON) => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/push/subscribe`, {
+      method: 'POST',
+      body: JSON.stringify({ subscription }),
+    });
+    return res.data || res;
+  },
+
+  unsubscribePush: async (workspaceId: string, endpoint?: string) => {
+    const res = await apiRequest(`/workspaces/${workspaceId}/agent/push/subscribe`, {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint }),
+    });
+    return res.data || res;
   },
 };
 
@@ -493,6 +582,23 @@ export const authApi = {
 
   logout: async () => {
     return apiRequest('/auth/logout', { method: 'POST' });
+  },
+};
+
+export const commercialApi = {
+  getUsage: async (workspaceId: string) => {
+    const res = await apiRequest(`/commercial/usage?workspaceId=${encodeURIComponent(workspaceId)}`);
+    return res.usage || res.data?.usage || null;
+  },
+
+  getHistory: async (workspaceId: string) => {
+    const res = await apiRequest(`/commercial/history?workspaceId=${encodeURIComponent(workspaceId)}`);
+    return {
+      subscription: res.subscription ?? res.data?.subscription ?? null,
+      usage: res.usage ?? res.data?.usage ?? null,
+      receipts: res.receipts ?? res.data?.receipts ?? [],
+      intents: res.intents ?? res.data?.intents ?? [],
+    };
   },
 };
 

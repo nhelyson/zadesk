@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Zadesk — Direction 4 : Operational Editorial System (Desktop 1440x900)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       ZADESK DIRECTION 4 : OPERATIONAL EDITORIAL SYSTEM
+       Swiss Graphic Design & Modern Linear/Apple Precision Architecture
+       ========================================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --z-canvas: #FAFAF8;
+      --z-surface: #FFFFFF;
+      --z-surface-subtle: #F4F4F0;
+      --z-navy-primary: #0D1B3D;
+      --z-navy-subtle: rgba(13, 27, 61, 0.05);
+      --z-hairline: rgba(13, 27, 61, 0.08);
+      --z-hairline-strong: rgba(13, 27, 61, 0.16);
+      --z-emerald: #059669;
+      --z-emerald-light: #ECFDF5;
+      --z-amber: #D97706;
+      --z-amber-light: #FFFBEB;
+      --z-rose: #DC2626;
+      --z-rose-light: #FEF2F2;
+      --z-text-primary: #0F172A;
+      --z-text-secondary: #475569;
+      --z-text-muted: #94A3B8;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--z-canvas);
+      color: var(--z-navy-primary);
+      display: flex;
+      height: 900px;
+      width: 1440px;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* --------------------------------------------------------------------------
+       1. SIDEBAR ARCHITECTURALE CANONIQUE PHASE 1 (256px)
+       -------------------------------------------------------------------------- */
+    .sidebar {
+      width: 256px;
+      height: 100%;
+      background: var(--z-surface);
+      border-right: 1px solid var(--z-hairline);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .sidebar-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--z-hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--z-navy-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22C55E;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .brand-meta { display: flex; flex-direction: column; }
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--z-navy-primary);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--z-text-muted);
+      font-weight: 500;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 12px;
+      overflow-y: auto;
+    }
+    .nav-group-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--z-text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 10px 4px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--z-text-secondary);
+      border-radius: 7px;
+      margin-bottom: 2px;
+      text-decoration: none;
+      transition: all 0.12s ease;
+    }
+    .nav-link:hover {
+      background: var(--z-navy-subtle);
+      color: var(--z-navy-primary);
+    }
+    .nav-link.active {
+      background: var(--z-navy-subtle);
+      color: var(--z-navy-primary);
+      font-weight: 700;
+      border-left: 2.5px solid #22C55E;
+      border-radius: 2px 7px 7px 2px;
+    }
+    .nav-link svg {
+      width: 15px;
+      height: 15px;
+      opacity: 0.75;
+      stroke-width: 2px;
+    }
+    .nav-link.active svg {
+      opacity: 1;
+      stroke: var(--z-navy-primary);
+    }
+
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--z-hairline);
+      background: #FAFAF8;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .role-toggle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--z-text-muted);
+      padding: 0 4px;
+    }
+    .role-badge-btn {
+      background: #E2E8F0;
+      color: #334155;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .user-profile-plate {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      padding: 7px 10px;
+      border-radius: 8px;
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #DCFCE7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --------------------------------------------------------------------------
+       2. TOPBAR DE CONTRÔLE (52px)
+       -------------------------------------------------------------------------- */
+    .viewport {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--z-canvas);
+    }
+
+    .topbar {
+      height: 52px;
+      background: var(--z-surface);
+      border-bottom: 1px solid var(--z-hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--z-text-secondary);
+    }
+    .breadcrumb-root { color: var(--z-text-muted); }
+    .breadcrumb-sep { color: #CBD5E1; }
+    .breadcrumb-current {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+    }
+    .tenant-badge {
+      font-size: 10.5px;
+      background: #F1F5F9;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .state-toggle-group {
+      display: flex;
+      align-items: center;
+      background: #F1F5F9;
+      border-radius: 6px;
+      padding: 2px;
+      font-size: 11px;
+    }
+    .state-toggle-btn {
+      background: transparent;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--z-text-secondary);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .state-toggle-btn.active {
+      background: #FFFFFF;
+      color: var(--z-navy-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .btn-action-primary {
+      background: var(--z-navy-primary);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-action-primary:hover {
+      background: #152C61;
+    }
+
+    /* --------------------------------------------------------------------------
+       3. GRILLE ARCHITECTURALE DUAL-PLANE (1440 × 900 Layout)
+       -------------------------------------------------------------------------- */
+    .dual-plane-canvas {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      height: calc(100% - 52px);
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       PLAN GAUCHE : FLUX OPÉRATIONNEL MAÎTRE (68%)
+       ========================================================================== */
+    .operational-main {
+      padding: 28px 36px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      border-right: 1px solid var(--z-hairline);
+    }
+
+    /* 3.1 LE BULLETIN DE COMMANDEMENT ÉDITORIAL (DISPATCH MASTHEAD) */
+    .dispatch-masthead {
+      border-bottom: 2px solid var(--z-navy-primary);
+      padding-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .masthead-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--z-text-muted);
+    }
+    .masthead-statement {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+      color: var(--z-navy-primary);
+    }
+    .highlight-urgent {
+      color: var(--z-amber);
+      background: rgba(217, 119, 6, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .highlight-nominal {
+      color: var(--z-emerald);
+      background: rgba(5, 150, 105, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* TENSION DE CHARGE : RUBAN NARRATIF LINÉAIRE */
+    .tension-ribbon {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 0 2px;
+      font-size: 12px;
+    }
+    .tension-metric {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .tension-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--z-navy-primary);
+      letter-spacing: -0.02em;
+    }
+    .tension-label {
+      font-size: 11.5px;
+      color: var(--z-text-secondary);
+    }
+    .tension-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--z-hairline-strong);
+    }
+
+    /* 3.2 L'ÎLOT D'INTERVENTION CHIRURGICALE (INCIDENT BAY) */
+    .incident-bay {
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-left: 4px solid var(--z-amber);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 6px rgba(13, 27, 61, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+    .bay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bay-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--z-amber);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--z-amber);
+      box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+    }
+    .sla-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--z-amber-light);
+      color: #92400E;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .bay-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      line-height: 1.3;
+    }
+    .bay-excerpt {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+      background: #F8FAFC;
+      border-left: 2px solid #CBD5E1;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+    }
+    .bay-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 4px;
+    }
+    .client-card-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .client-avatar-sq {
+      width: 32px;
+      height: 32px;
+      background: var(--z-navy-primary);
+      color: #FFFFFF;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-group-bay {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-bay-sec {
+      background: var(--z-surface);
+      border: 1px solid #CBD5E1;
+      color: var(--z-text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-bay-pri {
+      background: var(--z-navy-primary);
+      border: 1px solid var(--z-navy-primary);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-bay-pri:hover { background: #152C61; }
+
+    /* 3.3 TABLE DE FLUX HAUTE DENSITÉ (DISPATCH TABLE) */
+    .dispatch-stream-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .stream-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--z-hairline);
+    }
+    .stream-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stream-filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stream-pill {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--z-text-muted);
+      background: transparent;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .stream-pill.active {
+      background: var(--z-navy-subtle);
+      color: var(--z-navy-primary);
+    }
+
+    .dispatch-table {
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .dt-row {
+      display: grid;
+      grid-template-columns: 85px 150px 1fr 100px 90px;
+      align-items: center;
+      padding: 11px 18px;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 12px;
+      transition: background 0.12s;
+    }
+    .dt-row:last-child { border-bottom: none; }
+    .dt-row:hover { background: #F8FAFC; }
+    .dt-row.header {
+      background: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      color: var(--z-text-muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--z-hairline);
+    }
+    .dt-ref {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--z-text-secondary);
+    }
+    .dt-cust {
+      font-weight: 600;
+      color: var(--z-navy-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dt-subject {
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 14px;
+    }
+    .dt-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--z-text-muted);
+    }
+    .dt-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      text-align: center;
+      display: inline-block;
+    }
+    .dt-badge.amber { background: var(--z-amber-light); color: var(--z-amber); }
+    .dt-badge.blue { background: #EFF6FF; color: #1D4ED8; }
+    .dt-badge.gray { background: #F1F5F9; color: #475569; }
+
+    /* ==========================================================================
+       PLAN DROIT : RESSOURCES, VEILLE & CONTRÔLE (32%)
+       ========================================================================== */
+    .operational-side {
+      background: var(--z-surface);
+      padding: 28px 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      overflow-y: auto;
+    }
+
+    .side-block-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--z-hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* JAUGE DE CAPACITÉ NOMINALE */
+    .capacity-capsule {
+      background: #FAFAF8;
+      border: 1px solid var(--z-hairline);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cap-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .cap-fig {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--z-navy-primary);
+      line-height: 1;
+    }
+    .cap-bar {
+      height: 5px;
+      background: #E2E8F0;
+      border-radius: 9999px;
+      overflow: hidden;
+      display: flex;
+    }
+    .cap-fill {
+      background: var(--z-emerald);
+      height: 100%;
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    /* LISTE DES CONSEILLERS DE QUART */
+    .agent-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .agent-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #FAFAF8;
+      border: 1px solid #F1F5F9;
+      font-size: 12px;
+    }
+    .agent-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .agent-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--z-emerald);
+    }
+    .agent-dot.offline { background: #94A3B8; }
+    .agent-name-text { font-weight: 600; color: var(--z-navy-primary); }
+    .agent-agency-text { font-size: 10.5px; color: var(--z-text-muted); }
+    .agent-load-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    /* ÉTAT HONNÊTE DE L'INTELLIGENCE ARTIFICIELLE */
+    .ai-governance-box {
+      background: #FAFAF8;
+      border: 1px dashed #CBD5E1;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--z-text-secondary);
+    }
+    .ai-gov-title {
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* REGISTRE CHRONOLOGIQUE STRICT DU CYCLE DE VIE DES TICKETS */
+    .activity-ledger {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .act-entry {
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: var(--z-text-secondary);
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+    .act-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--z-text-muted);
+      white-space: nowrap;
+    }
+
+    /* ÉTAT VIDE / SITUATION FLUIDE (CALME) */
+    .calm-state-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 12px;
+      text-align: center;
+      gap: 12px;
+    }
+    .calm-state-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--z-emerald-light);
+      color: var(--z-emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .calm-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+    }
+    .calm-desc {
+      font-size: 12.5px;
+      color: var(--z-text-secondary);
+      max-width: 420px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       1. SIDEBAR CANONIQUE PHASE 1 (Officielle & Restreinte)
+       ======================================================================== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-mark">Z</div>
+      <div class="brand-meta">
+        <span class="brand-name">ZADESK</span>
+        <span class="brand-sub">Sodico SARL • Akwa</span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-group-title">SERVICE CLIENT</div>
+      <a href="#" class="nav-link active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        Vue d'ensemble
+      </a>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        Conversations
+      </a>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+        Demandes clients
+      </a>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        Clients
+      </a>
+
+      <div class="nav-group-title" style="margin-top: 14px;">MON ÉQUIPE</div>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        Équipe et accès
+      </a>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        Nos agences
+      </a>
+
+      <div class="nav-group-title" style="margin-top: 14px;">INTELLIGENCE ARTIFICIELLE</div>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Configuration IA
+      </a>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        Connaissances
+      </a>
+
+      <div class="nav-group-title" style="margin-top: 14px;">PERFORMANCES</div>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        Statistiques
+      </a>
+
+      <div class="nav-group-title" style="margin-top: 14px;">ADMINISTRATION</div>
+      <a href="#" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        Paramètres
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="role-toggle-bar">
+        <span>Aperçu rôle :</span>
+        <button class="role-badge-btn">Voir Conseiller</button>
+      </div>
+      <div class="user-profile-plate">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="user-avatar">A</div>
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--z-navy-primary);">Aimé Ndongo</div>
+            <div style="font-size: 9.5px; color: var(--z-text-muted);">Responsable SAV</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       2. VIEWPORT PRINCIPAL
+       ======================================================================== -->
+  <main class="viewport">
+    
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="breadcrumb-root">Workspace</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Cockpit SAV</span>
+        <span class="tenant-badge">Agence Douala Akwa</span>
+      </div>
+
+      <div class="topbar-right">
+        <!-- SWITCH DE DÉMONSTRATION D'ÉTAT : AFFLUENCE VS CALME -->
+        <div class="state-toggle-group">
+          <button class="state-toggle-btn active" id="btn-state-busy" onclick="setDashboardState('busy')">Affluence (14)</button>
+          <button class="state-toggle-btn" id="btn-state-calm" onclick="setDashboardState('calm')">Calme / Fluide</button>
+        </div>
+
+        <button class="btn-action-primary">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          Nouveau dossier
+        </button>
+      </div>
+    </header>
+
+    <!-- GRILLE DUAL-PLANE -->
+    <div class="dual-plane-canvas">
+      
+      <!-- --------------------------------------------------------------------
+           PLAN MAÎTRE GAUCHE : FLUX OPÉRATIONNEL (68%)
+           -------------------------------------------------------------------- -->
+      <section class="operational-main">
+        
+        <!-- 3.1 LE BULLETIN DE COMMANDEMENT ÉDITORIAL -->
+        <header class="dispatch-masthead">
+          <div class="masthead-eyebrow">
+            <span>BULLETIN OPÉRATIONNEL DU QUART • MARDI 18 NOVEMBRE</span>
+            <span style="font-weight: 600; color: #64748B;">[DONNÉES DE DÉMONSTRATION]</span>
+          </div>
+
+          <h1 class="masthead-statement" id="masthead-text">
+            14 dossiers ouverts sur le portail, dont <span class="highlight-urgent">1 arbitrage prioritaire immédiat</span>. La capacité de traitement de Douala et Yaoundé est nominale à 78%.
+          </h1>
+
+          <div class="tension-ribbon">
+            <div class="tension-metric">
+              <span class="tension-value" id="val-open">14</span>
+              <span class="tension-label">Dossiers ouverts</span>
+            </div>
+            <div class="tension-sep"></div>
+            <div class="tension-metric">
+              <span class="tension-value" style="color: var(--z-amber);" id="val-pending">3</span>
+              <span class="tension-label">En attente d'agent</span>
+            </div>
+            <div class="tension-sep"></div>
+            <div class="tension-metric">
+              <span class="tension-value" style="color: var(--z-emerald);" id="val-resolved">7</span>
+              <span class="tension-label">Résolus ce jour</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- 3.2 L'ÎLOT D'INTERVENTION CHIRURGICALE (INCIDENT BAY) -->
+        <div class="incident-bay" id="incident-bay-block">
+          <div class="bay-header">
+            <div class="bay-tag">
+              <span class="pulse-dot"></span>
+              <span>INTERVENTION PRIORITAIRE N°1 • ARBITRAGE IMMÉDIAT</span>
+            </div>
+            <div class="sla-timer">Attente portail : 28 min</div>
+          </div>
+
+          <div class="bay-title">
+            #TK-8021 — Colis non livré suite commande #84920 (Agence Akwa)
+          </div>
+
+          <div class="bay-excerpt">
+            « Bonjour, j'ai passé ma commande hier matin avec retrait prévu à l'agence de Douala Akwa à 11h. Arrivé sur place, l'équipe me dit que le carton n'a pas été réceptionné du dépôt central. Pouvez-vous localiser mon colis en urgence ? »
+          </div>
+
+          <div class="bay-controls">
+            <div class="client-card-compact">
+              <div class="client-avatar-sq">AT</div>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 700; color: var(--z-navy-primary);">Alain Tchakounte</div>
+                <div style="font-size: 11px; color: var(--z-text-muted);">Portail Client Web • Douala</div>
+              </div>
+            </div>
+
+            <div class="btn-group-bay">
+              <button class="btn-bay-sec">Assigner à un conseiller</button>
+              <button class="btn-bay-pri">
+                <span>Prendre en charge</span>
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉTAT CALME / VIDE (MASQUÉ PAR DÉFAUT, ACTIVABLE VIA LE SWITCH) -->
+        <div class="calm-state-view" id="calm-state-block">
+          <div class="calm-state-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+          </div>
+          <h2 class="calm-title">Aucune intervention urgente en attente</h2>
+          <p class="calm-desc">Toutes les demandes entrantes ont été prises en charge par les conseillers SAV en poste. Le flux d'assistance fonctionne de manière parfaitement fluide.</p>
+        </div>
+
+        <!-- 3.3 TABLE DE FLUX HAUTE DENSITÉ (DISPATCH TABLE) -->
+        <div class="dispatch-stream-section">
+          <div class="stream-header">
+            <span class="stream-title">File de traitement des dossiers</span>
+            <div class="stream-filter-pills">
+              <button class="stream-pill active">Tous (14)</button>
+              <button class="stream-pill">En attente (3)</button>
+              <button class="stream-pill">En cours (7)</button>
+              <button class="stream-pill">Résolus (4)</button>
+            </div>
+          </div>
+
+          <div class="dispatch-table">
+            <div class="dt-row header">
+              <div>RÉF.</div>
+              <div>CLIENT</div>
+              <div>OBJET DE LA DEMANDE</div>
+              <div>ATTENTE</div>
+              <div style="text-align: right;">STATUT</div>
+            </div>
+
+            <div class="dt-row">
+              <div class="dt-ref">#TK-8019</div>
+              <div class="dt-cust">Béatrice Ngo</div>
+              <div class="dt-subject">Demande urgente de duplicata de facture proforma #491</div>
+              <div class="dt-time">14 min</div>
+              <div style="text-align: right;"><span class="dt-badge amber">À assigner</span></div>
+            </div>
+
+            <div class="dt-row">
+              <div class="dt-ref">#TK-8018</div>
+              <div class="dt-cust">Mamadou Traoré</div>
+              <div class="dt-subject">Question sur le délai de garantie groupe électrogène</div>
+              <div class="dt-time">Il y a 1h</div>
+              <div style="text-align: right;"><span class="dt-badge blue">En cours</span></div>
+            </div>
+
+            <div class="dt-row">
+              <div class="dt-ref">#TK-8012</div>
+              <div class="dt-cust">Cabinet Ekwalla</div>
+              <div class="dt-subject">Demande d'intervention technicien sur site Bastos</div>
+              <div class="dt-time">8 min</div>
+              <div style="text-align: right;"><span class="dt-badge amber">À assigner</span></div>
+            </div>
+
+            <div class="dt-row">
+              <div class="dt-ref">#TK-8009</div>
+              <div class="dt-cust">Société BTP Sahel</div>
+              <div class="dt-subject">Réclamation bon de commande non conforme livraison</div>
+              <div class="dt-time">Il y a 2h</div>
+              <div style="text-align: right;"><span class="dt-badge blue">En cours</span></div>
+            </div>
+
+            <div class="dt-row">
+              <div class="dt-ref">#TK-8005</div>
+              <div class="dt-cust">Pauline Mbida</div>
+              <div class="dt-subject">Changement d'adresse de facturation avant expédition</div>
+              <div class="dt-time">Hier</div>
+              <div style="text-align: right;"><span class="dt-badge gray">En attente</span></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- --------------------------------------------------------------------
+           PLAN DROIT : RESSOURCES, VEILLE & CONTRÔLE (32%)
+           -------------------------------------------------------------------- -->
+      <aside class="operational-side">
+        
+        <!-- SECTION 1 : JAUGE D'ÉQUILIBRE OPÉRATIONNEL -->
+        <div>
+          <div class="side-block-header">
+            <span>Ressources & Capacité SAV</span>
+            <span style="font-size: 11px; color: var(--z-emerald); font-weight: 700;">Nominal</span>
+          </div>
+
+          <div class="capacity-capsule" style="margin-top: 10px;">
+            <div class="cap-top">
+              <span class="cap-fig">78%</span>
+              <span style="font-size: 11.5px; color: var(--z-text-secondary); font-weight: 600;">7 / 9 dossiers actifs</span>
+            </div>
+            <div class="cap-bar">
+              <div class="cap-fill" style="width: 78%;"></div>
+            </div>
+            <span style="font-size: 10.5px; color: var(--z-text-muted);">Capacité d'absorption optimale sur les 2 agences</span>
+          </div>
+        </div>
+
+        <!-- SECTION 2 : CONSEILLERS EN SERVICE -->
+        <div>
+          <div class="side-block-header">
+            <span>Conseillers de Quart (4/5)</span>
+            <span style="font-size: 10px; color: var(--z-text-muted); font-family: 'JetBrains Mono';">RÉEL</span>
+          </div>
+
+          <div class="agent-stream" style="margin-top: 10px;">
+            <div class="agent-entry">
+              <div class="agent-info">
+                <span class="agent-dot"></span>
+                <div>
+                  <div class="agent-name-text">Marc Eyango</div>
+                  <div class="agent-agency-text">Douala Akwa</div>
+                </div>
+              </div>
+              <span class="agent-load-badge">3 dossiers</span>
+            </div>
+
+            <div class="agent-entry">
+              <div class="agent-info">
+                <span class="agent-dot"></span>
+                <div>
+                  <div class="agent-name-text">Sophie Mendomo</div>
+                  <div class="agent-agency-text">Yaoundé Bastos</div>
+                </div>
+              </div>
+              <span class="agent-load-badge">2 dossiers</span>
+            </div>
+
+            <div class="agent-entry">
+              <div class="agent-info">
+                <span class="agent-dot"></span>
+                <div>
+                  <div class="agent-name-text">Cédric Bella</div>
+                  <div class="agent-agency-text">Douala Akwa</div>
+                </div>
+              </div>
+              <span class="agent-load-badge">2 dossiers</span>
+            </div>
+
+            <div class="agent-entry">
+              <div class="agent-info">
+                <span class="agent-dot offline"></span>
+                <div>
+                  <div class="agent-name-text">Esther Nguema</div>
+                  <div class="agent-agency-text">En pause repas</div>
+                </div>
+              </div>
+              <span class="agent-load-badge" style="color: #94A3B8;">0 dossier</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3 : ÉTAT HONNÊTE DU MODULE IA -->
+        <div class="ai-governance-box">
+          <div class="ai-gov-title">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>GOUVERNANCE IA • PRÉPARATION</span>
+          </div>
+          Le module d'automatisation IA est en phase de paramétrage. <strong>100% des réponses et résolutions sont assurées par l'équipe humaine.</strong>
+        </div>
+
+        <!-- SECTION 4 : REGISTRE D'ÉVÉNEMENTS RÉCENTS -->
+        <div>
+          <div class="side-block-header">
+            <span>Journal de Bord SAV</span>
+            <span style="font-size: 10px; color: var(--z-text-muted); font-family: 'JetBrains Mono';">LIVE</span>
+          </div>
+
+          <div class="activity-ledger" style="margin-top: 10px;">
+            <div class="act-entry">
+              <span class="act-time">12:44</span>
+              <span>Dossier <strong>#TK-8016</strong> résolu par Marc Eyango (Agence Akwa).</span>
+            </div>
+            <div class="act-entry">
+              <span class="act-time">12:31</span>
+              <span>Dossier <strong>#TK-8021</strong> créé par Alain Tchakounte sur le Portail.</span>
+            </div>
+            <div class="act-entry">
+              <span class="act-time">12:15</span>
+              <span>Dossier <strong>#TK-8019</strong> assigné à Sophie Mendomo.</span>
+            </div>
+            <div class="act-entry">
+              <span class="act-time">11:50</span>
+              <span>Dossier <strong>#TK-8010</strong> clôturé avec accord du client.</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- SCRIPT D'INTERACTION POUR DÉMONSTRATION ÉTAT FLUIDE VS ACTIF -->
+  <script>
+    function setDashboardState(state) {
+      const isBusy = (state === 'busy');
+      document.getElementById('btn-state-busy').classList.toggle('active', isBusy);
+      document.getElementById('btn-state-calm').classList.toggle('active', !isBusy);
+
+      const incidentBay = document.getElementById('incident-bay-block');
+      const calmView = document.getElementById('calm-state-block');
+      const masthead = document.getElementById('masthead-text');
+      const valPending = document.getElementById('val-pending');
+
+      if (isBusy) {
+        incidentBay.style.display = 'flex';
+        calmView.style.display = 'none';
+        masthead.innerHTML = '14 dossiers ouverts sur le portail, dont <span class="highlight-urgent">1 arbitrage prioritaire immédiat</span>. La capacité de traitement de Douala et Yaoundé est nominale à 78%.';
+        valPending.textContent = '3';
+        valPending.style.color = 'var(--z-amber)';
+      } else {
+        incidentBay.style.display = 'none';
+        calmView.style.display = 'flex';
+        masthead.innerHTML = 'Toutes les demandes du portail sont sous contrôle : <span class="highlight-nominal">0 arbitrage en attente</span>. Les équipes de Douala et Yaoundé absorbent le flux avec sérénité.';
+        valPending.textContent = '0';
+        valPending.style.color = 'var(--z-emerald)';
+      }
+    }
+  </script>
+</body>
+</html>

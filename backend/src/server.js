@@ -1,8 +1,12 @@
+import { bootstrapSecurityGateway } from "./security/financialVerificationGateway.js";
 import app from "./app.js";
 import { env } from "./config/env.js";
 import { prisma } from "./lib/prisma.js";
 import { logger } from "./utils/logger.js";
 import { queueManager } from "./queues/queueManager.js";
+
+// Eagerly bootstrap the financial security gateway at the composition root
+bootstrapSecurityGateway();
 import {
   dispatchMaintenanceCleanupJob,
   scheduleRecurringMaintenance,

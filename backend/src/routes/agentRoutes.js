@@ -26,15 +26,27 @@ router.post("/tickets/:ticketId/reassign", agentController.reassignTicket);
 router.get("/conversations", agentController.getConversations);
 router.post("/conversations", agentController.createConversation);
 router.get("/conversations/:conversationId", agentController.getConversation);
+router.get("/conversations/:conversationId/attachments/:fileName", agentController.getConversationAttachment);
 router.post("/conversations/:conversationId/messages", agentController.sendConversationMessage);
 router.post("/conversations/:conversationId/customer-messages", agentController.receiveCustomerMessage);
 
 // 4. Real-time Pulse Constellation Stream (SSE)
 router.get("/pulse/stream", agentController.streamPulse);
 
+// 4b. Background Web Push Subscriptions for Agents
+router.get("/push/vapid-key", agentController.getPushVapidKey);
+router.get("/push/status", agentController.getPushStatus);
+router.post("/push/subscribe", agentController.subscribePush);
+router.delete("/push/subscribe", agentController.unsubscribePush);
+
 // 5. Profile & Team
 router.get("/profile", agentController.getProfile);
 router.patch("/profile", agentController.updateProfile);
 router.get("/team", agentController.listTeamMembers);
+
+// 6. Real-Time Automatic Advisor Presence (Heartbeat & Leave)
+router.get("/presence", agentController.getMyPresence);
+router.post("/presence/heartbeat", agentController.heartbeatPresence);
+router.post("/presence/leave", agentController.leavePresenceController);
 
 export default router;

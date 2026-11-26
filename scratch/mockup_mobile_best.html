@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Zadesk — Mobile : Le Pupitre Focal (390x844)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #FAFAF8;
+      color: #0D1B3D;
+      width: 390px;
+      height: 844px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOPBAR MOBILE NATIVE (54px) */
+    .mobile-topbar {
+      height: 54px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      background: #0D1B3D;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22C55E;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0D1B3D;
+      letter-spacing: -0.02em;
+    }
+    .org-pill {
+      font-size: 10px;
+      color: #64748B;
+      background: #F1F5F9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .demo-tag {
+      background: #DCFCE7;
+      color: #166534;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #DCFCE7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* CONTENU SCROLLABLE MOBILE */
+    .mobile-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* EN-TÊTE ÉDITORIAL */
+    .brief-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .brief-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .brief-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #0D1B3D;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    .brief-subtitle {
+      font-size: 12px;
+      color: #475569;
+    }
+
+    /* LE PUPITRE D'INTERVENTION MOBILE */
+    .mobile-stage-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #F59E0B;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(13, 27, 61, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .m-stage-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .m-stage-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #B45309;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .m-stage-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .m-stage-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0D1B3D;
+      line-height: 1.3;
+    }
+    .m-stage-quote {
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.45;
+      background: #F8FAFC;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #F1F5F9;
+    }
+    .m-stage-client {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cust-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #0D1B3D;
+      color: #FFFFFF;
+      font-family: 'Outfit';
+      font-weight: 700;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-mobile-primary {
+      width: 100%;
+      background: #0D1B3D;
+      color: #FFFFFF;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 11px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* MINI BAROMÈTRE MOBILE */
+    .mobile-balance-strip {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .balance-info { display: flex; flex-direction: column; }
+    .balance-title { font-size: 12px; font-weight: 700; color: #0D1B3D; }
+    .balance-meta { font-size: 10.5px; color: #64748B; margin-top: 1px; }
+    .balance-pill {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #22C55E;
+      background: #F0FDF4;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    /* FILE CONTINUE */
+    .mobile-queue {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .m-queue-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      justify-content: space-between;
+    }
+    .m-queue-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mq-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .mq-name { font-weight: 600; font-size: 12px; color: #0D1B3D; }
+    .mq-ref { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #94A3B8; }
+    .mq-desc {
+      font-size: 11.5px;
+      color: #475569;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* BOTTOM NAV FIXE A 5 ONGLETS */
+    .mobile-bottom-nav {
+      height: 60px;
+      background: #FFFFFF;
+      border-top: 1px solid #E2E8F0;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      text-decoration: none;
+      color: #64748B;
+      font-size: 9.5px;
+      font-weight: 500;
+    }
+    .nav-tab.active {
+      color: #0D1B3D;
+      font-weight: 700;
+    }
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+    }
+    .nav-tab.active .tab-icon {
+      color: #0D1B3D;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOPBAR MOBILE -->
+  <header class="mobile-topbar">
+    <div class="brand-group">
+      <div class="logo-mark">Z</div>
+      <div class="brand-name">Zadesk</div>
+      <div class="org-pill">Sodico</div>
+    </div>
+    <div class="topbar-right">
+      <span class="demo-tag">[DÉMO DIR 2]</span>
+      <div class="user-avatar">A</div>
+    </div>
+  </header>
+
+  <!-- 2. SCROLL VIEWPORT -->
+  <main class="mobile-scroll">
+    
+    <div class="brief-header">
+      <div class="brief-date">Mardi 18 Novembre • Douala</div>
+      <h1 class="brief-title">Pupitre d'Intervention</h1>
+      <p class="brief-subtitle">1 dossier prioritaire nécessite un arbitrage rapide</p>
+    </div>
+
+    <!-- LE PUPITRE MOBILE (FOCAL CARD) -->
+    <div class="mobile-stage-card">
+      <div class="m-stage-top">
+        <span class="m-stage-badge">Priorité Haute</span>
+        <span class="m-stage-timer">Attente : 28 min</span>
+      </div>
+
+      <div class="m-stage-title">
+        #TK-8021 — Colis non livré suite commande #84920
+      </div>
+
+      <div class="m-stage-quote">
+        « Colis introuvable à l'agence Akwa alors que le retrait était confirmé à 11h. »
+      </div>
+
+      <div class="m-stage-client">
+        <div class="cust-avatar">AT</div>
+        <div>
+          <div style="font-size: 11.5px; font-weight: 700; color: #0D1B3D;">Alain Tchakounte</div>
+          <div style="font-size: 10px; color: #64748B;">Portail Client • Douala</div>
+        </div>
+      </div>
+
+      <button class="btn-mobile-primary">
+        Prendre en charge immédiatement
+      </button>
+    </div>
+
+    <!-- BANDEAU ÉQUILIBRE OPÉRATIONNEL -->
+    <div class="mobile-balance-strip">
+      <div class="balance-info">
+        <span class="balance-title">Équipe en service</span>
+        <span class="balance-meta">4/5 conseillers • Douala & Yaoundé</span>
+      </div>
+      <div class="balance-pill">78% nominal</div>
+    </div>
+
+    <!-- FILE CONTINUE -->
+    <div class="mobile-queue">
+      <div class="m-queue-header">
+        <span>Suivants dans la file (3)</span>
+        <span style="color: #0D1B3D; cursor: pointer;">Tout voir</span>
+      </div>
+
+      <div class="m-queue-card">
+        <div class="mq-top">
+          <span class="mq-name">Béatrice Ngo</span>
+          <span class="mq-ref">#TK-8019 • 14 min</span>
+        </div>
+        <div class="mq-desc">Demande urgente de duplicata de facture proforma #491</div>
+      </div>
+
+      <div class="m-queue-card">
+        <div class="mq-top">
+          <span class="mq-name">Mamadou Traoré</span>
+          <span class="mq-ref">#TK-8018 • Il y a 1h</span>
+        </div>
+        <div class="mq-desc">Question sur la garantie et pièces de rechange groupe</div>
+      </div>
+
+      <div class="m-queue-card">
+        <div class="mq-top">
+          <span class="mq-name">Cabinet Ekwalla</span>
+          <span class="mq-ref">#TK-8012 • 8 min</span>
+        </div>
+        <div class="mq-desc">Demande d'intervention d'un technicien à Bastos</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 3. BOTTOM NAV FIXE 5 ONGLETS (PHASE 1 CONFORME) -->
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-tab active">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+      <span>Cockpit</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+      <span>Messages</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+      <span>Demandes</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+      <span>Clients</span>
+    </a>
+    <a href="#" class="nav-tab">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      <span>Menu</span>
+    </a>
+  </nav>
+
+</body>
+</html>

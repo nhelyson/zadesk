@@ -1,0 +1,76 @@
+@startuml zadesk_domain6_events_audit
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+package "Domaine 6 : Événements, Temps Réel & Traçabilité" {
+
+    class Workspace <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class ConversationMessage <<external>> {
+        - id: CUID
+        - senderType: MessageType
+    }
+
+    class OutboxEvent <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String?
+        - eventType: String
+        - payload: Json
+        - status: String = "PENDING"
+        - attempts: Integer = 0
+        - lockedAt: DateTime?
+        - processedAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        --
+        + markAsProcessed(): void
+        + markAsFailed(error: String): void
+        + lock(): Boolean
+    }
+
+    class PulseEvent <<event>> {
+        - id: String {readOnly}
+        - type: String
+        - workspaceId: String
+        - conversationId: String?
+        - messageId: String?
+        - payload: Json
+        - timestamp: DateTime
+    }
+
+    class AuditLog <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - userId: String?
+        - action: String
+        - entityType: String
+        - entityId: String
+        - metadata: Json?
+        - createdAt: DateTime {readOnly}
+    }
+
+    ' Relations du Domaine 6
+    Workspace "1" *-- "0..*" OutboxEvent : génère >
+    Workspace "1" *-- "0..*" AuditLog : enregistre >
+    ConversationMessage ..> PulseEvent : déclenche >
+}
+@enduml

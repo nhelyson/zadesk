@@ -1,0 +1,138 @@
+@startuml zadesk_domain4_conversations
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+package "Domaine 4 : Gestion des Conversations (Omnicanal)" {
+
+    enum ConversationStatus <<enumeration>> {
+        WAITING_ASSIGNMENT
+        ACTIVE
+        WAITING_CUSTOMER
+        RESOLVED
+        CLOSED
+    }
+
+    enum MessageType <<enumeration>> {
+        CUSTOMER
+        AGENT_REPLY
+        INTERNAL_NOTE
+        SYSTEM
+    }
+
+    enum ChannelType <<enumeration>> {
+        PORTAL
+        WHATSAPP
+        EMAIL
+    }
+
+    enum ShareAccessLevel <<enumeration>> {
+        READ_ONLY
+        CONTRIBUTE
+    }
+
+    class Workspace <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class Customer <<external>> {
+        - identifier: String
+        - fullName: String
+    }
+
+    class AgentProfile <<external>> {
+        - id: CUID
+        - userId: String
+    }
+
+    class Ticket <<external>> {
+        - id: CUID
+        - ticketNumber: String
+    }
+
+    class Conversation <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - ticketId: String?
+        - assignedAgentId: String?
+        - customerName: String = "Visiteur Web"
+        - customerPhone: String?
+        - customerEmail: String?
+        - category: String?
+        - channel: ChannelType = PORTAL
+        - status: ConversationStatus = ACTIVE
+        - publicTokenHash: String?
+        - lastMessageAt: DateTime
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + postCustomerMessage(content: String, token: String): ConversationMessage
+        + postAgentReply(content: String, agentId: String): ConversationMessage
+        + postInternalNote(content: String, agentId: String): ConversationMessage
+        + convertToTicket(data: TicketCreationDTO): Ticket
+        + changeStatus(newStatus: ConversationStatus): void
+        + verifyToken(rawToken: String): Boolean
+    }
+
+    class ConversationMessage <<entity>> {
+        - id: CUID {readOnly, unique}
+        - conversationId: String
+        - senderType: MessageType
+        - senderName: String
+        - senderId: String?
+        - content: String
+        - isInternalNote: Boolean = false
+        - createdAt: DateTime {readOnly}
+    }
+
+    class ConversationShare <<entity>> {
+        - id: CUID {readOnly, unique}
+        - conversationId: String
+        - sharedWithAgentId: String
+        - accessLevel: ShareAccessLevel = READ_ONLY
+        - createdAt: DateTime {readOnly}
+    }
+
+    class WhatsAppConnection <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String {unique}
+        - wabaId: String
+        - phoneNumberId: String
+        - displayPhoneNumber: String
+        - verifiedName: String?
+        - accessToken: String {readOnly}
+        - status: String = "CONNECTED"
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + disconnect(): void
+        + verifySync(): Boolean
+    }
+
+    ' Relations du Domaine 4
+    Workspace "1" *-- "0..*" Conversation : supervise >
+    Customer "1" -- "0..*" Conversation : échange via >
+    AgentProfile "0..1" -- "0..*" Conversation : anime >
+    Ticket "0..1" -- "0..1" Conversation : lié à >
+    Conversation "1" *-- "1..*" ConversationMessage : compose >
+    Conversation "1" *-- "0..*" ConversationShare : partage >
+    Workspace "1" *-- "0..1" WhatsAppConnection : connecte >
+}
+@enduml

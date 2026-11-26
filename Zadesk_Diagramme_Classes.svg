@@ -1,0 +1,501 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2480 2380" width="2480" height="2380">
+<defs>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap');
+        text { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .mono { font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace; font-size: 13.5px; font-weight: 500; }
+        .mono-op { font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace; font-size: 13.5px; fill: #334155; }
+        .class-stereo { font-size: 12.5px; font-weight: 700; letter-spacing: 0.8px; text-anchor: middle; font-style: italic; }
+        .class-title { font-size: 18.5px; font-weight: 800; text-anchor: middle; letter-spacing: 0.2px; }
+        .card { rx: 8; ry: 8; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.07)); }
+        .rel-line { stroke: #2563EB; stroke-width: 2.0; fill: none; }
+        .rel-comp { stroke: #0F172A; stroke-width: 2.0; fill: none; }
+        .rel-dash { stroke: #475569; stroke-width: 1.8; stroke-dasharray: 7,4; fill: none; }
+        .rel-text { font-size: 12.5px; font-weight: 700; fill: #0F172A; text-anchor: middle; }
+        .pill-bg { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.2; rx: 5; ry: 5; }
+    </style>
+    <marker id="comp-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#0F172A" stroke="#0F172A" stroke-width="1"/>
+    </marker>
+    <marker id="aggr-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.0"/>
+    </marker>
+    <marker id="nav-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polygon points="1,2 10,6 1,10" fill="#2563EB"/>
+    </marker>
+    <marker id="dep-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polyline points="2,2 10,6 2,10" fill="none" stroke="#475569" stroke-width="2.0"/>
+    </marker>
+</defs>
+
+<rect width="2480" height="2380" fill="#FAFAFA"/>
+
+<polyline points="460,252.5 545,210.0" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="419.5" y="207.25" width="166.0" height="22" class="pill-bg" />
+<text x="502.5" y="222.25" class="rel-text">contient (1 .. 0..*)</text>
+<polyline points="270.0,435 270.0,500" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="190.75" y="443.5" width="158.5" height="22" class="pill-bg" />
+<text x="270.0" y="458.5" class="rel-text">possède (1 .. 0..*)</text>
+<polyline points="1010,232.5 925,210.0" class="rel-line"   />
+<rect x="892.0" y="197.25" width="151.0" height="22" class="pill-bg" />
+<text x="967.5" y="212.25" class="rel-text">adhère (1 .. 0..*)</text>
+<polyline points="1200.0,395 1200.0,460 785.0,460 785.0,500" class="rel-line"   />
+<rect x="917.0" y="436.0" width="151.0" height="22" class="pill-bg" />
+<text x="992.5" y="451.0" class="rel-text">invite (1 .. 0..*)</text>
+<polyline points="1390,232.5 1475,242.5" class="rel-line"   />
+<rect x="1353.25" y="213.5" width="158.5" height="22" class="pill-bg" />
+<text x="1432.5" y="228.5" class="rel-text">incarne (1 .. 0..*)</text>
+<polyline points="1665.0,415 1665.0,460 2080.0,460 2080.0,500" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="1793.25" y="436.0" width="158.5" height="22" class="pill-bg" />
+<text x="1872.5" y="451.0" class="rel-text">détient (1 .. 0..*)</text>
+<polyline points="2130.0,300 2130.0,500" class="rel-comp" marker-start="url(#aggr-diamond)"  />
+<rect x="2047.0" y="376.0" width="166.0" height="22" class="pill-bg" />
+<text x="2130.0" y="391.0" class="rel-text">qualifie (1 .. 0..*)</text>
+<polyline points="1665.0,500 1665.0,415" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="1634.5" y="433.5" width="61.0" height="22" class="pill-bg" />
+<text x="1665.0" y="448.5" class="rel-text">évalue</text>
+<polyline points="1475,620.0 1435,620.0 1435,870 815.0,870 815.0,900" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="1400.75" y="721.0" width="68.5" height="22" class="pill-bg" />
+<text x="1435.0" y="736.0" class="rel-text">affecte</text>
+<polyline points="270.0,435 270.0,860 655.0,860 655.0,900" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="394.5" y="836.0" width="136.0" height="22" class="pill-bg" />
+<text x="462.5" y="851.0" class="rel-text">gère (1 .. 0..*)</text>
+<polyline points="460,1050.0 545,1107.5" class="rel-line"   />
+<rect x="427.0" y="1054.75" width="151.0" height="22" class="pill-bg" />
+<text x="502.5" y="1069.75" class="rel-text">soumet (1 .. 0..*)</text>
+<polyline points="925,1107.5 1010,1027.5" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="880.75" y="1043.5" width="173.5" height="22" class="pill-bg" />
+<text x="967.5" y="1058.5" class="rel-text">historise (1 .. 1..*)</text>
+<polyline points="735.0,1315 735.0,1385" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="655.75" y="1326.0" width="158.5" height="22" class="pill-bg" />
+<text x="735.0" y="1341.0" class="rel-text">retrace (1 .. 0..*)</text>
+<polyline points="735.0,1315 785.0,1350 1200.0,1350 1200.0,1385" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="913.25" y="1326.0" width="158.5" height="22" class="pill-bg" />
+<text x="992.5" y="1341.0" class="rel-text">partage (1 .. 0..*)</text>
+<polyline points="1665.0,415 1635.0,445 855.0,445 855.0,900" class="rel-line"  marker-end="url(#nav-arrow)" />
+<rect x="1158.25" y="421.0" width="173.5" height="22" class="pill-bg" />
+<text x="1245.0" y="436.0" class="rel-text">traite (0..1 .. 0..*)</text>
+<polyline points="270.0,1200 270.0,1230 1545.0,1230 1545.0,1245" class="rel-line"   />
+<rect x="813.25" y="1206.0" width="188.5" height="22" class="pill-bg" />
+<text x="907.5" y="1221.0" class="rel-text">échange via (1 .. 0..*)</text>
+<polyline points="1475,1072.5 925,1107.5" class="rel-line"   />
+<rect x="1102.0" y="1066.0" width="196.0" height="22" class="pill-bg" />
+<text x="1200.0" y="1081.0" class="rel-text">élévation (0..1 .. 0..1)</text>
+<polyline points="1855,1072.5 1940,1040.0" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="1818.25" y="1032.25" width="158.5" height="22" class="pill-bg" />
+<text x="1897.5" y="1047.25" class="rel-text">compose (1 .. 1..*)</text>
+<polyline points="1665.0,1245 1715.0,1280 2130.0,1280 2130.0,1385" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="1843.25" y="1256.0" width="158.5" height="22" class="pill-bg" />
+<text x="1922.5" y="1271.0" class="rel-text">partage (1 .. 0..*)</text>
+<polyline points="270.0,435 220.0,485 220.0,1670 735.0,1670 735.0,1710" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="140.75" y="1053.5" width="158.5" height="22" class="pill-bg" />
+<text x="220.0" y="1068.5" class="rel-text">possède (1 .. 0..*)</text>
+<polyline points="925,1850.0 1010,1837.5" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="877.0" y="1819.75" width="181.0" height="22" class="pill-bg" />
+<text x="967.5" y="1834.75" class="rel-text">découpé en (1 .. 1..*)</text>
+<polyline points="270.0,1710 270.0,1675 1150.0,1675 1150.0,1710" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="627.0" y="1651.0" width="166.0" height="22" class="pill-bg" />
+<text x="710.0" y="1666.0" class="rel-text">recherche sémantique</text>
+<polyline points="270.0,1710 320.0,1660 1745.0,1660 1745.0,1245" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="998.25" y="1636.0" width="68.5" height="22" class="pill-bg" />
+<text x="1032.5" y="1651.0" class="rel-text">assiste</text>
+<polyline points="270.0,1710 270.0,1355 675.0,1355 675.0,1315" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="434.5" y="1331.0" width="76.0" height="22" class="pill-bg" />
+<text x="472.5" y="1346.0" class="rel-text">escalade</text>
+<polyline points="270.0,435 340.0,505 340.0,1665 1665.0,1665 1665.0,1710" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="264.5" y="1061.0" width="151.0" height="22" class="pill-bg" />
+<text x="340.0" y="1076.0" class="rel-text">génère (1 .. 0..*)</text>
+<polyline points="2130.0,1180 2130.0,1710" class="rel-dash"  marker-end="url(#dep-arrow)" />
+<rect x="2088.25" y="1421.0" width="83.5" height="22" class="pill-bg" />
+<text x="2130.0" y="1436.0" class="rel-text">déclenche</text>
+<polyline points="270.0,435 205.0,515 205.0,2000 1665.0,2000 1665.0,2040" class="rel-comp" marker-start="url(#comp-diamond)"  />
+<rect x="122.0" y="1233.5" width="166.0" height="22" class="pill-bg" />
+<text x="205.0" y="1248.5" class="rel-text">consigne (1 .. 0..*)</text>
+
+<g id="svg-workspace">
+    <rect x="80" y="70" width="380" height="365" class="card" fill="#EFF6FF" stroke="#2563EB" stroke-width="2.0" />
+    <text x="270.0" y="98" class="class-stereo" fill="#3B82F6">&#171;entity&#187;</text>
+    <text x="270.0" y="122" class="class-title" fill="#1D4ED8">Workspace</text>
+    <line x1="80" y1="132" x2="460" y2="132" stroke="#93C5FD" stroke-width="1.8"/>
+
+    <text x="96" y="156" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="96" y="180" class="mono" fill="#0F172A">+ slug : text [UQ]</text>
+    <text x="96" y="204" class="mono" fill="#0F172A">+ name : text</text>
+    <text x="96" y="228" class="mono" fill="#0F172A">+ category : text</text>
+    <text x="96" y="252" class="mono" fill="#0F172A">+ supportEmail : text?</text>
+    <text x="96" y="276" class="mono" fill="#0F172A">+ supportPhone : text?</text>
+    <text x="96" y="300" class="mono" fill="#0F172A">+ isPublic : boolean = true</text>
+    <text x="96" y="324" class="mono" fill="#0F172A">+ verified : boolean = false</text>
+    <line x1="80" y1="348" x2="460" y2="348" stroke="#93C5FD" stroke-width="1.8"/>
+    <text x="96" y="372" class="mono-op">+ createTicket() : Ticket</text>
+    <text x="96" y="396" class="mono-op">+ addMember() : Membership</text>
+    <text x="96" y="420" class="mono-op">+ getCapacityMetrics() : Metrics</text>
+</g>
+
+<g id="svg-membership">
+    <rect x="545" y="70" width="380" height="280" class="card" fill="#EFF6FF" stroke="#2563EB" stroke-width="2.0" />
+    <text x="735.0" y="98" class="class-stereo" fill="#3B82F6">&#171;entity&#187;</text>
+    <text x="735.0" y="122" class="class-title" fill="#1D4ED8">Membership</text>
+    <line x1="545" y1="132" x2="925" y2="132" stroke="#93C5FD" stroke-width="1.8"/>
+
+    <text x="561" y="156" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="561" y="180" class="mono" fill="#0F172A">+ userId : text [FK]</text>
+    <text x="561" y="204" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="561" y="228" class="mono" fill="#0F172A">+ role : Role = AGENT</text>
+    <text x="561" y="252" class="mono" fill="#0F172A">+ status : MembershipStatus</text>
+    <line x1="545" y1="276" x2="925" y2="276" stroke="#93C5FD" stroke-width="1.8"/>
+    <text x="561" y="300" class="mono-op">+ changeRole(role) : void</text>
+    <text x="561" y="324" class="mono-op">+ hasPermission() : boolean</text>
+</g>
+
+<g id="svg-user">
+    <rect x="1010" y="70" width="380" height="325" class="card" fill="#ECFDF5" stroke="#059669" stroke-width="2.0" />
+    <text x="1200.0" y="98" class="class-stereo" fill="#10B981">&#171;entity&#187;</text>
+    <text x="1200.0" y="122" class="class-title" fill="#047857">User</text>
+    <line x1="1010" y1="132" x2="1390" y2="132" stroke="#6EE7B7" stroke-width="1.8"/>
+
+    <text x="1026" y="156" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1026" y="180" class="mono" fill="#0F172A">+ email : text [UQ]</text>
+    <text x="1026" y="204" class="mono" fill="#0F172A">+ googleId : text? [UQ]</text>
+    <text x="1026" y="228" class="mono" fill="#0F172A">+ firstName : text</text>
+    <text x="1026" y="252" class="mono" fill="#0F172A">+ lastName : text</text>
+    <text x="1026" y="276" class="mono" fill="#0F172A">+ emailVerified : boolean</text>
+    <line x1="1010" y1="300" x2="1390" y2="300" stroke="#6EE7B7" stroke-width="1.8"/>
+    <text x="1026" y="324" class="mono-op">+ getFullName() : text</text>
+    <text x="1026" y="348" class="mono-op">+ verifyPassword(raw) : boolean</text>
+    <text x="1026" y="372" class="mono-op">+ updateProfile(data) : void</text>
+</g>
+
+<g id="svg-agentprofile">
+    <rect x="1475" y="70" width="380" height="345" class="card" fill="#FFFBEB" stroke="#D97706" stroke-width="2.0" />
+    <text x="1665.0" y="98" class="class-stereo" fill="#D97706">&#171;entity&#187;</text>
+    <text x="1665.0" y="122" class="class-title" fill="#B45309">AgentProfile</text>
+    <line x1="1475" y1="132" x2="1855" y2="132" stroke="#FCD34D" stroke-width="1.8"/>
+
+    <text x="1491" y="156" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1491" y="180" class="mono" fill="#0F172A">+ userId : text [FK]</text>
+    <text x="1491" y="204" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="1491" y="228" class="mono" fill="#0F172A">+ title : text = &#x27;Conseiller&#x27;</text>
+    <text x="1491" y="252" class="mono" fill="#0F172A">+ availability : AgentAvailability</text>
+    <text x="1491" y="276" class="mono" fill="#0F172A">+ maxCapacity : int = 10</text>
+    <text x="1491" y="300" class="mono" fill="#0F172A">+ autoAssignment : boolean</text>
+    <line x1="1475" y1="324" x2="1855" y2="324" stroke="#FCD34D" stroke-width="1.8"/>
+    <text x="1491" y="348" class="mono-op">+ setAvailability(s) : void</text>
+    <text x="1491" y="372" class="mono-op">+ isAvailable() : boolean</text>
+    <text x="1491" y="396" class="mono-op">+ getActiveTicketsCount() : int</text>
+</g>
+
+<g id="svg-skill">
+    <rect x="1940" y="70" width="380" height="230" class="card" fill="#FFFBEB" stroke="#D97706" stroke-width="2.0" />
+    <text x="2130.0" y="98" class="class-stereo" fill="#D97706">&#171;entity&#187;</text>
+    <text x="2130.0" y="122" class="class-title" fill="#B45309">Skill</text>
+    <line x1="1940" y1="132" x2="2320" y2="132" stroke="#FCD34D" stroke-width="1.8"/>
+
+    <text x="1956" y="156" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1956" y="180" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="1956" y="204" class="mono" fill="#0F172A">+ name : text</text>
+    <text x="1956" y="228" class="mono" fill="#0F172A">+ description : text?</text>
+    <line x1="1940" y1="252" x2="2320" y2="252" stroke="#FCD34D" stroke-width="1.8"/>
+    <text x="1956" y="276" class="mono-op">+ updateSkill(name, desc) : void</text>
+</g>
+
+<g id="svg-establishment">
+    <rect x="80" y="500" width="380" height="320" class="card" fill="#EFF6FF" stroke="#2563EB" stroke-width="2.0" />
+    <text x="270.0" y="528" class="class-stereo" fill="#3B82F6">&#171;entity&#187;</text>
+    <text x="270.0" y="552" class="class-title" fill="#1D4ED8">Establishment</text>
+    <line x1="80" y1="562" x2="460" y2="562" stroke="#93C5FD" stroke-width="1.8"/>
+
+    <text x="96" y="586" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="96" y="610" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="96" y="634" class="mono" fill="#0F172A">+ name : text</text>
+    <text x="96" y="658" class="mono" fill="#0F172A">+ type : EstablishmentType</text>
+    <text x="96" y="682" class="mono" fill="#0F172A">+ city : text?</text>
+    <text x="96" y="706" class="mono" fill="#0F172A">+ isMain : boolean = false</text>
+    <text x="96" y="730" class="mono" fill="#0F172A">+ isActive : boolean = true</text>
+    <line x1="80" y1="754" x2="460" y2="754" stroke="#93C5FD" stroke-width="1.8"/>
+    <text x="96" y="778" class="mono-op">+ updateDetails() : void</text>
+    <text x="96" y="802" class="mono-op">+ toggleStatus() : void</text>
+</g>
+
+<g id="svg-workspaceinvitation">
+    <rect x="545" y="500" width="380" height="310" class="card" fill="#EFF6FF" stroke="#2563EB" stroke-width="2.0" />
+    <text x="735.0" y="528" class="class-stereo" fill="#3B82F6">&#171;entity&#187;</text>
+    <text x="735.0" y="552" class="class-title" fill="#1D4ED8">WorkspaceInvitation</text>
+    <line x1="545" y1="562" x2="925" y2="562" stroke="#93C5FD" stroke-width="1.8"/>
+
+    <text x="561" y="586" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="561" y="610" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="561" y="634" class="mono" fill="#0F172A">+ email : text</text>
+    <text x="561" y="658" class="mono" fill="#0F172A">+ invitedById : text [FK]</text>
+    <text x="561" y="682" class="mono" fill="#0F172A">+ token : text [UQ]</text>
+    <text x="561" y="706" class="mono" fill="#0F172A">+ role : Role = AGENT</text>
+    <text x="561" y="730" class="mono" fill="#0F172A">+ expiresAt : timestamp</text>
+    <line x1="545" y1="754" x2="925" y2="754" stroke="#93C5FD" stroke-width="1.8"/>
+    <text x="561" y="778" class="mono-op">+ accept(user) : Membership</text>
+</g>
+
+<g id="svg-assignmentengine">
+    <rect x="1475" y="500" width="380" height="240" class="card" fill="#FFFBEB" stroke="#D97706" stroke-width="2.0" />
+    <text x="1665.0" y="528" class="class-stereo" fill="#D97706">&#171;service&#187;</text>
+    <text x="1665.0" y="552" class="class-title" fill="#B45309">AssignmentEngine</text>
+    <line x1="1475" y1="562" x2="1855" y2="562" stroke="#FCD34D" stroke-width="1.8"/>
+
+    <text x="1491" y="586" class="mono" fill="#0F172A">- criteria : AssignmentStrategy</text>
+    <text x="1491" y="610" class="mono" fill="#0F172A">- strictAvailability : boolean = true</text>
+    <line x1="1475" y1="634" x2="1855" y2="634" stroke="#FCD34D" stroke-width="1.8"/>
+    <text x="1491" y="658" class="mono-op">+ autoAssign(ticket) : AgentProfile?</text>
+    <text x="1491" y="682" class="mono-op">+ calculateScore(agent, tck) : float</text>
+    <text x="1491" y="706" class="mono-op">+ rebalanceWorkload(wsId) : Report</text>
+</g>
+
+<g id="svg-agentskill">
+    <rect x="1940" y="500" width="380" height="255" class="card" fill="#FFFBEB" stroke="#D97706" stroke-width="2.0" />
+    <text x="2130.0" y="528" class="class-stereo" fill="#D97706">&#171;entity&#187;</text>
+    <text x="2130.0" y="552" class="class-title" fill="#B45309">AgentSkill</text>
+    <line x1="1940" y1="562" x2="2320" y2="562" stroke="#FCD34D" stroke-width="1.8"/>
+
+    <text x="1956" y="586" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1956" y="610" class="mono" fill="#0F172A">+ agentProfileId : text [FK]</text>
+    <text x="1956" y="634" class="mono" fill="#0F172A">+ skillId : text [FK]</text>
+    <text x="1956" y="658" class="mono" fill="#0F172A">+ validatedAt : timestamp?</text>
+    <line x1="1940" y1="682" x2="2320" y2="682" stroke="#FCD34D" stroke-width="1.8"/>
+    <text x="1956" y="706" class="mono-op">+ validate(validatorId) : void</text>
+    <text x="1956" y="730" class="mono-op">+ revoke() : void</text>
+</g>
+
+<g id="svg-customer">
+    <rect x="80" y="900" width="380" height="300" class="card" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2.0" />
+    <text x="270.0" y="928" class="class-stereo" fill="#8B5CF6">&#171;entity&#187;</text>
+    <text x="270.0" y="952" class="class-title" fill="#6D28D9">Customer</text>
+    <line x1="80" y1="962" x2="460" y2="962" stroke="#C4B5FD" stroke-width="1.8"/>
+
+    <text x="96" y="986" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="96" y="1010" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="96" y="1034" class="mono" fill="#0F172A">+ name : text</text>
+    <text x="96" y="1058" class="mono" fill="#0F172A">+ email : text?</text>
+    <text x="96" y="1082" class="mono" fill="#0F172A">+ phone : text?</text>
+    <text x="96" y="1106" class="mono" fill="#0F172A">+ createdAt : timestamp</text>
+    <line x1="80" y1="1130" x2="460" y2="1130" stroke="#C4B5FD" stroke-width="1.8"/>
+    <text x="96" y="1154" class="mono-op">+ getTicketHistory() : List&lt;Ticket&gt;</text>
+    <text x="96" y="1178" class="mono-op">+ getConversations() : List&lt;Conv&gt;</text>
+</g>
+
+<g id="svg-ticket">
+    <rect x="545" y="900" width="380" height="415" class="card" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2.0" />
+    <text x="735.0" y="928" class="class-stereo" fill="#8B5CF6">&#171;entity&#187;</text>
+    <text x="735.0" y="952" class="class-title" fill="#6D28D9">Ticket</text>
+    <line x1="545" y1="962" x2="925" y2="962" stroke="#C4B5FD" stroke-width="1.8"/>
+
+    <text x="561" y="986" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="561" y="1010" class="mono" fill="#0F172A">+ reference : text [UQ]</text>
+    <text x="561" y="1034" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="561" y="1058" class="mono" fill="#0F172A">+ customerId : text [FK]</text>
+    <text x="561" y="1082" class="mono" fill="#0F172A">+ assignedAgentId : text? [FK]</text>
+    <text x="561" y="1106" class="mono" fill="#0F172A">+ title : text</text>
+    <text x="561" y="1130" class="mono" fill="#0F172A">+ priority : TicketPriority</text>
+    <text x="561" y="1154" class="mono" fill="#0F172A">+ status : TicketStatus</text>
+    <text x="561" y="1178" class="mono" fill="#0F172A">+ slaDueAt : timestamp?</text>
+    <line x1="545" y1="1202" x2="925" y2="1202" stroke="#C4B5FD" stroke-width="1.8"/>
+    <text x="561" y="1226" class="mono-op">+ assignToAgent(agent) : void</text>
+    <text x="561" y="1250" class="mono-op">+ updateStatus(status) : void</text>
+    <text x="561" y="1274" class="mono-op">+ isSlaBreached() : boolean</text>
+    <text x="561" y="1298" class="mono-op">+ markResolved(summary) : void</text>
+</g>
+
+<g id="svg-ticketactivity">
+    <rect x="1010" y="900" width="380" height="255" class="card" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2.0" />
+    <text x="1200.0" y="928" class="class-stereo" fill="#8B5CF6">&#171;entity&#187;</text>
+    <text x="1200.0" y="952" class="class-title" fill="#6D28D9">TicketActivity</text>
+    <line x1="1010" y1="962" x2="1390" y2="962" stroke="#C4B5FD" stroke-width="1.8"/>
+
+    <text x="1026" y="986" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1026" y="1010" class="mono" fill="#0F172A">+ ticketId : text [FK]</text>
+    <text x="1026" y="1034" class="mono" fill="#0F172A">+ actorId : text?</text>
+    <text x="1026" y="1058" class="mono" fill="#0F172A">+ type : text</text>
+    <text x="1026" y="1082" class="mono" fill="#0F172A">+ content : text?</text>
+    <line x1="1010" y1="1106" x2="1390" y2="1106" stroke="#C4B5FD" stroke-width="1.8"/>
+    <text x="1026" y="1130" class="mono-op">+ getFormattedLog() : text</text>
+</g>
+
+<g id="svg-conversation">
+    <rect x="1475" y="900" width="380" height="345" class="card" fill="#F0FDFA" stroke="#0D9488" stroke-width="2.0" />
+    <text x="1665.0" y="928" class="class-stereo" fill="#14B8A6">&#171;entity&#187;</text>
+    <text x="1665.0" y="952" class="class-title" fill="#0F766E">Conversation</text>
+    <line x1="1475" y1="962" x2="1855" y2="962" stroke="#5EEAD4" stroke-width="1.8"/>
+
+    <text x="1491" y="986" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1491" y="1010" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="1491" y="1034" class="mono" fill="#0F172A">+ customerId : text [FK]</text>
+    <text x="1491" y="1058" class="mono" fill="#0F172A">+ assignedAgentId : text? [FK]</text>
+    <text x="1491" y="1082" class="mono" fill="#0F172A">+ status : ConversationStatus</text>
+    <text x="1491" y="1106" class="mono" fill="#0F172A">+ channel : ChannelType</text>
+    <text x="1491" y="1130" class="mono" fill="#0F172A">+ lastMessageAt : timestamp</text>
+    <line x1="1475" y1="1154" x2="1855" y2="1154" stroke="#5EEAD4" stroke-width="1.8"/>
+    <text x="1491" y="1178" class="mono-op">+ postMessage(text, type) : Message</text>
+    <text x="1491" y="1202" class="mono-op">+ elevateToTicket(priority) : Ticket</text>
+    <text x="1491" y="1226" class="mono-op">+ closeConversation() : void</text>
+</g>
+
+<g id="svg-conversationmessage">
+    <rect x="1940" y="900" width="380" height="280" class="card" fill="#F0FDFA" stroke="#0D9488" stroke-width="2.0" />
+    <text x="2130.0" y="928" class="class-stereo" fill="#14B8A6">&#171;entity&#187;</text>
+    <text x="2130.0" y="952" class="class-title" fill="#0F766E">ConversationMessage</text>
+    <line x1="1940" y1="962" x2="2320" y2="962" stroke="#5EEAD4" stroke-width="1.8"/>
+
+    <text x="1956" y="986" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1956" y="1010" class="mono" fill="#0F172A">+ conversationId : text [FK]</text>
+    <text x="1956" y="1034" class="mono" fill="#0F172A">+ senderUserId : text?</text>
+    <text x="1956" y="1058" class="mono" fill="#0F172A">+ senderCustomerId : text?</text>
+    <text x="1956" y="1082" class="mono" fill="#0F172A">+ type : MessageType</text>
+    <text x="1956" y="1106" class="mono" fill="#0F172A">+ body : text</text>
+    <line x1="1940" y1="1130" x2="2320" y2="1130" stroke="#5EEAD4" stroke-width="1.8"/>
+    <text x="1956" y="1154" class="mono-op">+ isInternalNote() : boolean</text>
+</g>
+
+<g id="svg-ticketassignment">
+    <rect x="545" y="1385" width="380" height="255" class="card" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2.0" />
+    <text x="735.0" y="1413" class="class-stereo" fill="#8B5CF6">&#171;entity&#187;</text>
+    <text x="735.0" y="1437" class="class-title" fill="#6D28D9">TicketAssignment</text>
+    <line x1="545" y1="1447" x2="925" y2="1447" stroke="#C4B5FD" stroke-width="1.8"/>
+
+    <text x="561" y="1471" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="561" y="1495" class="mono" fill="#0F172A">+ ticketId : text [FK]</text>
+    <text x="561" y="1519" class="mono" fill="#0F172A">+ agentProfileId : text [FK]</text>
+    <text x="561" y="1543" class="mono" fill="#0F172A">+ assignedById : text?</text>
+    <text x="561" y="1567" class="mono" fill="#0F172A">+ reason : text?</text>
+    <line x1="545" y1="1591" x2="925" y2="1591" stroke="#C4B5FD" stroke-width="1.8"/>
+    <text x="561" y="1615" class="mono-op">+ getDetails() : text</text>
+</g>
+
+<g id="svg-ticketshare">
+    <rect x="1010" y="1385" width="380" height="230" class="card" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2.0" />
+    <text x="1200.0" y="1413" class="class-stereo" fill="#8B5CF6">&#171;entity&#187;</text>
+    <text x="1200.0" y="1437" class="class-title" fill="#6D28D9">TicketShare</text>
+    <line x1="1010" y1="1447" x2="1390" y2="1447" stroke="#C4B5FD" stroke-width="1.8"/>
+
+    <text x="1026" y="1471" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1026" y="1495" class="mono" fill="#0F172A">+ ticketId : text [FK]</text>
+    <text x="1026" y="1519" class="mono" fill="#0F172A">+ sharedWithUserId : text [FK]</text>
+    <text x="1026" y="1543" class="mono" fill="#0F172A">+ accessLevel : ShareAccessLevel</text>
+    <line x1="1010" y1="1567" x2="1390" y2="1567" stroke="#C4B5FD" stroke-width="1.8"/>
+    <text x="1026" y="1591" class="mono-op">+ revoke() : void</text>
+</g>
+
+<g id="svg-conversationshare">
+    <rect x="1940" y="1385" width="380" height="230" class="card" fill="#F0FDFA" stroke="#0D9488" stroke-width="2.0" />
+    <text x="2130.0" y="1413" class="class-stereo" fill="#14B8A6">&#171;entity&#187;</text>
+    <text x="2130.0" y="1437" class="class-title" fill="#0F766E">ConversationShare</text>
+    <line x1="1940" y1="1447" x2="2320" y2="1447" stroke="#5EEAD4" stroke-width="1.8"/>
+
+    <text x="1956" y="1471" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1956" y="1495" class="mono" fill="#0F172A">+ conversationId : text [FK]</text>
+    <text x="1956" y="1519" class="mono" fill="#0F172A">+ sharedWithUserId : text [FK]</text>
+    <text x="1956" y="1543" class="mono" fill="#0F172A">+ accessLevel : ShareAccessLevel</text>
+    <line x1="1940" y1="1567" x2="2320" y2="1567" stroke="#5EEAD4" stroke-width="1.8"/>
+    <text x="1956" y="1591" class="mono-op">+ revoke() : void</text>
+</g>
+
+<g id="svg-aiassistantsupervisor">
+    <rect x="80" y="1710" width="380" height="255" class="card" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2.0" stroke-dasharray="7,4"/>
+    <text x="270.0" y="1738" class="class-stereo" fill="#6366F1">&#171;service&#187;</text>
+    <text x="270.0" y="1762" class="class-title" fill="#4338CA">AiAssistantSupervisor</text>
+    <line x1="80" y1="1772" x2="460" y2="1772" stroke="#A5B4FC" stroke-width="1.8"/>
+
+    <text x="96" y="1796" class="mono" fill="#0F172A">- modelName : text = &#x27;llama-3.3&#x27;</text>
+    <text x="96" y="1820" class="mono" fill="#0F172A">- confidenceThreshold : float = 0.75</text>
+    <text x="96" y="1844" class="mono" fill="#0F172A">- vectorStore : MongoDBAtlas</text>
+    <line x1="80" y1="1868" x2="460" y2="1868" stroke="#A5B4FC" stroke-width="1.8"/>
+    <text x="96" y="1892" class="mono-op">+ handleMessage(msg) : AiResponse</text>
+    <text x="96" y="1916" class="mono-op">+ retrieveChunks(query) : List&lt;Chunk&gt;</text>
+    <text x="96" y="1940" class="mono-op">+ shouldEscalate(conf) : boolean</text>
+</g>
+
+<g id="svg-knowledgedocument">
+    <rect x="545" y="1710" width="380" height="280" class="card" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2.0" stroke-dasharray="7,4"/>
+    <text x="735.0" y="1738" class="class-stereo" fill="#6366F1">&#171;target_doc&#187;</text>
+    <text x="735.0" y="1762" class="class-title" fill="#4338CA">KnowledgeDocument</text>
+    <line x1="545" y1="1772" x2="925" y2="1772" stroke="#A5B4FC" stroke-width="1.8"/>
+
+    <text x="561" y="1796" class="mono" fill="#0F172A">+ _id : ObjectId [PK]</text>
+    <text x="561" y="1820" class="mono" fill="#0F172A">+ workspaceId : text [Index]</text>
+    <text x="561" y="1844" class="mono" fill="#0F172A">+ title : text</text>
+    <text x="561" y="1868" class="mono" fill="#0F172A">+ category : text</text>
+    <text x="561" y="1892" class="mono" fill="#0F172A">+ status : DocumentStatus</text>
+    <line x1="545" y1="1916" x2="925" y2="1916" stroke="#A5B4FC" stroke-width="1.8"/>
+    <text x="561" y="1940" class="mono-op">+ chunkDocument(size) : List&lt;Chunk&gt;</text>
+    <text x="561" y="1964" class="mono-op">+ markAsOutdated() : void</text>
+</g>
+
+<g id="svg-knowledgechunk">
+    <rect x="1010" y="1710" width="380" height="255" class="card" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2.0" stroke-dasharray="7,4"/>
+    <text x="1200.0" y="1738" class="class-stereo" fill="#6366F1">&#171;target_doc&#187;</text>
+    <text x="1200.0" y="1762" class="class-title" fill="#4338CA">KnowledgeChunk</text>
+    <line x1="1010" y1="1772" x2="1390" y2="1772" stroke="#A5B4FC" stroke-width="1.8"/>
+
+    <text x="1026" y="1796" class="mono" fill="#0F172A">+ _id : ObjectId [PK]</text>
+    <text x="1026" y="1820" class="mono" fill="#0F172A">+ documentId : ObjectId [FK]</text>
+    <text x="1026" y="1844" class="mono" fill="#0F172A">+ workspaceId : text [Index]</text>
+    <text x="1026" y="1868" class="mono" fill="#0F172A">+ chunkIndex : int</text>
+    <text x="1026" y="1892" class="mono" fill="#0F172A">+ embedding : float[1536]</text>
+    <line x1="1010" y1="1916" x2="1390" y2="1916" stroke="#A5B4FC" stroke-width="1.8"/>
+    <text x="1026" y="1940" class="mono-op">+ cosineSimilarity(vec) : float</text>
+</g>
+
+<g id="svg-outboxevent">
+    <rect x="1475" y="1710" width="380" height="255" class="card" fill="#F8FAFC" stroke="#475569" stroke-width="2.0" />
+    <text x="1665.0" y="1738" class="class-stereo" fill="#64748B">&#171;entity&#187;</text>
+    <text x="1665.0" y="1762" class="class-title" fill="#1E293B">OutboxEvent</text>
+    <line x1="1475" y1="1772" x2="1855" y2="1772" stroke="#CBD5E1" stroke-width="1.8"/>
+
+    <text x="1491" y="1796" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1491" y="1820" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="1491" y="1844" class="mono" fill="#0F172A">+ aggregateType : text</text>
+    <text x="1491" y="1868" class="mono" fill="#0F172A">+ eventType : text</text>
+    <text x="1491" y="1892" class="mono" fill="#0F172A">+ processed : boolean = false</text>
+    <line x1="1475" y1="1916" x2="1855" y2="1916" stroke="#CBD5E1" stroke-width="1.8"/>
+    <text x="1491" y="1940" class="mono-op">+ markProcessed() : void</text>
+</g>
+
+<g id="svg-pulseevent">
+    <rect x="1940" y="1710" width="380" height="230" class="card" fill="#F8FAFC" stroke="#475569" stroke-width="2.0" />
+    <text x="2130.0" y="1738" class="class-stereo" fill="#64748B">&#171;entity&#187;</text>
+    <text x="2130.0" y="1762" class="class-title" fill="#1E293B">PulseEvent</text>
+    <line x1="1940" y1="1772" x2="2320" y2="1772" stroke="#CBD5E1" stroke-width="1.8"/>
+
+    <text x="1956" y="1796" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1956" y="1820" class="mono" fill="#0F172A">+ channel : text</text>
+    <text x="1956" y="1844" class="mono" fill="#0F172A">+ eventName : text</text>
+    <text x="1956" y="1868" class="mono" fill="#0F172A">+ emittedAt : timestamp</text>
+    <line x1="1940" y1="1892" x2="2320" y2="1892" stroke="#CBD5E1" stroke-width="1.8"/>
+    <text x="1956" y="1916" class="mono-op">+ broadcastSSE(stream) : void</text>
+</g>
+
+<g id="svg-aiconfiguration">
+    <rect x="80" y="2040" width="380" height="230" class="card" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2.0" stroke-dasharray="7,4"/>
+    <text x="270.0" y="2068" class="class-stereo" fill="#6366F1">&#171;entity&#187;</text>
+    <text x="270.0" y="2092" class="class-title" fill="#4338CA">AiConfiguration</text>
+    <line x1="80" y1="2102" x2="460" y2="2102" stroke="#A5B4FC" stroke-width="1.8"/>
+
+    <text x="96" y="2126" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="96" y="2150" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="96" y="2174" class="mono" fill="#0F172A">+ autonomyMode : AutonomyMode</text>
+    <text x="96" y="2198" class="mono" fill="#0F172A">+ autoEscalate : boolean = true</text>
+    <line x1="80" y1="2222" x2="460" y2="2222" stroke="#A5B4FC" stroke-width="1.8"/>
+    <text x="96" y="2246" class="mono-op">+ setMode(mode) : void</text>
+</g>
+
+<g id="svg-auditlog">
+    <rect x="1475" y="2040" width="380" height="255" class="card" fill="#F8FAFC" stroke="#475569" stroke-width="2.0" />
+    <text x="1665.0" y="2068" class="class-stereo" fill="#64748B">&#171;entity&#187;</text>
+    <text x="1665.0" y="2092" class="class-title" fill="#1E293B">AuditLog</text>
+    <line x1="1475" y1="2102" x2="1855" y2="2102" stroke="#CBD5E1" stroke-width="1.8"/>
+
+    <text x="1491" y="2126" class="mono" fill="#0F172A">+ id : text [PK]</text>
+    <text x="1491" y="2150" class="mono" fill="#0F172A">+ workspaceId : text [FK]</text>
+    <text x="1491" y="2174" class="mono" fill="#0F172A">+ actorId : text</text>
+    <text x="1491" y="2198" class="mono" fill="#0F172A">+ action : text</text>
+    <text x="1491" y="2222" class="mono" fill="#0F172A">+ resource : text</text>
+    <line x1="1475" y1="2246" x2="1855" y2="2246" stroke="#CBD5E1" stroke-width="1.8"/>
+    <text x="1491" y="2270" class="mono-op">+ exportRecord() : text</text>
+</g>
+</svg>

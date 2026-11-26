@@ -1,0 +1,576 @@
+@startuml zadesk_class_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam handwritten false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, 'Segoe UI', sans-serif"
+skinparam packageFontStyle bold
+skinparam linetype ortho
+skinparam defaultTextAlignment left
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    ArrowColor #2B6CB0
+    ArrowThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+skinparam package {
+    BackgroundColor #F7FAFC
+    BorderColor #CBD5E0
+    BorderThickness 1.5
+}
+
+' ====================================================================
+' ENUMERATIONS DU DOMAINE
+' ====================================================================
+package "Énumérations du Domaine" <<style>> {
+    enum Role <<enumeration>> {
+        OWNER
+        ADMIN
+        MANAGER
+        AGENT
+    }
+
+    enum MembershipStatus <<enumeration>> {
+        ACTIVE
+        SUSPENDED
+        ARCHIVED
+    }
+
+    enum TicketStatus <<enumeration>> {
+        PENDING_ASSIGNMENT
+        OPEN
+        IN_PROGRESS
+        WAITING_CUSTOMER
+        RESOLVED
+        CLOSED
+    }
+
+    enum TicketPriority <<enumeration>> {
+        LOW
+        MEDIUM
+        HIGH
+        URGENT
+    }
+
+    enum ConversationStatus <<enumeration>> {
+        WAITING_ASSIGNMENT
+        ACTIVE
+        WAITING_CUSTOMER
+        RESOLVED
+        CLOSED
+    }
+
+    enum MessageType <<enumeration>> {
+        CUSTOMER
+        AGENT_REPLY
+        INTERNAL_NOTE
+        SYSTEM
+    }
+
+    enum AgentAvailability <<enumeration>> {
+        AVAILABLE
+        BUSY
+        AWAY
+        OFFLINE
+    }
+
+    enum ShareAccessLevel <<enumeration>> {
+        READ_ONLY
+        CONTRIBUTE
+    }
+
+    enum EstablishmentType <<enumeration>> {
+        HEADQUARTERS
+        BRANCH
+        REPAIR_CENTER
+        STORE
+        WAREHOUSE
+        RELAY_POINT
+    }
+
+    enum ChannelType <<enumeration>> {
+        PORTAL
+        WHATSAPP
+        EMAIL
+    }
+
+    enum AutonomyMode <<enumeration, target>> {
+        ASSISTED
+        SEMI_AUTONOMOUS
+        FULL_AUTONOMOUS
+    }
+
+    enum DocumentStatus <<enumeration, target>> {
+        DRAFT
+        INDEXED
+        OUTDATED
+        ARCHIVED
+    }
+}
+
+' ====================================================================
+' DOMAINE 1: GESTION DES ENTREPRISES & MULTI-TENANT
+' ====================================================================
+package "Gestion des Entreprises & Multi-Tenant" {
+    class Workspace <<entity>> {
+        - id: CUID {readOnly, unique}
+        - name: String
+        - slug: String {unique}
+        - category: String
+        - description: String?
+        - logoUrl: String?
+        - country: String = "Congo"
+        - currency: String = "XAF"
+        - plan: String = "FREE"
+        - isPublic: Boolean = true
+        - allowCustomerChat: Boolean = true
+        - activeChats: Integer = 0
+        - slaResponseHours: Integer = 2
+        - slaResolutionHours: Integer = 24
+        - operatingHours: Json?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + updateSettings(data: WorkspaceUpdateDTO): Workspace
+        + togglePublicVisibility(isPublic: Boolean): void
+        + getCapacityMetrics(): CapacityMetricsDTO
+        + checkSlaCompliance(ticket: Ticket): Boolean
+    }
+
+    class User <<entity>> {
+        - id: CUID {readOnly, unique}
+        - email: String {unique}
+        - firstName: String
+        - lastName: String
+        - avatarUrl: String?
+        - passwordHash: String?
+        - googleId: String? {unique}
+        - emailVerified: Boolean = false
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + verifyEmail(): void
+        + updateProfile(firstName: String, lastName: String): void
+        + changePassword(newPasswordHash: String): void
+        + getActiveMemberships(): List<Membership>
+    }
+
+    class Membership <<entity>> {
+        - id: CUID {readOnly, unique}
+        - userId: String
+        - workspaceId: String
+        - role: Role
+        - status: MembershipStatus = ACTIVE
+        - joinedAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + changeRole(newRole: Role): void
+        + suspend(reason: String): void
+        + reactivate(): void
+        + archive(): void
+    }
+
+    class WorkspaceInvitation <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - invitedById: String
+        - email: String
+        - role: Role = AGENT
+        - token: String {unique}
+        - status: String = "PENDING"
+        - expiresAt: DateTime
+        - createdAt: DateTime {readOnly}
+        --
+        + accept(userId: String): Membership
+        + cancel(): void
+        + isExpired(): Boolean
+    }
+
+    class Establishment <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - name: String
+        - type: EstablishmentType = BRANCH
+        - description: String?
+        - isMain: Boolean = false
+        - isPublic: Boolean = true
+        - isActive: Boolean = true
+        - address: String
+        - city: String = "Brazzaville"
+        - country: String = "Congo"
+        - phone: String?
+        - email: String?
+        - whatsapp: String?
+        - openingHours: String?
+        - businessHours: Json?
+        - services: Json?
+        - practicalInfo: String?
+        - createdAt: DateTime {readOnly}
+        --
+        + updateDetails(data: EstablishmentDTO): void
+        + toggleStatus(isActive: Boolean): void
+        + setAsMainBranch(): void
+    }
+}
+
+' ====================================================================
+' DOMAINE 2: GESTION DES AGENTS & COMPÉTENCES
+' ====================================================================
+package "Gestion des Agents & Compétences" {
+    class AgentProfile <<entity>> {
+        - id: CUID {readOnly, unique}
+        - userId: String
+        - workspaceId: String
+        - title: String = "Conseiller SAV"
+        - bio: String?
+        - avatarUrl: String?
+        - availability: AgentAvailability = AVAILABLE
+        - maxCapacity: Integer = 10
+        - autoAssignmentEnabled: Boolean = true
+        - phone: String?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + setAvailability(status: AgentAvailability): void
+        + updateCapacity(limit: Integer): void
+        + toggleAutoAssignment(enabled: Boolean): void
+        + getActiveTicketsCount(): Integer
+        + isAvailableForAssignment(): Boolean
+    }
+
+    class Skill <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - name: String
+        - description: String?
+        - createdAt: DateTime {readOnly}
+        --
+        + updateSkill(name: String, description: String): void
+    }
+
+    class AgentSkill <<entity>> {
+        - id: CUID {readOnly, unique}
+        - agentProfileId: String
+        - skillId: String
+        - validatedAt: DateTime?
+        - validatedById: String?
+        --
+        + validate(validatorUserId: String): void
+        + revoke(): void
+    }
+
+    class AssignmentEngine <<service>> {
+        --
+        + autoAssignTicket(ticket: Ticket, workspace: Workspace): AssignmentResult
+        - filterEligibleAgents(category: String, workspaceId: String): List<AgentProfile>
+        - computeWeightedLoad(agent: AgentProfile): Integer
+        - selectBestCandidate(candidates: List<AgentScoreDTO>): AgentProfile
+    }
+}
+
+' ====================================================================
+' DOMAINE 3: GESTION DES CLIENTS & TICKETS SAV
+' ====================================================================
+package "Gestion des Clients & Tickets SAV" {
+    class Customer <<concept>> {
+        - identifier: String {unique, readOnly}
+        - fullName: String
+        - phone: String?
+        - email: String?
+        - city: String?
+        - firstSeenAt: DateTime {readOnly}
+        - lastInteractionAt: DateTime
+        --
+        + getTicketsHistory(): List<Ticket>
+        + getConversations(): List<Conversation>
+        + updateContactInfo(phone: String, email: String): void
+    }
+
+    class Ticket <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketNumber: String {unique}
+        - workspaceId: String
+        - createdById: String?
+        - assignedAgentId: String?
+        - establishmentId: String?
+        - title: String
+        - description: String
+        - category: String = "Général"
+        - priority: TicketPriority = MEDIUM
+        - status: TicketStatus = PENDING_ASSIGNMENT
+        - customerName: String
+        - customerEmail: String?
+        - customerPhone: String?
+        - slaDeadlineAt: DateTime?
+        - resolvedAt: DateTime?
+        - closedAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + assignTo(agent: AgentProfile, reason: String): void
+        + updateStatus(newStatus: TicketStatus, authorId: String): void
+        + changePriority(newPriority: TicketPriority, authorId: String): void
+        + addNote(content: String, authorId: String): TicketActivity
+        + shareWith(targetAgent: AgentProfile, level: ShareAccessLevel, days: Integer): TicketShare
+        + reassign(newAgent: AgentProfile, reason: String, authorId: String): void
+        + markAsResolved(resolutionNotes: String): void
+        + closeTicket(): void
+    }
+
+    class TicketAssignment <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - previousAgentId: String?
+        - newAgentId: String
+        - reason: String?
+        - assignedAt: DateTime {readOnly}
+    }
+
+    class TicketShare <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - sharedWithAgentId: String
+        - accessLevel: ShareAccessLevel = READ_ONLY
+        - expiresAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        --
+        + isExpired(): Boolean
+        + revoke(): void
+    }
+
+    class TicketActivity <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - authorId: String?
+        - type: String
+        - content: String
+        - createdAt: DateTime {readOnly}
+    }
+}
+
+' ====================================================================
+' DOMAINE 4: GESTION DES CONVERSATIONS (OMNICANAL)
+' ====================================================================
+package "Gestion des Conversations" {
+    class Conversation <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - ticketId: String?
+        - assignedAgentId: String?
+        - customerName: String = "Visiteur Web"
+        - customerPhone: String?
+        - customerEmail: String?
+        - category: String?
+        - channel: ChannelType = PORTAL
+        - status: ConversationStatus = ACTIVE
+        - publicTokenHash: String?
+        - lastMessageAt: DateTime
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + postCustomerMessage(content: String, token: String): ConversationMessage
+        + postAgentReply(content: String, agentId: String): ConversationMessage
+        + postInternalNote(content: String, agentId: String): ConversationMessage
+        + convertToTicket(data: TicketCreationDTO): Ticket
+        + changeStatus(newStatus: ConversationStatus): void
+        + verifyToken(rawToken: String): Boolean
+    }
+
+    class ConversationMessage <<entity>> {
+        - id: CUID {readOnly, unique}
+        - conversationId: String
+        - senderType: MessageType
+        - senderName: String
+        - senderId: String?
+        - content: String
+        - isInternalNote: Boolean = false
+        - createdAt: DateTime {readOnly}
+    }
+
+    class ConversationShare <<entity>> {
+        - id: CUID {readOnly, unique}
+        - conversationId: String
+        - sharedWithAgentId: String
+        - accessLevel: ShareAccessLevel = READ_ONLY
+        - createdAt: DateTime {readOnly}
+    }
+
+    class WhatsAppConnection <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String {unique}
+        - wabaId: String
+        - phoneNumberId: String
+        - displayPhoneNumber: String
+        - verifiedName: String?
+        - accessToken: String {readOnly}
+        - status: String = "CONNECTED"
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + disconnect(): void
+        + verifySync(): Boolean
+    }
+}
+
+' ====================================================================
+' DOMAINE 5: ASSISTANCE INTELLIGENTE & RAG (ARCHITECTURE CIBLE)
+' ====================================================================
+package "Assistance Intelligente & RAG (Cible)" {
+    class KnowledgeDocument <<entity, target>> {
+        - id: String {readOnly, unique}
+        - workspaceId: String
+        - title: String
+        - category: String
+        - fileType: String
+        - sourceUrl: String?
+        - totalChunks: Integer = 0
+        - status: DocumentStatus = DRAFT
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + extractText(): String
+        + chunkAndEmbed(chunkSize: Integer, overlap: Integer): List<KnowledgeChunk>
+        + archive(): void
+    }
+
+    class KnowledgeChunk <<entity, target>> {
+        - id: String {readOnly, unique}
+        - documentId: String
+        - workspaceId: String
+        - chunkIndex: Integer
+        - content: String
+        - tokenCount: Integer
+        - embedding: Float[1536]
+        - metadata: Json
+        - createdAt: DateTime {readOnly}
+    }
+
+    class AiAssistantSupervisor <<service, target>> {
+        - confidenceThreshold: Float = 0.82
+        - autonomyMode: AutonomyMode = SEMI_AUTONOMOUS
+        --
+        + query(message: String, workspaceId: String): AiResponseDTO
+        - vectorSearch(embedding: Float[], workspaceId: String, limit: Integer): List<KnowledgeChunk>
+        - evaluateConfidence(score: Float): ConfidenceLevel
+        + escalateToHuman(conversation: Conversation, reason: String): Ticket
+    }
+
+    class AiConfiguration <<entity, target>> {
+        - workspaceId: String {unique}
+        - autonomyMode: AutonomyMode = SEMI_AUTONOMOUS
+        - tone: String = "PROFESSIONAL_EMPATHETIC"
+        - language: String = "fr"
+        - confidenceMin: Float = 0.85
+        - escalationKeywords: List<String>
+        - claimAmountThreshold: Decimal = 50000.00
+        --
+        + updateRules(data: AiConfigDTO): void
+    }
+}
+
+' ====================================================================
+' DOMAINE 6: ÉVÉNEMENTS, TEMPS RÉEL & SÉCURITÉ
+' ====================================================================
+package "Événements, Temps Réel & Sécurité" {
+    class OutboxEvent <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String?
+        - eventType: String
+        - payload: Json
+        - status: String = "PENDING"
+        - attempts: Integer = 0
+        - lockedAt: DateTime?
+        - processedAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        --
+        + markAsProcessed(): void
+        + markAsFailed(error: String): void
+        + lock(): Boolean
+    }
+
+    class PulseEvent <<event>> {
+        - id: String {readOnly}
+        - type: String
+        - workspaceId: String
+        - conversationId: String?
+        - messageId: String?
+        - payload: Json
+        - timestamp: DateTime
+    }
+
+    class AuditLog <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - userId: String?
+        - action: String
+        - entityType: String
+        - entityId: String
+        - metadata: Json?
+        - createdAt: DateTime {readOnly}
+    }
+}
+
+' ====================================================================
+' RELATIONS ET MULTIPLICITÉS MULTI-TENANT (UML 2.x)
+' ====================================================================
+
+' Rattachement Multi-Tenant des Utilisateurs aux Organisations
+User "1" -- "0..*" Membership : possède >
+Workspace "1" *-- "0..*" Membership : contient >
+Workspace "1" *-- "0..*" WorkspaceInvitation : émet >
+Workspace "1" *-- "0..*" Establishment : possède >
+
+' Profils Agents & Compétences
+User "1" -- "0..*" AgentProfile : incarne >
+Workspace "1" *-- "0..*" AgentProfile : emploie >
+AgentProfile "1" *-- "0..*" AgentSkill : détient >
+Skill "1" -- "0..*" AgentSkill : catégorise >
+Workspace "1" *-- "0..*" Skill : définit >
+AssignmentEngine ..> AgentProfile : évalue >
+AssignmentEngine ..> Ticket : affecte >
+
+' Gestion des Tickets et Demandes SAV
+Workspace "1" *-- "0..*" Ticket : gère >
+Establishment "0..1" -- "0..*" Ticket : localise >
+AgentProfile "0..1" -- "0..*" Ticket : traite >
+User "0..1" -- "0..*" Ticket : a créé >
+Customer "1" -- "0..*" Ticket : soumet >
+Ticket "1" *-- "1..*" TicketActivity : historise >
+Ticket "1" *-- "0..*" TicketAssignment : retrace >
+Ticket "1" *-- "0..*" TicketShare : partage >
+AgentProfile "0..1" -- "0..*" TicketShare : reçoit >
+
+' Gestion des Conversations
+Workspace "1" *-- "0..*" Conversation : supervise >
+Customer "1" -- "0..*" Conversation : échange via >
+AgentProfile "0..1" -- "0..*" Conversation : anime >
+Ticket "0..1" -- "0..1" Conversation : lié à >
+Conversation "1" *-- "1..*" ConversationMessage : compose >
+Conversation "1" *-- "0..*" ConversationShare : partage >
+Workspace "1" *-- "0..1" WhatsAppConnection : connecte >
+
+' Architecture Cible RAG
+Workspace "1" *-- "0..*" KnowledgeDocument : possède >
+KnowledgeDocument "1" *-- "1..*" KnowledgeChunk : découpé en >
+Workspace "1" *-- "0..1" AiConfiguration : paramètre >
+AiAssistantSupervisor ..> KnowledgeChunk : recherche sémantique >
+AiAssistantSupervisor ..> Conversation : assiste >
+AiAssistantSupervisor ..> Ticket : escalade >
+
+' Événements et Audit
+Workspace "1" *-- "0..*" OutboxEvent : génère >
+Workspace "1" *-- "0..*" AuditLog : enregistre >
+ConversationMessage ..> PulseEvent : déclenche >
+
+@enduml

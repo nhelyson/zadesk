@@ -1,0 +1,3803 @@
+{
+  "User": {
+    "model_name": "User",
+    "table_name": "users",
+    "composite_uniques": [],
+    "composite_indices": [],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id            String       @id @default(cuid())"
+      },
+      {
+        "name": "googleId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "googleId      String?      @unique"
+      },
+      {
+        "name": "email",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "email         String       @unique"
+      },
+      {
+        "name": "firstName",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "firstName     String"
+      },
+      {
+        "name": "lastName",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "lastName      String"
+      },
+      {
+        "name": "avatarUrl",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "avatarUrl     String?"
+      },
+      {
+        "name": "passwordHash",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "passwordHash  String?"
+      },
+      {
+        "name": "emailVerified",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "false",
+        "raw": "emailVerified Boolean      @default(false)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt     DateTime     @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt     DateTime     @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "memberships",
+        "target_model": "Membership",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "memberships              Membership[]"
+      },
+      {
+        "field_name": "sessions",
+        "target_model": "Session",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "sessions                 Session[]"
+      },
+      {
+        "field_name": "otpTokens",
+        "target_model": "OtpToken",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "otpTokens                OtpToken[]"
+      },
+      {
+        "field_name": "sentInvitations",
+        "target_model": "WorkspaceInvitation",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "sentInvitations          WorkspaceInvitation[]"
+      },
+      {
+        "field_name": "agentProfiles",
+        "target_model": "AgentProfile",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "agentProfiles            AgentProfile[]"
+      },
+      {
+        "field_name": "assignedTickets",
+        "target_model": "Ticket",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "assignedTickets          Ticket[]              @relation(\"AssignedAgentTickets\")",
+        "relation_name": "AssignedAgentTickets",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "createdTickets",
+        "target_model": "Ticket",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "createdTickets           Ticket[]              @relation(\"CreatedTickets\")",
+        "relation_name": "CreatedTickets",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "receivedTicketShares",
+        "target_model": "TicketShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "receivedTicketShares     TicketShare[]         @relation(\"ReceivedTicketShares\")",
+        "relation_name": "ReceivedTicketShares",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "createdTicketShares",
+        "target_model": "TicketShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "createdTicketShares      TicketShare[]         @relation(\"CreatedTicketShares\")",
+        "relation_name": "CreatedTicketShares",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "prevAssignments",
+        "target_model": "TicketAssignment",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "prevAssignments          TicketAssignment[]    @relation(\"PrevAgentAssignments\")",
+        "relation_name": "PrevAgentAssignments",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "newAssignments",
+        "target_model": "TicketAssignment",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "newAssignments           TicketAssignment[]    @relation(\"NewAgentAssignments\")",
+        "relation_name": "NewAgentAssignments",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "madeAssignments",
+        "target_model": "TicketAssignment",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "madeAssignments          TicketAssignment[]    @relation(\"AssignedByAssignments\")",
+        "relation_name": "AssignedByAssignments",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "ticketActivities",
+        "target_model": "TicketActivity",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "ticketActivities         TicketActivity[]"
+      },
+      {
+        "field_name": "assignedConversations",
+        "target_model": "Conversation",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "assignedConversations    Conversation[]        @relation(\"AssignedConversations\")",
+        "relation_name": "AssignedConversations",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "messages",
+        "target_model": "ConversationMessage",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "messages                 ConversationMessage[]"
+      },
+      {
+        "field_name": "receivedConvShares",
+        "target_model": "ConversationShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "receivedConvShares       ConversationShare[]   @relation(\"ReceivedConversationShares\")",
+        "relation_name": "ReceivedConversationShares",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "createdConvShares",
+        "target_model": "ConversationShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "createdConvShares        ConversationShare[]   @relation(\"CreatedConversationShares\")",
+        "relation_name": "CreatedConversationShares",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "auditLogs",
+        "target_model": "AuditLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "auditLogs                AuditLog[]"
+      },
+      {
+        "field_name": "onboardingDraft",
+        "target_model": "OnboardingDraft",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "onboardingDraft          OnboardingDraft?"
+      },
+      {
+        "field_name": "subscriptionIntents",
+        "target_model": "SubscriptionIntent",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "subscriptionIntents           SubscriptionIntent[]"
+      },
+      {
+        "field_name": "receiptAuditLogs",
+        "target_model": "ProviderReceiptAuditLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "receiptAuditLogs              ProviderReceiptAuditLog[]"
+      },
+      {
+        "field_name": "subscriptionHistoryLogs",
+        "target_model": "SubscriptionHistoryLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "subscriptionHistoryLogs       SubscriptionHistoryLog[]"
+      },
+      {
+        "field_name": "requestedCommercialDowngrades",
+        "target_model": "CommercialDowngradeRequest",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "requestedCommercialDowngrades CommercialDowngradeRequest[] @relation(\"RequestedCommercialDowngrades\")",
+        "relation_name": "RequestedCommercialDowngrades",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      },
+      {
+        "field_name": "cancelledCommercialDowngrades",
+        "target_model": "CommercialDowngradeRequest",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "cancelledCommercialDowngrades CommercialDowngradeRequest[] @relation(\"CancelledCommercialDowngrades\")",
+        "relation_name": "CancelledCommercialDowngrades",
+        "fields": [],
+        "references": [],
+        "onDelete": null,
+        "onUpdate": null
+      }
+    ]
+  },
+  "Workspace": {
+    "model_name": "Workspace",
+    "table_name": "workspaces",
+    "composite_uniques": [
+      [
+        "normalizedName",
+        "country"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "normalizedName"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                String       @id @default(cuid())"
+      },
+      {
+        "name": "name",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "name              String"
+      },
+      {
+        "name": "normalizedName",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "normalizedName    String?"
+      },
+      {
+        "name": "slug",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "slug              String       @unique"
+      },
+      {
+        "name": "hasExistingSav",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "false",
+        "raw": "hasExistingSav    Boolean      @default(false)"
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "description       String?"
+      },
+      {
+        "name": "category",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Autre\"",
+        "raw": "category          String?      @default(\"Autre\")"
+      },
+      {
+        "name": "logoUrl",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "logoUrl           String?"
+      },
+      {
+        "name": "coverUrl",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "coverUrl          String?"
+      },
+      {
+        "name": "verified",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "verified          Boolean      @default(true)"
+      },
+      {
+        "name": "isPublic",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "isPublic          Boolean      @default(true)"
+      },
+      {
+        "name": "website",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "website           String?"
+      },
+      {
+        "name": "supportPhone",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "supportPhone      String?"
+      },
+      {
+        "name": "supportEmail",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "supportEmail      String?"
+      },
+      {
+        "name": "supportWhatsApp",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "supportWhatsApp   String?"
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "address           String?"
+      },
+      {
+        "name": "city",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Brazzaville\"",
+        "raw": "city              String?      @default(\"Brazzaville\")"
+      },
+      {
+        "name": "country",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Congo\"",
+        "raw": "country           String?      @default(\"Congo\")"
+      },
+      {
+        "name": "openingHours",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "openingHours      String?"
+      },
+      {
+        "name": "supportCategories",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "supportCategories Json?"
+      },
+      {
+        "name": "brandColor",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "brandColor        String?"
+      },
+      {
+        "name": "brandPalette",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "brandPalette      Json?"
+      },
+      {
+        "name": "cannedResponses",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "cannedResponses   Json?"
+      },
+      {
+        "name": "businessHours",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "businessHours     Json?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt         DateTime     @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt         DateTime     @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "memberships",
+        "target_model": "Membership",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "memberships       Membership[]"
+      },
+      {
+        "field_name": "invitations",
+        "target_model": "WorkspaceInvitation",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "invitations       WorkspaceInvitation[]"
+      },
+      {
+        "field_name": "whatsAppConnection",
+        "target_model": "WhatsAppConnection",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "whatsAppConnection WhatsAppConnection?"
+      },
+      {
+        "field_name": "agentProfiles",
+        "target_model": "AgentProfile",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "agentProfiles     AgentProfile[]"
+      },
+      {
+        "field_name": "skills",
+        "target_model": "Skill",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "skills            Skill[]"
+      },
+      {
+        "field_name": "tickets",
+        "target_model": "Ticket",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "tickets           Ticket[]"
+      },
+      {
+        "field_name": "conversations",
+        "target_model": "Conversation",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "conversations     Conversation[]"
+      },
+      {
+        "field_name": "auditLogs",
+        "target_model": "AuditLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "auditLogs         AuditLog[]"
+      },
+      {
+        "field_name": "outboxEvents",
+        "target_model": "OutboxEvent",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "outboxEvents      OutboxEvent[]"
+      },
+      {
+        "field_name": "establishments",
+        "target_model": "Establishment",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "establishments    Establishment[]"
+      },
+      {
+        "field_name": "subscription",
+        "target_model": "Subscription",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "subscription             Subscription?"
+      },
+      {
+        "field_name": "subscriptionIntents",
+        "target_model": "SubscriptionIntent",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "subscriptionIntents      SubscriptionIntent[]"
+      },
+      {
+        "field_name": "paymentAttempts",
+        "target_model": "PaymentAttempt",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "paymentAttempts          PaymentAttempt[]"
+      },
+      {
+        "field_name": "paymentTransactions",
+        "target_model": "PaymentTransaction",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "paymentTransactions      PaymentTransaction[]"
+      },
+      {
+        "field_name": "providerPaymentReceipts",
+        "target_model": "ProviderPaymentReceipt",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "providerPaymentReceipts  ProviderPaymentReceipt[]"
+      },
+      {
+        "field_name": "subscriptionHistoryLogs",
+        "target_model": "SubscriptionHistoryLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "subscriptionHistoryLogs  SubscriptionHistoryLog[]"
+      },
+      {
+        "field_name": "downgradeRequests",
+        "target_model": "CommercialDowngradeRequest",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "downgradeRequests        CommercialDowngradeRequest[]"
+      }
+    ]
+  },
+  "WorkspaceInvitation": {
+    "model_name": "WorkspaceInvitation",
+    "table_name": "workspace_invitations",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "email"
+      ],
+      [
+        "workspaceId"
+      ],
+      [
+        "token"
+      ],
+      [
+        "workspaceId",
+        "dispatchStatus"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                String    @id @default(cuid())"
+      },
+      {
+        "name": "email",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "email             String"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId       String"
+      },
+      {
+        "name": "role",
+        "type": "Role",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "AGENT",
+        "raw": "role              Role      @default(AGENT)"
+      },
+      {
+        "name": "token",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "token             String    @unique"
+      },
+      {
+        "name": "invitedById",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "invitedById       String"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "expiresAt         DateTime"
+      },
+      {
+        "name": "acceptedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "acceptedAt        DateTime?"
+      },
+      {
+        "name": "revokedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "revokedAt         DateTime?"
+      },
+      {
+        "name": "dispatchStatus",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"PENDING\"",
+        "raw": "dispatchStatus    String?   @default(\"PENDING\")"
+      },
+      {
+        "name": "dispatchLockedBy",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "dispatchLockedBy  String?"
+      },
+      {
+        "name": "dispatchStartedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "dispatchStartedAt DateTime?"
+      },
+      {
+        "name": "dispatchAttempts",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "0",
+        "raw": "dispatchAttempts  Int       @default(0)"
+      },
+      {
+        "name": "nextRetryAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "nextRetryAt       DateTime?"
+      },
+      {
+        "name": "dispatchError",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "dispatchError     String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt         DateTime  @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "invitedBy",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "invitedBy         User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "invitedById"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "Membership": {
+    "model_name": "Membership",
+    "table_name": "memberships",
+    "composite_uniques": [
+      [
+        "userId",
+        "workspaceId"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "userId"
+      ],
+      [
+        "workspaceId"
+      ],
+      [
+        "workspaceId",
+        "status"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id              String           @id @default(cuid())"
+      },
+      {
+        "name": "userId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "userId          String"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId     String"
+      },
+      {
+        "name": "role",
+        "type": "Role",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "AGENT",
+        "raw": "role            Role             @default(AGENT)"
+      },
+      {
+        "name": "status",
+        "type": "MembershipStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "ACTIVE",
+        "raw": "status          MembershipStatus @default(ACTIVE)"
+      },
+      {
+        "name": "suspendedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "suspendedAt     DateTime?"
+      },
+      {
+        "name": "suspendedReason",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "suspendedReason String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt       DateTime         @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "updatedAt       DateTime         @default(now()) @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "user",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "userId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "AgentProfile": {
+    "model_name": "AgentProfile",
+    "table_name": "agent_profiles",
+    "composite_uniques": [
+      [
+        "workspaceId",
+        "userId"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "workspaceId"
+      ],
+      [
+        "userId"
+      ],
+      [
+        "workspaceId",
+        "availability"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                    String            @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId           String"
+      },
+      {
+        "name": "userId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "userId                String"
+      },
+      {
+        "name": "availability",
+        "type": "AgentAvailability",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "AVAILABLE",
+        "raw": "availability          AgentAvailability @default(AVAILABLE)"
+      },
+      {
+        "name": "maxCapacity",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "10",
+        "raw": "maxCapacity           Int               @default(10)"
+      },
+      {
+        "name": "autoAssignmentEnabled",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "autoAssignmentEnabled Boolean           @default(true)"
+      },
+      {
+        "name": "title",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Agent SAV\"",
+        "raw": "title                 String?           @default(\"Agent SAV\")"
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "phone                 String?"
+      },
+      {
+        "name": "notificationEmail",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "notificationEmail     Boolean           @default(true)"
+      },
+      {
+        "name": "notificationApp",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "notificationApp       Boolean           @default(true)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt             DateTime          @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt             DateTime          @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "user",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "userId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "skills",
+        "target_model": "AgentSkill",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "skills                AgentSkill[]"
+      }
+    ]
+  },
+  "Skill": {
+    "model_name": "Skill",
+    "table_name": "skills",
+    "composite_uniques": [
+      [
+        "workspaceId",
+        "name"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "workspaceId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id          String       @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId String"
+      },
+      {
+        "name": "name",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "name        String"
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "description String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt   DateTime     @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt   DateTime     @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "agents",
+        "target_model": "AgentSkill",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "agents      AgentSkill[]"
+      }
+    ]
+  },
+  "AgentSkill": {
+    "model_name": "AgentSkill",
+    "table_name": "agent_skills",
+    "composite_uniques": [
+      [
+        "agentProfileId",
+        "skillId"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "skillId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id             String       @id @default(cuid())"
+      },
+      {
+        "name": "agentProfileId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "agentProfileId String"
+      },
+      {
+        "name": "skillId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "skillId        String"
+      },
+      {
+        "name": "validatedById",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "validatedById  String?"
+      },
+      {
+        "name": "validatedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "validatedAt    DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt      DateTime     @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "agentProfile",
+        "target_model": "AgentProfile",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "agentProfile   AgentProfile @relation(fields: [agentProfileId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "agentProfileId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "skill",
+        "target_model": "Skill",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "skill          Skill        @relation(fields: [skillId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "skillId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "Ticket": {
+    "model_name": "Ticket",
+    "table_name": "tickets",
+    "composite_uniques": [
+      [
+        "workspaceId",
+        "reference"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "workspaceId"
+      ],
+      [
+        "workspaceId",
+        "assignedAgentId"
+      ],
+      [
+        "workspaceId",
+        "status"
+      ],
+      [
+        "workspaceId",
+        "priority"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id              String            @id @default(cuid())"
+      },
+      {
+        "name": "reference",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "reference       String"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId     String"
+      },
+      {
+        "name": "assignedAgentId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "assignedAgentId String?"
+      },
+      {
+        "name": "createdById",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "createdById     String?"
+      },
+      {
+        "name": "title",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "title           String"
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "description     String"
+      },
+      {
+        "name": "category",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "category        String?"
+      },
+      {
+        "name": "priority",
+        "type": "TicketPriority",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "MEDIUM",
+        "raw": "priority        TicketPriority    @default(MEDIUM)"
+      },
+      {
+        "name": "status",
+        "type": "TicketStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "OPEN",
+        "raw": "status          TicketStatus      @default(OPEN)"
+      },
+      {
+        "name": "customerName",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerName    String"
+      },
+      {
+        "name": "customerPhone",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerPhone   String?"
+      },
+      {
+        "name": "customerEmail",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerEmail   String?"
+      },
+      {
+        "name": "slaDueAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "slaDueAt        DateTime?"
+      },
+      {
+        "name": "resolvedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "resolvedAt      DateTime?"
+      },
+      {
+        "name": "closedAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "closedAt        DateTime?"
+      },
+      {
+        "name": "conversationId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "conversationId  String?"
+      },
+      {
+        "name": "metadata",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "metadata        Json?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt       DateTime          @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt       DateTime          @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "assignedAgent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "assignedAgent   User?             @relation(\"AssignedAgentTickets\", fields: [assignedAgentId], references: [id], onDelete: SetNull)",
+        "relation_name": "AssignedAgentTickets",
+        "fields": [
+          "assignedAgentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "createdBy",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "createdBy       User?             @relation(\"CreatedTickets\", fields: [createdById], references: [id], onDelete: SetNull)",
+        "relation_name": "CreatedTickets",
+        "fields": [
+          "createdById"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "conversation",
+        "target_model": "Conversation",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "conversation    Conversation?     @relation(fields: [conversationId], references: [id], onDelete: SetNull)",
+        "relation_name": null,
+        "fields": [
+          "conversationId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "assignments",
+        "target_model": "TicketAssignment",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "assignments     TicketAssignment[]"
+      },
+      {
+        "field_name": "shares",
+        "target_model": "TicketShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "shares          TicketShare[]"
+      },
+      {
+        "field_name": "activities",
+        "target_model": "TicketActivity",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "activities      TicketActivity[]"
+      }
+    ]
+  },
+  "TicketAssignment": {
+    "model_name": "TicketAssignment",
+    "table_name": "ticket_assignments",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "ticketId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id              String    @id @default(cuid())"
+      },
+      {
+        "name": "ticketId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "ticketId        String"
+      },
+      {
+        "name": "previousAgentId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "previousAgentId String?"
+      },
+      {
+        "name": "newAgentId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "newAgentId      String?"
+      },
+      {
+        "name": "assignedById",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "assignedById    String?"
+      },
+      {
+        "name": "reason",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "reason          String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt       DateTime  @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "ticket",
+        "target_model": "Ticket",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "ticket          Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "ticketId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "previousAgent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "previousAgent   User?     @relation(\"PrevAgentAssignments\", fields: [previousAgentId], references: [id], onDelete: SetNull)",
+        "relation_name": "PrevAgentAssignments",
+        "fields": [
+          "previousAgentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "newAgent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "newAgent        User?     @relation(\"NewAgentAssignments\", fields: [newAgentId], references: [id], onDelete: SetNull)",
+        "relation_name": "NewAgentAssignments",
+        "fields": [
+          "newAgentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "assignedBy",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "assignedBy      User?     @relation(\"AssignedByAssignments\", fields: [assignedById], references: [id], onDelete: SetNull)",
+        "relation_name": "AssignedByAssignments",
+        "fields": [
+          "assignedById"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      }
+    ]
+  },
+  "TicketShare": {
+    "model_name": "TicketShare",
+    "table_name": "ticket_shares",
+    "composite_uniques": [
+      [
+        "ticketId",
+        "agentId"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "agentId"
+      ],
+      [
+        "ticketId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id          String           @id @default(cuid())"
+      },
+      {
+        "name": "ticketId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "ticketId    String"
+      },
+      {
+        "name": "agentId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "agentId     String"
+      },
+      {
+        "name": "sharedById",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "sharedById  String"
+      },
+      {
+        "name": "accessLevel",
+        "type": "ShareAccessLevel",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "READ_ONLY",
+        "raw": "accessLevel ShareAccessLevel @default(READ_ONLY)"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "expiresAt   DateTime?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt   DateTime         @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "ticket",
+        "target_model": "Ticket",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "ticket      Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "ticketId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "agent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "agent       User             @relation(\"ReceivedTicketShares\", fields: [agentId], references: [id], onDelete: Cascade)",
+        "relation_name": "ReceivedTicketShares",
+        "fields": [
+          "agentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "sharedBy",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "sharedBy    User             @relation(\"CreatedTicketShares\", fields: [sharedById], references: [id], onDelete: Cascade)",
+        "relation_name": "CreatedTicketShares",
+        "fields": [
+          "sharedById"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "TicketActivity": {
+    "model_name": "TicketActivity",
+    "table_name": "ticket_activities",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "ticketId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id        String    @id @default(cuid())"
+      },
+      {
+        "name": "ticketId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "ticketId  String"
+      },
+      {
+        "name": "authorId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "authorId  String?"
+      },
+      {
+        "name": "type",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "type      String    // STATUS_CHANGE, NOTE, ASSIGNMENT, PRIORITY_CHANGE, RESOLUTION"
+      },
+      {
+        "name": "content",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "content   String"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt DateTime  @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "ticket",
+        "target_model": "Ticket",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "ticket    Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "ticketId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "author",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)",
+        "relation_name": null,
+        "fields": [
+          "authorId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      }
+    ]
+  },
+  "Conversation": {
+    "model_name": "Conversation",
+    "table_name": "conversations",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "workspaceId"
+      ],
+      [
+        "workspaceId",
+        "assignedAgentId"
+      ],
+      [
+        "workspaceId",
+        "status"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id              String                @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId     String"
+      },
+      {
+        "name": "assignedAgentId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "assignedAgentId String?"
+      },
+      {
+        "name": "customerName",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerName    String"
+      },
+      {
+        "name": "customerPhone",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerPhone   String?"
+      },
+      {
+        "name": "customerEmail",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "customerEmail   String?"
+      },
+      {
+        "name": "category",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "category        String?"
+      },
+      {
+        "name": "channel",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"PORTAL\"",
+        "raw": "channel         String                @default(\"PORTAL\") // PORTAL, WHATSAPP, EMAIL"
+      },
+      {
+        "name": "status",
+        "type": "ConversationStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "ACTIVE",
+        "raw": "status          ConversationStatus    @default(ACTIVE)"
+      },
+      {
+        "name": "priority",
+        "type": "TicketPriority",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "MEDIUM",
+        "raw": "priority        TicketPriority        @default(MEDIUM)"
+      },
+      {
+        "name": "publicTokenHash",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "publicTokenHash String?"
+      },
+      {
+        "name": "lastMessageAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "lastMessageAt   DateTime              @default(now())"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt       DateTime              @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt       DateTime              @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "assignedAgent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "assignedAgent   User?                 @relation(\"AssignedConversations\", fields: [assignedAgentId], references: [id], onDelete: SetNull)",
+        "relation_name": "AssignedConversations",
+        "fields": [
+          "assignedAgentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      },
+      {
+        "field_name": "messages",
+        "target_model": "ConversationMessage",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "messages        ConversationMessage[]"
+      },
+      {
+        "field_name": "shares",
+        "target_model": "ConversationShare",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "shares          ConversationShare[]"
+      },
+      {
+        "field_name": "tickets",
+        "target_model": "Ticket",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "tickets         Ticket[]"
+      }
+    ]
+  },
+  "ConversationMessage": {
+    "model_name": "ConversationMessage",
+    "table_name": "conversation_messages",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "conversationId"
+      ],
+      [
+        "conversationId",
+        "isInternalNote"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id             String       @id @default(cuid())"
+      },
+      {
+        "name": "conversationId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "conversationId String"
+      },
+      {
+        "name": "senderId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "senderId       String?"
+      },
+      {
+        "name": "senderType",
+        "type": "MessageType",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "CUSTOMER",
+        "raw": "senderType     MessageType  @default(CUSTOMER)"
+      },
+      {
+        "name": "senderName",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "senderName     String"
+      },
+      {
+        "name": "content",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "content        String"
+      },
+      {
+        "name": "isInternalNote",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "false",
+        "raw": "isInternalNote Boolean      @default(false)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt      DateTime     @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "conversation",
+        "target_model": "Conversation",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "conversationId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "sender",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)",
+        "relation_name": null,
+        "fields": [
+          "senderId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      }
+    ]
+  },
+  "ConversationShare": {
+    "model_name": "ConversationShare",
+    "table_name": "conversation_shares",
+    "composite_uniques": [
+      [
+        "conversationId",
+        "agentId"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "agentId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id             String           @id @default(cuid())"
+      },
+      {
+        "name": "conversationId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "conversationId String"
+      },
+      {
+        "name": "agentId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "agentId        String"
+      },
+      {
+        "name": "sharedById",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "sharedById     String"
+      },
+      {
+        "name": "accessLevel",
+        "type": "ShareAccessLevel",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "READ_ONLY",
+        "raw": "accessLevel    ShareAccessLevel @default(READ_ONLY)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt      DateTime         @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "conversation",
+        "target_model": "Conversation",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "conversationId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "agent",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "agent          User             @relation(\"ReceivedConversationShares\", fields: [agentId], references: [id], onDelete: Cascade)",
+        "relation_name": "ReceivedConversationShares",
+        "fields": [
+          "agentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      },
+      {
+        "field_name": "sharedBy",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "sharedBy       User             @relation(\"CreatedConversationShares\", fields: [sharedById], references: [id], onDelete: Cascade)",
+        "relation_name": "CreatedConversationShares",
+        "fields": [
+          "sharedById"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "Establishment": {
+    "model_name": "Establishment",
+    "table_name": "establishments",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "workspaceId"
+      ],
+      [
+        "workspaceId",
+        "isPublic"
+      ],
+      [
+        "workspaceId",
+        "isActive"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id              String            @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId     String"
+      },
+      {
+        "name": "name",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "name            String"
+      },
+      {
+        "name": "type",
+        "type": "EstablishmentType",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "BRANCH",
+        "raw": "type            EstablishmentType @default(BRANCH)"
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "description     String?"
+      },
+      {
+        "name": "isMain",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "false",
+        "raw": "isMain          Boolean           @default(false)"
+      },
+      {
+        "name": "isPublic",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "isPublic        Boolean           @default(true)"
+      },
+      {
+        "name": "isActive",
+        "type": "Boolean",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "true",
+        "raw": "isActive        Boolean           @default(true)"
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "address         String"
+      },
+      {
+        "name": "city",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Brazzaville\"",
+        "raw": "city            String            @default(\"Brazzaville\")"
+      },
+      {
+        "name": "country",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"Congo\"",
+        "raw": "country         String            @default(\"Congo\")"
+      },
+      {
+        "name": "addressDetails",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "addressDetails  String?"
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "phone           String?"
+      },
+      {
+        "name": "email",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "email           String?"
+      },
+      {
+        "name": "whatsapp",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "whatsapp        String?"
+      },
+      {
+        "name": "openingHours",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "openingHours    String?"
+      },
+      {
+        "name": "businessHours",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "businessHours   Json?"
+      },
+      {
+        "name": "imageUrl",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "imageUrl        String?           @db.Text"
+      },
+      {
+        "name": "galleryImages",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "galleryImages   Json?"
+      },
+      {
+        "name": "services",
+        "type": "Json",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "services        Json?"
+      },
+      {
+        "name": "practicalInfo",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "practicalInfo   String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt       DateTime          @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt       DateTime          @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Cascade",
+        "onUpdate": null
+      }
+    ]
+  },
+  "Subscription": {
+    "model_name": "Subscription",
+    "table_name": "subscriptions",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "status",
+        "currentPeriodEnd"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                   String             @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "workspaceId          String             @unique"
+      },
+      {
+        "name": "plan",
+        "type": "PlanType",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "DECOUVERTE",
+        "raw": "plan                 PlanType           @default(DECOUVERTE)"
+      },
+      {
+        "name": "status",
+        "type": "SubscriptionStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "ACTIVE",
+        "raw": "status               SubscriptionStatus @default(ACTIVE)"
+      },
+      {
+        "name": "activePriceXaf",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "0",
+        "raw": "activePriceXaf       Int                @default(0)"
+      },
+      {
+        "name": "currentPeriodStart",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "currentPeriodStart   DateTime           @default(now())"
+      },
+      {
+        "name": "currentPeriodEnd",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "currentPeriodEnd     DateTime?"
+      },
+      {
+        "name": "gracePeriodEnd",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "gracePeriodEnd       DateTime?"
+      },
+      {
+        "name": "billingAnchorDay",
+        "type": "Int",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "billingAnchorDay     Int?"
+      },
+      {
+        "name": "version",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "1",
+        "raw": "version              Int                @default(1)"
+      },
+      {
+        "name": "lastNoticeSentAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "lastNoticeSentAt     DateTime?"
+      },
+      {
+        "name": "noticeCount",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "0",
+        "raw": "noticeCount          Int                @default(0)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt            DateTime           @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt            DateTime           @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "intents",
+        "target_model": "SubscriptionIntent",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "intents              SubscriptionIntent[]"
+      },
+      {
+        "field_name": "transactions",
+        "target_model": "PaymentTransaction",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "transactions         PaymentTransaction[]"
+      },
+      {
+        "field_name": "history",
+        "target_model": "SubscriptionHistoryLog",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "history              SubscriptionHistoryLog[]"
+      },
+      {
+        "field_name": "downgradeRequests",
+        "target_model": "CommercialDowngradeRequest",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "downgradeRequests    CommercialDowngradeRequest[]"
+      }
+    ]
+  },
+  "SubscriptionIntent": {
+    "model_name": "SubscriptionIntent",
+    "table_name": "subscription_intents",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "workspaceId",
+        "status"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                          String             @id @default(cuid())"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId                 String"
+      },
+      {
+        "name": "subscriptionId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "subscriptionId              String"
+      },
+      {
+        "name": "userId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "userId                      String"
+      },
+      {
+        "name": "intentType",
+        "type": "IntentType",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "INITIAL_PURCHASE",
+        "raw": "intentType                  IntentType         @default(INITIAL_PURCHASE)"
+      },
+      {
+        "name": "targetPlan",
+        "type": "PlanType",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "targetPlan                  PlanType"
+      },
+      {
+        "name": "priceXaf",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "priceXaf                    Int"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"XAF\"",
+        "raw": "currency                    String             @default(\"XAF\")"
+      },
+      {
+        "name": "status",
+        "type": "IntentStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "PENDING",
+        "raw": "status                      IntentStatus       @default(PENDING)"
+      },
+      {
+        "name": "clientMutationKey",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "clientMutationKey           String             @unique"
+      },
+      {
+        "name": "expectedSubscriptionVersion",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "1",
+        "raw": "expectedSubscriptionVersion Int                @default(1)"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt                   DateTime           @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt                   DateTime           @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace                   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "subscription",
+        "target_model": "Subscription",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "subscription                Subscription       @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "subscriptionId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "user",
+        "target_model": "User",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "user                        User               @relation(fields: [userId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "userId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "attempts",
+        "target_model": "PaymentAttempt",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "attempts                    PaymentAttempt[]"
+      },
+      {
+        "field_name": "transactions",
+        "target_model": "PaymentTransaction",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "transactions                PaymentTransaction[]"
+      },
+      {
+        "field_name": "receipts",
+        "target_model": "ProviderPaymentReceipt",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "receipts                    ProviderPaymentReceipt[]"
+      }
+    ]
+  },
+  "PaymentAttempt": {
+    "model_name": "PaymentAttempt",
+    "table_name": "payment_attempts",
+    "composite_uniques": [
+      [
+        "intentId",
+        "attemptNumber"
+      ]
+    ],
+    "composite_indices": [
+      [
+        "providerSessionId"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                   String             @id @default(cuid())"
+      },
+      {
+        "name": "intentId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "intentId             String"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId          String"
+      },
+      {
+        "name": "attemptNumber",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "1",
+        "raw": "attemptNumber        Int                @default(1)"
+      },
+      {
+        "name": "provider",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"SASPAY\"",
+        "raw": "provider             String             @default(\"SASPAY\")"
+      },
+      {
+        "name": "providerSessionId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "providerSessionId    String?            @unique"
+      },
+      {
+        "name": "checkoutUrl",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "checkoutUrl          String?"
+      },
+      {
+        "name": "status",
+        "type": "AttemptStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "INITIATED",
+        "raw": "status               AttemptStatus      @default(INITIATED)"
+      },
+      {
+        "name": "localAttemptKey",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "localAttemptKey      String             @unique"
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "expiresAt            DateTime?"
+      },
+      {
+        "name": "failureReason",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "failureReason        String?"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt            DateTime           @default(now())"
+      },
+      {
+        "name": "updatedAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "updatedAt            DateTime           @updatedAt"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "intent",
+        "target_model": "SubscriptionIntent",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "intent               SubscriptionIntent @relation(fields: [intentId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "intentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "transactions",
+        "target_model": "PaymentTransaction",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "transactions         PaymentTransaction[]"
+      },
+      {
+        "field_name": "receipts",
+        "target_model": "ProviderPaymentReceipt",
+        "is_list": true,
+        "is_optional": false,
+        "raw": "receipts             ProviderPaymentReceipt[]"
+      }
+    ]
+  },
+  "PaymentTransaction": {
+    "model_name": "PaymentTransaction",
+    "table_name": "payment_transactions",
+    "composite_uniques": [],
+    "composite_indices": [
+      [
+        "workspaceId",
+        "paidAt"
+      ]
+    ],
+    "fields": [
+      {
+        "name": "id",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": true,
+        "is_unique": false,
+        "default": "cuid(",
+        "raw": "id                    String                       @id @default(cuid())"
+      },
+      {
+        "name": "receiptId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": true,
+        "default": null,
+        "raw": "receiptId             String                       @unique"
+      },
+      {
+        "name": "workspaceId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "workspaceId           String"
+      },
+      {
+        "name": "subscriptionId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "subscriptionId        String"
+      },
+      {
+        "name": "intentId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "intentId              String"
+      },
+      {
+        "name": "attemptId",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "attemptId             String?"
+      },
+      {
+        "name": "provider",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"SASPAY\"",
+        "raw": "provider              String                       @default(\"SASPAY\")"
+      },
+      {
+        "name": "providerTransactionId",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "providerTransactionId String"
+      },
+      {
+        "name": "amountXaf",
+        "type": "Int",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "amountXaf             Int"
+      },
+      {
+        "name": "currency",
+        "type": "String",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "\"XAF\"",
+        "raw": "currency              String                       @default(\"XAF\")"
+      },
+      {
+        "name": "paymentMethod",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "paymentMethod         String?"
+      },
+      {
+        "name": "operatorReference",
+        "type": "String",
+        "is_optional": true,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "operatorReference     String?"
+      },
+      {
+        "name": "status",
+        "type": "TransactionApplicationStatus",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "status                TransactionApplicationStatus"
+      },
+      {
+        "name": "paidAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": null,
+        "raw": "paidAt                DateTime"
+      },
+      {
+        "name": "createdAt",
+        "type": "DateTime",
+        "is_optional": false,
+        "is_list": false,
+        "is_id": false,
+        "is_unique": false,
+        "default": "now(",
+        "raw": "createdAt             DateTime                     @default(now())"
+      }
+    ],
+    "relations": [
+      {
+        "field_name": "receipt",
+        "target_model": "ProviderPaymentReceipt",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "receipt               ProviderPaymentReceipt       @relation(fields: [receiptId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "receiptId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "workspace",
+        "target_model": "Workspace",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "workspace             Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "workspaceId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "subscription",
+        "target_model": "Subscription",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "subscription          Subscription                 @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "subscriptionId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "intent",
+        "target_model": "SubscriptionIntent",
+        "is_list": false,
+        "is_optional": false,
+        "raw": "intent                SubscriptionIntent           @relation(fields: [intentId], references: [id], onDelete: Restrict)",
+        "relation_name": null,
+        "fields": [
+          "intentId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "Restrict",
+        "onUpdate": null
+      },
+      {
+        "field_name": "attempt",
+        "target_model": "PaymentAttempt",
+        "is_list": false,
+        "is_optional": true,
+        "raw": "attempt               PaymentAttempt?              @relation(fields: [attemptId], references: [id], onDelete: SetNull)",
+        "relation_name": null,
+        "fields": [
+          "attemptId"
+        ],
+        "references": [
+          "id"
+        ],
+        "onDelete": "SetNull",
+        "onUpdate": null
+      }
+    ]
+  }
+}

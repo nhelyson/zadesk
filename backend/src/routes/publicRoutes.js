@@ -6,6 +6,11 @@ import {
   getCompanyProfile,
   sendPublicChatMessage,
   getPublicChatMessages,
+  getPublicChatAttachment,
+  getPublicPushVapidKey,
+  subscribePublicPush,
+  unsubscribePublicPush,
+  savePublicNotificationEmail,
 } from "../controllers/publicCompanyController.js";
 import { publicDirectoryRateLimiter } from "../middleware/rateLimiter.js";
 
@@ -23,5 +28,12 @@ router.get("/companies/:slug", getCompanyProfile);
 // Real-time Public Customer SAV Chat endpoints
 router.post("/companies/:slug/chat", sendPublicChatMessage);
 router.get("/companies/:slug/chat/:conversationId", getPublicChatMessages);
+router.get("/companies/:slug/chat/:conversationId/attachments/:fileName", getPublicChatAttachment);
+
+// Offline / Background Web Push & Email Notifications for Public Portal Customers
+router.get("/push/vapid-key", getPublicPushVapidKey);
+router.post("/companies/:slug/chat/:conversationId/push-subscribe", subscribePublicPush);
+router.delete("/companies/:slug/chat/:conversationId/push-subscribe", unsubscribePublicPush);
+router.post("/companies/:slug/chat/:conversationId/notify-email", savePublicNotificationEmail);
 
 export default router;

@@ -225,7 +225,7 @@ export default function SettingsPage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [palette, setPalette] = useState<CompanyBrandPalette>(() =>
-    resolveCompanyBrandPalette({ name: 'Zadesk' })
+    resolveCompanyBrandPalette({ name: 'Zalisk' })
   );
   const [extractedPalette, setExtractedPalette] = useState<CompanyBrandPalette | null>(null);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
@@ -525,349 +525,315 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16 animate-fade-in text-slate-800">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200/80 shadow-xs">
-              <Settings className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Paramètres de l&apos;entreprise</h1>
-              <p className="text-xs text-slate-500">
-                Gérez le profil de votre organisation, personnalisez votre page publique SAV et configurez vos disponibilités.
-              </p>
-            </div>
-          </div>
+    <div className="space-y-5 max-w-6xl mx-auto pb-16 text-[#0D1B3D]">
+      {/* Barre d'actions compacte en haut à droite (sans bloc titre redondant) */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <span className={`w-1.5 h-1.5 rounded-full ${isPublic ? 'bg-[#22C55E]' : 'bg-slate-300'}`} />
+          <span>
+            {name || 'Entreprise'} · {isPublic ? 'Guichet public actif' : 'Guichet masqué'}
+          </span>
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <Link
             href={`/entreprises/${slug}`}
             target="_blank"
-            className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-2.5 sm:py-2 rounded-xl border border-slate-200 hover:bg-slate-100/70 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+            className="px-3 min-h-[38px] rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#F4F3EF] text-[#0D1B3D] text-xs font-medium flex items-center gap-1.5 transition-colors"
           >
-            <Globe className="w-4 h-4 text-emerald-600" />
-            <span className="hidden xs:inline">Voir ma page publique</span>
-            <span className="xs:hidden">Page publique</span>
+            <span>Aperçu public</span>
             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
           </Link>
 
-          <Button
+          <button
+            type="button"
             onClick={() => handleSave()}
             disabled={saving}
-            variant="gradient"
-            leftIcon={saving ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            className="flex-1 sm:flex-initial justify-center active:scale-95"
+            className="px-4 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition-all flex items-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-50"
           >
-            {saving ? 'Enregistrement...' : 'Enregistrer tout'}
-          </Button>
+            {saving ? <RotateCcw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            <span>{saving ? 'Enregistrement…' : 'Enregistrer'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Global Alerts */}
+      {/* Alertes de validation / erreur */}
       {savedSuccess && (
-        <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-white border border-[#E5E4DF] border-l-[3px] border-l-[#22C55E] text-[#0D1B3D] text-xs font-medium">
+          <CheckCircle2 className="w-4 h-4 text-[#22C55E] shrink-0" />
           <span>{savedSuccess}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold animate-in fade-in">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
           <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Segmented Navigation Tabs */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/80 overflow-x-auto overscroll-contain scrollbar-none text-xs">
-        <button
-          onClick={() => setActiveTab('general')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'general'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <Building2 className="w-4 h-4 text-emerald-600" />
-          <span>Informations générales</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('branding')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'branding'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <Palette className="w-4 h-4 text-indigo-600" />
-          <span>Page publique & Charte graphique</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('canned')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'canned'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4 text-sky-600" />
-          <span>Réponses enregistrées</span>
-          <span className="px-1.5 py-0.2 rounded-md bg-slate-200 text-[10px] font-bold">
-            {cannedResponses.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('hours')}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'hours'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <Clock className="w-4 h-4 text-amber-600" />
-          <span>Disponibilité du SAV</span>
-        </button>
-
-        {userRole === 'OWNER' && (
+      {/* Navigation mobile horizontale soulignée (< lg) */}
+      <div className="lg:hidden flex items-center gap-5 border-b border-[#E5E4DF] overflow-x-auto overscroll-contain scrollbar-none text-xs">
+        {[
+          { id: 'general' as const, label: 'Général' },
+          { id: 'branding' as const, label: 'Page publique' },
+          { id: 'canned' as const, label: `Réponses (${cannedResponses.length})` },
+          { id: 'hours' as const, label: 'Horaires' },
+          { id: 'danger' as const, label: 'Zone sensible', danger: true },
+        ].map((tab) => (
           <button
-            onClick={() => setActiveTab('danger')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'danger'
-                ? 'bg-rose-50 text-rose-800 shadow-sm border border-rose-200'
-                : 'text-slate-500 hover:text-rose-700 hover:bg-rose-100/40'
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`pb-2.5 border-b-2 whitespace-nowrap cursor-pointer transition-colors ${
+              activeTab === tab.id
+                ? tab.danger
+                  ? 'border-rose-600 text-rose-700 font-semibold'
+                  : 'border-[#0D1B3D] text-[#0D1B3D] font-semibold'
+                : tab.danger
+                ? 'border-transparent text-rose-600/80'
+                : 'border-transparent text-slate-500 hover:text-[#0D1B3D]'
             }`}
           >
-            <ShieldAlert className="w-4 h-4 text-rose-600" />
-            <span>Zone de danger</span>
+            {tab.label}
           </button>
-        )}
+        ))}
       </div>
+
+      {/* Mise en page 2 colonnes style Stripe (Desktop >= lg) */}
+      <div className="lg:flex lg:gap-8 lg:items-start">
+        <aside className="hidden lg:block w-52 shrink-0 sticky top-20 space-y-1">
+          {[
+            { id: 'general' as const, label: 'Général & Contacts' },
+            { id: 'branding' as const, label: 'Page publique & Charte' },
+            { id: 'canned' as const, label: `Réponses rapides (${cannedResponses.length})` },
+            { id: 'hours' as const, label: 'Horaires d’ouverture' },
+            { id: 'danger' as const, label: 'Zone sensible', danger: true },
+          ].map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors cursor-pointer ${
+                  active
+                    ? tab.danger
+                      ? 'bg-rose-50 text-rose-700 font-semibold'
+                      : 'bg-[#ECEAE3] text-[#0D1B3D] font-semibold'
+                    : tab.danger
+                    ? 'text-rose-600/80 hover:bg-rose-50/60 font-medium'
+                    : 'text-slate-600 hover:bg-[#F4F3EF] hover:text-[#0D1B3D] font-medium'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </aside>
+
+        <div className="flex-1 min-w-0">
 
       {/* ================= TAB 1: INFORMATIONS GÉNÉRALES ================= */}
       {activeTab === 'general' && (
-        <div className="space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-emerald-600" />
-                  Identité de l&apos;Entreprise
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Ces informations définissent votre organisation et sont reprises sur vos guichets d&apos;assistance.
-                </p>
-              </div>
-
-              {/* Public toggle switch */}
-              <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                <span className="text-xs font-semibold text-slate-700">Page publique active</span>
-                <input
-                  type="checkbox"
-                  checked={isPublic}
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 relative"></div>
-              </label>
+        <div className="rounded-xl bg-white border border-[#E5E4DF] p-5 sm:p-6 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E5E4DF] pb-4">
+            <div>
+              <h3 className="text-sm font-bold text-[#0D1B3D]">
+                Identité de l&apos;entreprise
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Ces informations définissent votre organisation sur votre guichet client.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <span className="text-xs font-medium text-slate-700">Page publique active</span>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#22C55E] relative"></div>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5 text-xs">
+              <label className="font-medium text-slate-700">Nom officiel de l&apos;entreprise *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Clinique Sainte-Marie"
+                className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] font-medium"
+              />
+            </div>
+
+            <div className="space-y-1.5 text-xs">
+              <label className="font-medium text-slate-700">Secteur d&apos;activité</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] font-medium bg-white"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2 space-y-1.5 text-xs">
+              <label className="font-medium text-slate-700">Présentation publique</label>
+              <textarea
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Présentez brièvement vos activités et engagements de service..."
+                className="w-full p-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] font-normal leading-relaxed resize-y"
+              />
+            </div>
+
+            <div className="md:col-span-2 p-3.5 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div>
+                <span className="text-[11px] font-medium text-slate-400 block">
+                  Adresse du guichet public
+                </span>
+                <p className="font-mono font-medium text-[#0D1B3D] mt-0.5 break-all">{publicUrl}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={copyPublicUrl}
+                  className="px-3 h-8 rounded-lg bg-white border border-[#E5E4DF] hover:border-[#0D1B3D]/25 text-[#0D1B3D] text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  {copiedUrl ? <Check className="w-3.5 h-3.5 text-[#22C55E]" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                  <span>{copiedUrl ? 'Copié' : 'Copier'}</span>
+                </button>
+                <Link
+                  href={`/entreprises/${slug}`}
+                  target="_blank"
+                  className="px-3 h-8 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white font-medium text-xs flex items-center gap-1"
+                >
+                  <span>Ouvrir</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-5 border-t border-[#E5E4DF]">
+            <h3 className="text-sm font-bold text-[#0D1B3D] mb-4">
+              Coordonnées & emplacement
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5 text-xs">
-                <label className="font-bold text-slate-700">Nom officiel de l&apos;entreprise *</label>
+                <label className="font-medium text-slate-700">Téléphone assistance</label>
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Clinique Sainte-Marie"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium"
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  placeholder="Ex: +242 06 000 00 00"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
                 />
               </div>
 
               <div className="space-y-1.5 text-xs">
-                <label className="font-bold text-slate-700">Secteur d&apos;activité</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 font-medium bg-white"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+                <label className="font-medium text-slate-700">Email d&apos;assistance client</label>
+                <input
+                  type="email"
+                  value={supportEmail}
+                  onChange={(e) => setSupportEmail(e.target.value)}
+                  placeholder="Ex: sav@clinique-sainte-marie.cg"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                />
+              </div>
+
+              <div className="space-y-1.5 text-xs">
+                <label className="font-medium text-slate-700">Numéro WhatsApp officiel</label>
+                <input
+                  type="text"
+                  value={supportWhatsApp}
+                  onChange={(e) => setSupportWhatsApp(e.target.value)}
+                  placeholder="Ex: +242 06 942 09 72"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5 text-xs">
+                <label className="font-medium text-slate-700">Site web officiel</label>
+                <input
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="Ex: https://www.clinique-sainte-marie.cg"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                />
               </div>
 
               <div className="md:col-span-2 space-y-1.5 text-xs">
-                <label className="font-bold text-slate-700">Description / Présentation publique</label>
-                <textarea
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Présentez brièvement vos activités, engagements de service et missions auprès de vos clients..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 font-normal leading-relaxed resize-y"
+                <label className="font-medium text-slate-700">Adresse physique / Siège</label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Ex: Boulevard Denis Sassou Nguesso, Centre-Ville"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
                 />
               </div>
 
-              {/* Public URL Permalink banner */}
-              <div className="md:col-span-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    Adresse de votre guichet SAV officiel
-                  </span>
-                  <p className="font-mono font-semibold text-emerald-800 mt-0.5 break-all">{publicUrl}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={copyPublicUrl}
-                    className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                  >
-                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedUrl ? 'Copié !' : 'Copier le lien'}</span>
-                  </button>
-                  <Link
-                    href={`/entreprises/${slug}`}
-                    target="_blank"
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-2xs"
-                  >
-                    <span>Ouvrir</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
+              <div className="space-y-1.5 text-xs">
+                <label className="font-medium text-slate-700">Ville</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Ex: Brazzaville, Pointe-Noire"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                />
+              </div>
+
+              <div className="space-y-1.5 text-xs">
+                <label className="font-medium text-slate-700">Pays</label>
+                <input
+                  type="text"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="Ex: Congo"
+                  className="w-full h-10 px-3 rounded-lg border border-[#E5E4DF] text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                />
               </div>
             </div>
+          </div>
 
-            {/* Coordonnées de Contact & Localisation */}
-            <div className="pt-4 border-t border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 mb-4">
-                <MapPin className="w-4 h-4 text-sky-600" />
-                Coordonnées & Emplacement
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
-                    Téléphone assistance
-                  </label>
-                  <input
-                    type="text"
-                    value={supportPhone}
-                    onChange={(e) => setSupportPhone(e.target.value)}
-                    placeholder="Ex: +242 06 000 00 00"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
-                    Email d&apos;assistance client
-                  </label>
-                  <input
-                    type="email"
-                    value={supportEmail}
-                    onChange={(e) => setSupportEmail(e.target.value)}
-                    placeholder="Ex: sav@clinique-sainte-marie.cg"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-slate-400" />
-                    Numéro WhatsApp officiel
-                  </label>
-                  <input
-                    type="text"
-                    value={supportWhatsApp}
-                    onChange={(e) => setSupportWhatsApp(e.target.value)}
-                    placeholder="Ex: +242 06 942 09 72"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-slate-400" />
-                    Site web officiel
-                  </label>
-                  <input
-                    type="url"
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="Ex: https://www.clinique-sainte-marie.cg"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-
-                <div className="md:col-span-2 space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    Adresse physique / Siège
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Ex: Boulevard Denis Sassou Nguesso, Centre-Ville"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700">Ville</label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Ex: Brazzaville, Pointe-Noire"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-                  <label className="font-semibold text-slate-700">Pays</label>
-                  <input
-                    type="text"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Ex: Congo"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-slate-100">
-              <Button onClick={() => handleSave()} disabled={saving} variant="gradient">
-                {saving ? 'Enregistrement...' : 'Enregistrer les informations'}
-              </Button>
-            </div>
+          <div className="flex justify-end pt-4 border-t border-[#E5E4DF]">
+            <button
+              type="button"
+              onClick={() => handleSave()}
+              disabled={saving}
+              className="px-4 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {saving ? 'Enregistrement…' : 'Enregistrer les informations'}
+            </button>
           </div>
         </div>
       )}
 
       {/* ================= TAB 2: BRANDING & PAGE PUBLIQUE ================= */}
       {activeTab === 'branding' && (
-        <div className="space-y-8">
-          {/* Top Panel: Logo & Color Extraction Engine */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div className="space-y-6">
+          <div className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E4DF] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E4DF] pb-4">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-indigo-600" />
-                  Identité Visuelle & Extraction Automatique
+                <h3 className="text-sm font-bold text-[#0D1B3D]">
+                  Identité visuelle & charte
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Importez le logo de votre entreprise. Zadesk extrait instantanément une palette de couleurs harmonieuse pour votre page publique.
+                  Importez votre logo pour adapter automatiquement les couleurs de votre guichet public.
                 </p>
               </div>
 
@@ -876,17 +842,15 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={handleRestoreExtracted}
-                    className="px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                    title="Revenir à la palette déduite du logo"
+                    className="px-3 h-8 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-[#0D1B3D] hover:bg-[#F4F3EF] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Palette du logo</span>
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={handleResetColors}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-3 h-8 rounded-lg bg-white border border-[#E5E4DF] hover:bg-[#FAFAF8] text-slate-600 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Réinitialiser</span>
@@ -900,7 +864,7 @@ export default function SettingsPage() {
                 <label className="text-xs font-bold text-slate-700 block">Logo officiel</label>
 
                 <div className="flex items-center gap-4">
-                  <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center p-2 relative overflow-hidden group shadow-2xs">
+                  <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center p-2 relative overflow-hidden group shadow-sm">
                     {logoUrl ? (
                       <img src={logoUrl} alt="Logo entreprise" className="w-full h-full object-contain" />
                     ) : (
@@ -963,11 +927,10 @@ export default function SettingsPage() {
               </div>
 
               {/* Color Palette Customizer */}
-              <div className="md:col-span-7 bg-slate-50/70 p-5 rounded-2xl border border-slate-200 space-y-4">
+              <div className="md:col-span-7 bg-[#FAFAF8] p-5 rounded-xl border border-[#E5E4DF] space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                    Charte graphique dérivée (WCAG AA)
+                  <span className="text-xs font-bold text-[#0D1B3D]">
+                    Charte graphique dérivée
                   </span>
                   <span className="text-[11px] text-slate-500 font-mono">
                     Primaire : {palette.primary}
@@ -977,7 +940,7 @@ export default function SettingsPage() {
                 {/* Swatches preview */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                   <div
-                    className="p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1"
+                    className="p-3 rounded-xl border border-slate-200 shadow-sm space-y-1"
                     style={{ backgroundColor: palette.primary, color: palette.contrastText }}
                   >
                     <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider block">Principale</span>
@@ -985,7 +948,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div
-                    className="p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1"
+                    className="p-3 rounded-xl border border-slate-200 shadow-sm space-y-1"
                     style={{ backgroundColor: palette.secondary, color: palette.text }}
                   >
                     <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider block">Secondaire</span>
@@ -993,7 +956,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div
-                    className="p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1"
+                    className="p-3 rounded-xl border border-slate-200 shadow-sm space-y-1"
                     style={{ backgroundColor: palette.accent, color: '#FFFFFF' }}
                   >
                     <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider block">Accent</span>
@@ -1001,7 +964,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div
-                    className="p-3 rounded-xl border border-slate-200 shadow-2xs space-y-1"
+                    className="p-3 rounded-xl border border-slate-200 shadow-sm space-y-1"
                     style={{ backgroundColor: palette.surface, color: palette.text }}
                   >
                     <span className="text-[10px] opacity-80 uppercase font-bold tracking-wider block">Fond / Cartes</span>
@@ -1041,16 +1004,15 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Bottom Panel: Live Public Page Preview */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          {/* Aperçu direct */}
+          <div className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E4DF] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E4DF] pb-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Monitor className="w-4 h-4 text-emerald-600" />
-                  Aperçu en Direct de la Page Publique
+                <h3 className="text-sm font-bold text-[#0D1B3D]">
+                  Aperçu de la page publique
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Visualisez fidèlement le rendu de votre guichet SAV pour vos clients.
+                  Visualisez le rendu de votre guichet SAV client.
                 </p>
               </div>
 
@@ -1060,7 +1022,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => setPreviewMode('desktop')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    previewMode === 'desktop' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    previewMode === 'desktop' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -1070,7 +1032,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => setPreviewMode('mobile')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    previewMode === 'mobile' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                    previewMode === 'mobile' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -1130,7 +1092,7 @@ export default function SettingsPage() {
                       SAV
                     </div>
                     <div
-                      className="p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed space-y-1.5 shadow-2xs"
+                      className="p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed space-y-1.5 shadow-sm"
                       style={{
                         backgroundColor: palette.surface,
                         borderColor: palette.surfaceBorder,
@@ -1147,7 +1109,7 @@ export default function SettingsPage() {
 
                   {/* Customer question demo */}
                   <div className="flex justify-end">
-                    <div className="bg-slate-900 text-white p-3 rounded-2xl rounded-tr-sm text-xs max-w-[80%] shadow-2xs">
+                    <div className="bg-slate-900 text-white p-3 rounded-2xl rounded-tr-sm text-xs max-w-[80%] shadow-sm">
                       Bonjour, j&apos;aimerais connaître vos délais de prise en charge pour une réclamation.
                     </div>
                   </div>
@@ -1172,17 +1134,18 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Save Action Bar for Tab 2 */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-5 border-t border-slate-100">
-              <div className="text-xs text-slate-500 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>
-                  L&apos;enregistrement applique immédiatement votre logo, couverture et charte graphique à votre guichet SAV public.
-                </span>
-              </div>
-              <Button onClick={() => handleSave()} disabled={saving} variant="gradient" className="shrink-0">
-                {saving ? 'Enregistrement...' : "Enregistrer l'identité visuelle"}
-              </Button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[#E5E4DF]">
+              <span className="text-xs text-slate-500">
+                L&apos;enregistrement met à jour immédiatement votre guichet SAV public.
+              </span>
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                disabled={saving}
+                className="px-4 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {saving ? 'Enregistrement…' : "Enregistrer l'identité visuelle"}
+              </button>
             </div>
           </div>
         </div>
@@ -1190,36 +1153,34 @@ export default function SettingsPage() {
 
       {/* ================= TAB 3: RÉPONSES ENREGISTRÉES ================= */}
       {activeTab === 'canned' && (
-        <div className="space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-sky-600" />
-                  Réponses Types & Réponses Enregistrées
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Configurez les réponses réutilisables par vos agents dans leurs conversations pour un SAV plus rapide et homogène.
-                </p>
-              </div>
-
-              <Button
-                onClick={() => {
-                  setEditingResponse({
-                    title: '',
-                    category: 'Accueil',
-                    content: '',
-                    isActive: true,
-                  });
-                  setIsCannedModalOpen(true);
-                }}
-                variant="gradient"
-                size="sm"
-                leftIcon={<Plus className="w-3.5 h-3.5" />}
-              >
-                Nouvelle réponse
-              </Button>
+        <div className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E4DF] space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E4DF] pb-4">
+            <div>
+              <h3 className="text-sm font-bold text-[#0D1B3D]">
+                Réponses types
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Modèles réutilisables par vos conseillers dans les conversations.
+              </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingResponse({
+                  title: '',
+                  category: 'Accueil',
+                  content: '',
+                  isActive: true,
+                });
+                setIsCannedModalOpen(true);
+              }}
+              className="px-3.5 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nouvelle réponse</span>
+            </button>
+          </div>
 
             {/* Filter and Search Bar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
@@ -1324,24 +1285,21 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
-          </div>
         </div>
       )}
 
       {/* ================= TAB 4: DISPONIBILITÉ DU SAV (HORAIRES) ================= */}
       {activeTab === 'hours' && (
-        <div className="space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-600" />
-                  Horaires d&apos;Ouverture & Disponibilité SAV
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Définissez les plages de disponibilité de vos conseillers humains. Vos clients consultent ces horaires directement sur votre page officielle.
-                </p>
-              </div>
+        <div className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E4DF] space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E4DF] pb-4">
+            <div>
+              <h3 className="text-sm font-bold text-[#0D1B3D]">
+                Horaires d&apos;ouverture
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Plages de présence affichées sur votre guichet client.
+              </p>
+            </div>
 
               {/* Timezone picker */}
               <div className="flex items-center gap-2">
@@ -1501,26 +1459,30 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-slate-100">
-              <Button onClick={() => handleSave()} disabled={saving} variant="gradient">
-                {saving ? 'Enregistrement...' : 'Enregistrer les horaires'}
-              </Button>
+            <div className="flex justify-end pt-4 border-t border-[#E5E4DF]">
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                disabled={saving}
+                className="px-4 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold cursor-pointer disabled:opacity-50"
+              >
+                {saving ? 'Enregistrement…' : 'Enregistrer les horaires'}
+              </button>
             </div>
-          </div>
         </div>
       )}
 
       {/* ================= TAB 5: ZONE DE DANGER (OWNER ONLY) ================= */}
       {activeTab === 'danger' && userRole === 'OWNER' && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-rose-50/60 border border-rose-200 shadow-sm space-y-4">
+        <div className="p-5 sm:p-6 rounded-xl bg-white border border-rose-200 space-y-4">
           <div className="flex items-center gap-2 text-rose-800">
-            <AlertTriangle className="w-5 h-5 text-rose-600" />
-            <h3 className="text-sm font-bold uppercase tracking-wider">Zone de Danger</h3>
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
+            <h3 className="text-sm font-bold">Zone sensible</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-            La suppression de cet espace de travail est irréversible. Toutes les données associées (conversations, tickets de continuité, agences physiques et documents de connaissances) seront définitivement effacées.
+            La suppression de cet espace de travail est irréversible. Toutes les données associées seront définitivement effacées.
           </p>
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => {
@@ -1528,26 +1490,28 @@ export default function SettingsPage() {
                   `Pour confirmer la suppression définitive, veuillez taper le nom exact de l'entreprise : "${name}"`
                 );
                 if (conf === name) {
-                  alert('Protection active : la suppression complète en environnement de production requiert la confirmation du support Zadesk.');
+                  alert('Protection active : la suppression complète en environnement de production requiert la confirmation du support Zalisk.');
                 } else if (conf !== null) {
                   alert('Le nom saisi ne correspond pas. Suppression annulée.');
                 }
               }}
-              className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
+              className="px-4 min-h-[38px] rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Supprimer définitivement ce Workspace</span>
+              <span>Supprimer cet espace</span>
             </button>
           </div>
         </div>
       )}
+        </div>
+      </div>
 
       {/* Modal for Creating / Editing Canned Response */}
       {isCannedModalOpen && editingResponse && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 bg-[#0D1B3D]/35 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-xl border border-[#E5E4DF] p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E4DF] pb-3">
+              <h3 className="text-sm font-bold text-[#0D1B3D]">
                 {editingResponse.id ? 'Modifier la réponse type' : 'Nouvelle réponse type'}
               </h3>
               <button
@@ -1615,9 +1579,12 @@ export default function SettingsPage() {
                   Annuler
                 </button>
 
-                <Button type="submit" variant="gradient">
+                <button
+                  type="submit"
+                  className="px-4 min-h-[38px] rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold cursor-pointer"
+                >
                   {editingResponse.id ? 'Mettre à jour' : 'Créer la réponse'}
-                </Button>
+                </button>
               </div>
             </form>
           </div>

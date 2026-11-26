@@ -8,11 +8,21 @@ import { OnboardingPreview, OnboardingPreviewData } from "@/components/onboardin
 import { OnboardingStepIndicator } from "@/components/onboarding/OnboardingStepIndicator";
 import { Step1Company } from "@/components/onboarding/Step1Company";
 import { Step2LocationContact } from "@/components/onboarding/Step2LocationContact";
+import { Step3PlanSelection } from "@/components/onboarding/Step3PlanSelection";
 import { Step3Review } from "@/components/onboarding/Step3Review";
 import { Step4CommercialRecap } from "@/components/onboarding/Step4CommercialRecap";
 import { OnboardingMobileNav } from "@/components/onboarding/OnboardingMobileNav";
+import { MobileOnboardingTopBar } from "@/components/onboarding/mobile/MobileOnboardingTopBar";
+import { MobileMiniDeskCompact } from "@/components/onboarding/mobile/MobileMiniDeskCompact";
+import { MobileStep1Company } from "@/components/onboarding/mobile/MobileStep1Company";
+import { MobileStep2Location } from "@/components/onboarding/mobile/MobileStep2Location";
+import { MobileStep3Plan } from "@/components/onboarding/mobile/MobileStep3Plan";
+import { MobileStep4Review } from "@/components/onboarding/mobile/MobileStep4Review";
+import { MobileStep5SasPay } from "@/components/onboarding/mobile/MobileStep5SasPay";
+import { MobileStickyActionBar } from "@/components/onboarding/mobile/MobileStickyActionBar";
 import { workspaceApi, apiRequest } from "@/lib/api";
 import { User } from "@/types/workspace";
+import { getPlanConfig } from "@/config/plans";
 import { Loader2 } from "lucide-react";
 
 function slugify(text: string) {
@@ -33,7 +43,7 @@ export default function OnboardingPage() {
   const [user, setUser] = useState<User | null>(null);
   const [hasWorkspace, setHasWorkspace] = useState(false);
 
-  // 3 Progressive Steps (1: Entreprise, 2: Localisation & Contact, 3: Aperçu & Validation) + Step 4: Récapitulatif Commercial
+  // 4 Steps: 1: Entreprise, 2: Localisation & Contact, 3: Formule, 4: Aperçu & Validation (+ Step 5: Récapitulatif Commercial)
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxAccessibleStep, setMaxAccessibleStep] = useState<number>(1);
   const [selectedPlan, setSelectedPlan] = useState<string>("decouverte");
@@ -62,11 +72,11 @@ export default function OnboardingPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Animation DOM references
-  const step1And2ContainerRef = useRef<HTMLDivElement>(null);
-  const step3StageRef = useRef<HTMLDivElement>(null);
-  const step3HeaderRef = useRef<HTMLDivElement>(null);
-  const step3PhoneRef = useRef<HTMLDivElement>(null);
-  const step3RecapRef = useRef<HTMLDivElement>(null);
+  const stepContainerRef = useRef<HTMLDivElement>(null);
+  const step4StageRef = useRef<HTMLDivElement>(null);
+  const step4HeaderRef = useRef<HTMLDivElement>(null);
+  const step4PhoneRef = useRef<HTMLDivElement>(null);
+  const step4RecapRef = useRef<HTMLDivElement>(null);
 
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const nameCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,7 +97,7 @@ export default function OnboardingPage() {
           return;
         }
 
-        // GUARD: If user already possesses an active workspace, redirect immediately
+        // GUARD: If user already possesses an active workspace, check for pending payment or redirect
         const memberships = (currentUser as any)?.memberships || [];
         const hasExistingWorkspace = Boolean(
           meRes?.hasWorkspace || memberships.length > 0
@@ -95,6 +105,32 @@ export default function OnboardingPage() {
 
         if (hasExistingWorkspace) {
           if (typeof window !== "undefined") {
+            const wsId =
+              memberships[0]?.workspace?.id ||
+              memberships[0]?.workspaceId ||
+              meRes?.user?.memberships?.[0]?.workspace?.id;
+
+            if (wsId) {
+              try {
+                const histRes = await apiRequest<any>(`/commercial/history?workspaceId=${wsId}`);
+                const pendingIntent = histRes?.data?.intents?.find(
+                  (i: any) => i.status === "PENDING" && i.targetPlan !== "DECOUVERTE"
+                );
+                const currentPlan = (
+                  histRes?.data?.subscription?.plan || "DECOUVERTE"
+                ).toUpperCase();
+
+                if (pendingIntent && currentPlan === "DECOUVERTE") {
+                  router.replace(
+                    `/app/billing?payment_status=uncompleted&plan=${pendingIntent.targetPlan.toLowerCase()}`
+                  );
+                  return;
+                }
+              } catch {
+                // Ignore and fall back to /app
+              }
+            }
+
             router.replace("/app");
             return;
           }
@@ -142,8 +178,8 @@ export default function OnboardingPage() {
             }));
 
             // Restore step if valid
-            if (typeof savedStep === "number" && savedStep >= 1 && savedStep <= 3) {
-              const clamped = Math.min(savedStep, 3);
+            if (typeof savedStep === "number" && savedStep >= 1 && savedStep <= 4) {
+              const clamped = Math.min(savedStep, 4);
               setCurrentStep(clamped);
               setMaxAccessibleStep(clamped);
             } else if (restoredName.trim().length >= 2) {
@@ -252,7 +288,7 @@ export default function OnboardingPage() {
     });
   };
 
-  // GSAP Animations (Step transitions & Step 3 Discovery Sequence)
+  // GSAP Animations (Step transitions)
   useEffect(() => {
     if (isInitializing) return;
 
@@ -263,38 +299,37 @@ export default function OnboardingPage() {
     if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      if (currentStep === 1 || currentStep === 2) {
-        if (step1And2ContainerRef.current) {
+      if (currentStep <= 3) {
+        if (stepContainerRef.current) {
           gsap.fromTo(
-            step1And2ContainerRef.current,
+            stepContainerRef.current,
             { opacity: 0, y: 14 },
             { opacity: 1, y: 0, duration: 0.35, ease: "power2.out", clearProps: "all" }
           );
         }
-      } else if (currentStep === 3) {
-        // Orchestrated discovery sequence for Step 3
+      } else if (currentStep === 4) {
         const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
 
-        if (step3HeaderRef.current) {
+        if (step4HeaderRef.current) {
           tl.fromTo(
-            step3HeaderRef.current,
+            step4HeaderRef.current,
             { opacity: 0, y: 12 },
             { opacity: 1, y: 0, duration: 0.4 }
           );
         }
 
-        if (step3PhoneRef.current) {
+        if (step4PhoneRef.current) {
           tl.fromTo(
-            step3PhoneRef.current,
+            step4PhoneRef.current,
             { opacity: 0, y: 24, scale: 0.98 },
             { opacity: 1, y: 0, scale: 1, duration: 0.55 },
             "-=0.2"
           );
         }
 
-        if (step3RecapRef.current) {
+        if (step4RecapRef.current) {
           tl.fromTo(
-            step3RecapRef.current,
+            step4RecapRef.current,
             { opacity: 0, y: 16 },
             { opacity: 1, y: 0, duration: 0.45 },
             "-=0.3"
@@ -336,6 +371,17 @@ export default function OnboardingPage() {
 
     setErrorMsg(null);
     const nextStep = 3;
+    setCurrentStep(nextStep);
+    setMaxAccessibleStep((prev) => Math.max(prev, nextStep));
+    triggerAutoSave(nextStep, formData);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNextFromStep3 = () => {
+    setErrorMsg(null);
+    const nextStep = 4;
     setCurrentStep(nextStep);
     setMaxAccessibleStep((prev) => Math.max(prev, nextStep));
     triggerAutoSave(nextStep, formData);
@@ -404,14 +450,14 @@ export default function OnboardingPage() {
         localStorage.setItem("zadesk_active_workspace", wsData.id || wsData.slug);
       }
 
-      // Parcours A : Si offre Découverte, redirection directe sans paiement vers /app
+      // CAS A : Offre Découverte -> redirection directe sans paiement vers /app
       if (normPlan === "DECOUVERTE") {
         router.push("/app");
         return;
       }
 
-      // Parcours B : Pour toute formule payante (Starter, Pro, Entreprise)
-      // Enregistrement de l'intention commerciale et transition vers l'Étape 4 (Récapitulatif)
+      // CAS B : Formule payante (Starter, Pro, Entreprise)
+      // Enregistrement de l'intention commerciale et transition vers l'Étape 5 (Récapitulatif)
       try {
         await apiRequest("/commercial/intent", {
           method: "POST",
@@ -430,8 +476,8 @@ export default function OnboardingPage() {
         slug: wsData?.slug || formData.slug,
       });
 
-      setCurrentStep(4);
-      setMaxAccessibleStep(4);
+      setCurrentStep(5);
+      setMaxAccessibleStep(5);
       setIsSubmitting(false);
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -452,7 +498,7 @@ export default function OnboardingPage() {
     }
     setSaveStatus("saving");
     try {
-      await workspaceApi.saveOnboardingDraft(currentStep, formData);
+      await workspaceApi.saveOnboardingDraft(currentStep, { ...formData, selectedPlan });
       setSaveStatus("saved");
     } catch (e) {
       console.warn("Could not save draft before leaving:", e);
@@ -475,12 +521,16 @@ export default function OnboardingPage() {
     supportCategories: ["Information", "Commande", "Tarifs & Devis", "Autre demande"],
   };
 
+  const selectedPlanConfig = getPlanConfig(selectedPlan);
+
   // Condition for Mobile Next button
   const canProceedMobile =
     currentStep === 1
       ? formData.companyName.trim().length >= 2 && nameAvailability.available !== false
       : currentStep === 2
       ? formData.city.trim().length >= 2
+      : currentStep === 3
+      ? Boolean(selectedPlan)
       : true;
 
   if (isInitializing) {
@@ -501,68 +551,70 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="relative flex-1 flex flex-col min-h-screen bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(13,27,61,0.04),rgba(248,250,252,0.95)_70%)] bg-[#F8FAFC] text-[#0D1B3D]">
-      {/* 1. Header Institutionnel Sobre */}
-      <OnboardingHeader
-        saveStatus={saveStatus}
-        currentStep={currentStep}
-        totalSteps={3}
-        hasWorkspace={hasWorkspace}
-        onPause={handlePauseOnboarding}
-      />
+    <>
+      {/* ============================================================ */}
+      {/* VUE DESKTOP (>= 1024px / lg) : 100% PRÉSERVÉE SANS CHANGEMENT */}
+      {/* ============================================================ */}
+      <div className="hidden lg:flex flex-col flex-1 min-h-screen bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(13,27,61,0.04),rgba(248,250,252,0.95)_70%)] bg-[#F8FAFC] text-[#0D1B3D]">
+        {/* 1. Header Institutionnel Sobre */}
+        <OnboardingHeader
+          saveStatus={saveStatus}
+          currentStep={currentStep}
+          totalSteps={selectedPlan !== "decouverte" && currentStep === 5 ? 5 : 4}
+          hasWorkspace={hasWorkspace}
+          onPause={handlePauseOnboarding}
+        />
 
-      {/* 2. Main Stage */}
-      <main className="relative z-10 flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-28 sm:pb-12">
-        {/* ============================================================ */}
-        {/* ÉTAPES 1 & 2 : FORMULAIRE PLEIN CENTRE (ZÉRO VISUALISEUR)      */}
-        {/* ============================================================ */}
-        {(currentStep === 1 || currentStep === 2) && (
-          <div className="w-full max-w-2xl lg:max-w-3xl mx-auto space-y-6">
-            {/* Indicateur de Progression Discret */}
-            <div className="flex justify-center sm:justify-start">
-              <OnboardingStepIndicator
-                currentStep={currentStep}
-                maxAccessibleStep={maxAccessibleStep}
-                onStepClick={handleGoToStep}
-              />
-            </div>
-
-            {/* Carte de Formulaire Éditoriale Généreuse */}
-            <div
-              ref={step1And2ContainerRef}
-              className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-[0_20px_50px_rgba(13,27,61,0.05),0_1px_3px_rgba(0,0,0,0.02)] transition-all"
-            >
-              {currentStep === 1 && (
-                <Step1Company
-                  companyName={formData.companyName}
-                  sector={formData.sector}
-                  nameAvailability={nameAvailability}
-                  onUpdateField={updateField}
-                  onNext={handleNextFromStep1}
+        {/* 2. Main Stage Desktop */}
+        <main className="relative z-10 flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-28 sm:pb-12">
+          {/* ============================================================ */}
+          {/* ÉTAPES 1 & 2 : FORMULAIRES DE BASE (ENTREPRISE & LOCALISATION) */}
+          {/* ============================================================ */}
+          {(currentStep === 1 || currentStep === 2) && (
+            <div className="w-full max-w-2xl lg:max-w-3xl mx-auto space-y-6">
+              {/* Indicateur de Progression Discret */}
+              <div className="flex justify-center sm:justify-start">
+                <OnboardingStepIndicator
+                  currentStep={currentStep}
+                  maxAccessibleStep={maxAccessibleStep}
+                  onStepClick={handleGoToStep}
                 />
-              )}
+              </div>
 
-              {currentStep === 2 && (
-                <Step2LocationContact
-                  country={formData.country}
-                  city={formData.city}
-                  supportWhatsApp={formData.supportWhatsApp}
-                  onUpdateField={updateField}
-                  onNext={handleNextFromStep2}
-                  onBack={handleBack}
-                />
-              )}
+              {/* Carte de Formulaire Éditoriale Généreuse */}
+              <div
+                ref={stepContainerRef}
+                className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-[0_20px_50px_rgba(13,27,61,0.05),0_1px_3px_rgba(0,0,0,0.02)] transition-all"
+              >
+                {currentStep === 1 && (
+                  <Step1Company
+                    companyName={formData.companyName}
+                    sector={formData.sector}
+                    nameAvailability={nameAvailability}
+                    onUpdateField={updateField}
+                    onNext={handleNextFromStep1}
+                  />
+                )}
+
+                {currentStep === 2 && (
+                  <Step2LocationContact
+                    country={formData.country}
+                    city={formData.city}
+                    supportWhatsApp={formData.supportWhatsApp}
+                    onUpdateField={updateField}
+                    onNext={handleNextFromStep2}
+                    onBack={handleBack}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ============================================================ */}
-        {/* ÉTAPE 3 : SCÈNE ÉDITORIALE AVEC SMARTPHONE GÉNÉRIQUE EN VEDETTE */}
-        {/* ============================================================ */}
-        {currentStep === 3 && (
-          <div ref={step3StageRef} className="w-full max-w-[1240px] mx-auto space-y-8">
-            {/* En-tête & Progression de la Scène */}
-            <div ref={step3HeaderRef} className="space-y-4">
+          {/* ============================================================ */}
+          {/* ÉTAPE 3 : SÉLECTION DE LA FORMULE COMMERCIALE               */}
+          {/* ============================================================ */}
+          {currentStep === 3 && (
+            <div className="w-full max-w-6xl mx-auto space-y-6">
               <div className="flex justify-center sm:justify-start">
                 <OnboardingStepIndicator
                   currentStep={currentStep}
@@ -572,127 +624,238 @@ export default function OnboardingPage() {
                 />
               </div>
 
-              <div className="text-left space-y-1.5 max-w-2xl">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0D1B3D] tracking-tight">
-                  Découvrez votre guichet public officiel
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  Voici le rendu exact de la page d&apos;accueil que vos clients et partenaires consulteront pour échanger avec votre équipe, déposer des réclamations ou obtenir une assistance.
-                </p>
-              </div>
-            </div>
-
-            {/* Scène Asymétrique Desktop / Séquentielle Mobile */}
-            <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 xl:gap-14">
-              {/* 
-                SMARTPHONE GÉNÉRIQUE HAUTE FINITION (Au premier plan)
-                Défilement vertical indépendant à l'intérieur
-              */}
-              <div
-                ref={step3PhoneRef}
-                className="w-full max-w-[360px] sm:max-w-[380px] shrink-0 flex flex-col items-center"
-              >
-                <div className="w-full flex items-center justify-between px-2 mb-2 text-[11px] font-semibold text-slate-400">
-                  <span>Aperçu interactif</span>
-                  <span className="font-mono text-slate-500">
-                    zadesk.com/entreprises/{previewData.slug}
-                  </span>
-                </div>
-
-                <OnboardingPreview data={previewData} />
-              </div>
-
-              {/* RÉCAPITULATIF ÉDITORIAL & VALIDATION */}
-              <div
-                ref={step3RecapRef}
-                className="w-full max-w-xl lg:max-w-lg xl:max-w-xl space-y-6"
-              >
-                <Step3Review
-                  companyName={formData.companyName}
-                  sector={formData.sector}
-                  country={formData.country}
-                  city={formData.city}
-                  supportWhatsApp={formData.supportWhatsApp}
-                  generatedSlug={formData.slug}
+              <div ref={stepContainerRef}>
+                <Step3PlanSelection
                   selectedPlan={selectedPlan}
-                  isSubmitting={isSubmitting}
-                  submitError={errorMsg}
-                  onGoToStep={handleGoToStep}
-                  onSubmit={handleFinalSubmit}
+                  onSelectPlan={(plan) => {
+                    setSelectedPlan(plan);
+                    if (typeof window !== "undefined") {
+                      sessionStorage.setItem("zadesk_selected_plan", plan);
+                    }
+                    triggerAutoSave(3, { ...formData, selectedPlan: plan } as any);
+                  }}
+                  onNext={handleNextFromStep3}
                   onBack={handleBack}
                 />
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ============================================================ */}
-        {/* ÉTAPE 4 : RÉCAPITULATIF COMMERCIAL & VALIDATION TARIFAIRE   */}
-        {/* ============================================================ */}
-        {currentStep === 4 && (
-          <div className="w-full max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
-            <div className="space-y-4">
-              <div className="flex justify-center sm:justify-start">
-                <OnboardingStepIndicator
-                  currentStep={4}
-                  maxAccessibleStep={4}
-                  hasCommercialRecap={true}
-                />
+          {/* ============================================================ */}
+          {/* ÉTAPE 4 : APERÇU DU GUICHET & VALIDATION FINALE              */}
+          {/* ============================================================ */}
+          {currentStep === 4 && (
+            <div ref={step4StageRef} className="w-full max-w-[1240px] mx-auto space-y-8">
+              {/* En-tête & Progression de la Scène */}
+              <div ref={step4HeaderRef} className="space-y-4">
+                <div className="flex justify-center sm:justify-start">
+                  <OnboardingStepIndicator
+                    currentStep={currentStep}
+                    maxAccessibleStep={maxAccessibleStep}
+                    onStepClick={handleGoToStep}
+                    hasCommercialRecap={selectedPlan !== "decouverte"}
+                  />
+                </div>
+
+                <div className="text-left space-y-1.5 max-w-2xl">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0D1B3D] tracking-tight">
+                    Découvrez votre guichet public officiel
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                    Voici le rendu exact de la page d&apos;accueil que vos clients et partenaires consulteront pour échanger avec votre équipe, déposer des réclamations ou obtenir une assistance.
+                  </p>
+                </div>
               </div>
 
-              <div className="text-left space-y-1.5">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0D1B3D] tracking-tight uppercase">
-                  Récapitulatif de votre formule
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  Votre espace a été créé avec succès avec l&apos;accès Découverte actif. Vérifiez le détail de votre abonnement avant le passage au règlement.
-                </p>
+              {/* Scène Asymétrique Desktop */}
+              <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10 xl:gap-14">
+                {/* SMARTPHONE GÉNÉRIQUE HAUTE FINITION */}
+                <div
+                  ref={step4PhoneRef}
+                  className="w-full max-w-[360px] sm:max-w-[380px] shrink-0 flex flex-col items-center"
+                >
+                  <div className="w-full flex items-center justify-between px-2 mb-2 text-[11px] font-semibold text-slate-400">
+                    <span>Aperçu interactif</span>
+                    <span className="font-mono text-slate-500">
+                      zadesk.com/entreprises/{previewData.slug}
+                    </span>
+                  </div>
+
+                  <OnboardingPreview data={previewData} />
+                </div>
+
+                {/* RÉCAPITULATIF ÉDITORIAL & VALIDATION */}
+                <div
+                  ref={step4RecapRef}
+                  className="w-full max-w-xl lg:max-w-lg xl:max-w-xl space-y-6"
+                >
+                  <Step3Review
+                    companyName={formData.companyName}
+                    sector={formData.sector}
+                    country={formData.country}
+                    city={formData.city}
+                    supportWhatsApp={formData.supportWhatsApp}
+                    generatedSlug={formData.slug}
+                    selectedPlan={selectedPlan}
+                    isSubmitting={isSubmitting}
+                    submitError={errorMsg}
+                    onGoToStep={handleGoToStep}
+                    onSubmit={handleFinalSubmit}
+                    onBack={handleBack}
+                  />
+                </div>
               </div>
             </div>
+          )}
 
-            <Step4CommercialRecap
+          {/* ============================================================ */}
+          {/* ÉTAPE 5 : RÉCAPITULATIF COMMERCIAL & PAIEMENT SASPAY         */}
+          {/* ============================================================ */}
+          {currentStep === 5 && (
+            <div className="w-full max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
+              <div className="space-y-4">
+                <div className="flex justify-center sm:justify-start">
+                  <OnboardingStepIndicator
+                    currentStep={5}
+                    maxAccessibleStep={5}
+                    hasCommercialRecap={true}
+                  />
+                </div>
+
+                <div className="text-left space-y-1.5">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0D1B3D] tracking-tight uppercase">
+                    Récapitulatif de votre souscription
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                    Votre espace a été créé avec succès avec l&apos;accès Découverte actif. Finalisez votre abonnement en toute sécurité via SasPay.
+                  </p>
+                </div>
+              </div>
+
+              <Step4CommercialRecap
+                companyName={createdWorkspace?.name || formData.companyName}
+                planId={selectedPlan}
+                planName={selectedPlanConfig.name}
+                priceXaf={selectedPlanConfig.priceXaf}
+                workspaceId={createdWorkspace?.id}
+                workspaceSlug={createdWorkspace?.slug || formData.slug}
+                onContinueToWorkspace={() => router.push("/app")}
+              />
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ============================================================ */}
+      {/* NOUVELLE VUE MOBILE / PWA (< 1024px / lg:hidden) : DÉDIÉE   */}
+      {/* ============================================================ */}
+      <div className="lg:hidden flex flex-col flex-1 min-h-[100dvh] bg-[#FAFAF8] text-[#0D1B3D]">
+        {/* 1. TopBar Mobile avec retour, étapes et auto-save */}
+        <MobileOnboardingTopBar
+          currentStep={currentStep}
+          totalSteps={selectedPlan !== "decouverte" && currentStep === 5 ? 5 : 4}
+          saveStatus={saveStatus}
+          onBack={handleBack}
+          onPause={handlePauseOnboarding}
+        />
+
+        {/* 2. Corps Défilable Mobile */}
+        <main className="flex-1 w-full max-w-lg mx-auto px-4 py-4 space-y-4">
+          {/* Mini-guichet compact : actif uniquement sur étapes 1 et 2 */}
+          {(currentStep === 1 || currentStep === 2) && (
+            <MobileMiniDeskCompact
+              companyName={formData.companyName}
+              slug={formData.slug}
+              sector={formData.sector}
+              city={formData.city}
+              country={formData.country}
+            />
+          )}
+
+          {/* Étape 1 Mobile : Identité & 8 Secteurs */}
+          {currentStep === 1 && (
+            <MobileStep1Company
+              companyName={formData.companyName}
+              sector={formData.sector}
+              nameAvailability={nameAvailability}
+              onUpdateField={updateField}
+            />
+          )}
+
+          {/* Étape 2 Mobile : Pays CEMAC/RDC, Ville & WhatsApp */}
+          {currentStep === 2 && (
+            <MobileStep2Location
+              country={formData.country}
+              city={formData.city}
+              supportWhatsApp={formData.supportWhatsApp}
+              onUpdateField={updateField}
+            />
+          )}
+
+          {/* Étape 3 Mobile : Formules d'abonnement (sans mini-guichet) */}
+          {currentStep === 3 && (
+            <MobileStep3Plan
+              selectedPlan={selectedPlan}
+              onSelectPlan={(plan) => {
+                setSelectedPlan(plan);
+                if (typeof window !== "undefined") {
+                  sessionStorage.setItem("zadesk_selected_plan", plan);
+                }
+                triggerAutoSave(3, { ...formData, selectedPlan: plan } as any);
+              }}
+            />
+          )}
+
+          {/* Étape 4 Mobile : Aperçu Guichet & Validation */}
+          {currentStep === 4 && (
+            <MobileStep4Review
+              companyName={formData.companyName}
+              sector={formData.sector}
+              country={formData.country}
+              city={formData.city}
+              supportWhatsApp={formData.supportWhatsApp}
+              generatedSlug={formData.slug}
+              selectedPlanConfig={selectedPlanConfig}
+              previewData={previewData}
+              submitError={errorMsg}
+              onGoToStep={handleGoToStep}
+            />
+          )}
+
+          {/* Étape 5 Mobile : Récapitulatif & SasPay */}
+          {currentStep === 5 && (
+            <MobileStep5SasPay
               companyName={createdWorkspace?.name || formData.companyName}
               planId={selectedPlan}
-              planName={
-                selectedPlan === "starter"
-                  ? "Starter"
-                  : selectedPlan === "pro"
-                  ? "Pro"
-                  : selectedPlan === "entreprise"
-                  ? "Entreprise"
-                  : "Découverte"
-              }
-              priceXaf={
-                selectedPlan === "starter"
-                  ? 10000
-                  : selectedPlan === "pro"
-                  ? 45000
-                  : selectedPlan === "entreprise"
-                  ? 150000
-                  : 0
-              }
-              workspaceSlug={createdWorkspace?.slug || formData.slug}
+              planName={selectedPlanConfig.name}
+              priceXaf={selectedPlanConfig.priceXaf}
+              workspaceId={createdWorkspace?.id}
               onContinueToWorkspace={() => router.push("/app")}
             />
-          </div>
-        )}
-      </main>
+          )}
+        </main>
 
-      {/* Barre d'Action Flottante Mobile (active uniquement lors des étapes 1 à 3) */}
-      {currentStep <= 3 && (
-        <OnboardingMobileNav
-          currentStep={currentStep}
-          isSubmitting={isSubmitting}
-          canProceed={canProceedMobile}
-          customSubmitLabel={selectedPlan !== "decouverte" ? "Créer & voir le récapitulatif" : "Activer mon espace"}
-          onNext={() => {
-            if (currentStep === 1) handleNextFromStep1();
-            else if (currentStep === 2) handleNextFromStep2();
-            else if (currentStep === 3) handleFinalSubmit();
-          }}
-          onBack={handleBack}
-        />
-      )}
-    </div>
+        {/* 3. Barre d'action basse persistante au pouce (étapes 1 à 4) */}
+        {currentStep <= 4 && (
+          <MobileStickyActionBar
+            currentStep={currentStep}
+            isSubmitting={isSubmitting}
+            canProceed={canProceedMobile}
+            customSubmitLabel={
+              selectedPlan !== "decouverte"
+                ? `Créer mon espace & procéder au paiement (${selectedPlanConfig.price} F)`
+                : "Activer mon espace gratuitement"
+            }
+            onNext={() => {
+              if (currentStep === 1) handleNextFromStep1();
+              else if (currentStep === 2) handleNextFromStep2();
+              else if (currentStep === 3) handleNextFromStep3();
+              else if (currentStep === 4) handleFinalSubmit();
+            }}
+            onBack={handleBack}
+          />
+        )}
+      </div>
+    </>
   );
 }

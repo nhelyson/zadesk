@@ -1,0 +1,127 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #F8F9FA
+skinparam defaultTextAlignment left
+skinparam roundCorner 8
+skinparam packageTitleAlignment left
+skinparam wrapWidth 220
+
+<style>
+root {
+  FontName "Helvetica"
+  FontSize 11
+  FontColor #2D3142
+  LineColor #CBD5E1
+}
+header {
+  FontName "Georgia"
+  FontSize 13
+  FontStyle bold
+  FontColor #2D3142
+}
+package {
+  FontName "Georgia"
+  FontSize 12
+  FontStyle bold
+  FontColor #2D3142
+  LineColor #4F5D75
+  LineThickness 1.2
+  BackgroundColor #FFFFFF
+}
+rectangle {
+  RoundCorner 6
+  LineColor #CBD5E1
+  LineThickness 1.0
+  BackgroundColor #FFFFFF
+  FontColor #334155
+  FontSize 11
+}
+actor {
+  FontName "Helvetica"
+  FontSize 11
+  FontStyle bold
+  FontColor #2D3142
+  LineColor #4F5D75
+  BackgroundColor #FFFFFF
+}
+arrow {
+  LineColor #4F5D75
+  FontColor #2D3142
+  FontSize 10
+  LineThickness 1.1
+}
+.target {
+  LineColor #EB6C36
+  LineStyle 4-3
+  LineThickness 1.2
+  BackgroundColor #FFFAF8
+}
+.accentBadge {
+  FontColor #EB6C36
+  FontStyle bold
+}
+</style>
+
+' Alignement horizontal des deux colonnes principales
+rectangle "COLONNE GAUCHE : ESPACE PUBLIC" as col_left #F8F9FA;line:none {
+  actor "Client\n<size:9><color:#64748B>(Consommateur)</color></size>" as client
+  
+  package "PORTAIL PUBLIC\n<size:10><color:#64748B>Accès libre sur le Web sans compte</color></size>" as p_portal #FFFFFF {
+    rectangle "<b>Annuaire des Entreprises</b>\n---\n• Recherche commerces certifiés\n• Filtrage sectoriel et local" as pub_annuaire
+    rectangle "<b>Vitrine & Établissements</b>\n---\n• Présentation et coordonnées\n• Adresses & horaires ateliers\n  <i><size:9><color:#64748B>(si configurés par l'entreprise)</color></size></i>" as pub_vitrine
+    rectangle "<b>Soumission d'Assistance SAV</b>\n---\n• Formulaire de réclamation directe\n• Pièces justificatives et panne\n• Dépôt libre sans compte client" as pub_soumission
+    rectangle "<b>Tchat en Direct & Suivi</b>\n---\n• Dialogue instantané avec le SAV\n• Session sécurisée par jeton public\n• Consultation de l'avancement" as pub_tchat
+  }
+}
+
+rectangle "COLONNE DROITE : ESPACE ENTREPRISE" as col_right #F8F9FA;line:none {
+  package "Acteurs Internes de l'Entreprise" as p_actors #FFFFFF {
+    actor "Conseiller SAV\n<size:9><color:#64748B>(AGENT)</color></size>" as agent
+    actor "Superviseur SAV\n<size:9><color:#64748B>(MANAGER)</color></size>" as manager
+    actor "Administrateur\n<size:9><color:#64748B>(ADMIN)</color></size>" as admin
+    actor "Propriétaire\n<size:9><color:#64748B>(OWNER)</color></size>" as owner
+  }
+  
+  package "WORKSPACE ENTREPRISE\n<size:10><color:#64748B>Espace Collaboratif Multi-Tenant Sécurisé</color></size>" as p_ws #FFFFFF {
+    rectangle "<b>1. Gestion des Tickets SAV</b>\n---\n• Numérotation unique (TICK-ABC)\n• Cycle : OPEN → IN_PROGRESS → RESOLVED\n• Surveillance SLA et alertes d'échéance\n• Journal d'activité (TicketActivity)\n• Partage inter-agences (TicketShare)" as mod_tickets
+    
+    rectangle "<b>2. Conversations & Dialogue Direct</b>\n---\n• Messagerie instantanée omnicanale\n• Prise en charge des tchats clients\n• Notes internes d'équipe confidentielles\n• Élévation directe en Ticket SAV" as mod_conv
+    
+    rectangle "<b>3. Équipe & Compétences</b>\n---\n• Statuts (AVAILABLE, BUSY, AWAY...)\n• Plafonds de charge (maxCapacity)\n• Matrice de compétences (Skills)\n• Affectation automatique & manuelle" as mod_team
+    
+    rectangle "<b>4. Établissements & Succursales</b>\n<i><size:9><color:#64748B>(Module optionnel selon l'entreprise)</color></size></i>\n---\n• Réseau d'agences et ateliers SAV\n• Horaires, adresses et coordonnées\n• Affectation géographique des agents" as mod_etab
+    
+    rectangle "<b>5. Membres, Rôles & Accès</b>\n---\n• Invitations email et attribution RBAC\n• Rôles : OWNER, ADMIN, MANAGER, AGENT\n• Traçabilité et journal d'audit (AuditLog)\n• Suspension et révocation des accès" as mod_members
+    
+    rectangle "<b>6. Paramètres & Abonnements</b>\n---\n• Profil d'entreprise, coordonnées & SLA\n• Forfaits SaaS (Starter, Pro, Enterprise)\n• Paiements SasPay (Mobile Money / Cartes)\n• Régulation dynamique des quotas" as mod_billing
+    
+    rectangle "<b>7. Assistance IA & RAG (Supervisée)</b>\n<size:9.5><color:#EB6C36><b><<Composante cible • En préparation>></b></color></size>\n---\n• Base documentaire de référence entreprise\n• Recherche sémantique vectorielle (chunks)\n• Suggestions de réponses pré-rédigées (Llama)\n• <b>Escalade humaine immédiate obligatoire :</b>\n  1. Détection d'irritation client\n  2. Litige financier > 50 000 XAF\n  3. Demande explicite de conseiller humain" as mod_ai <<target>>
+  }
+}
+
+' Relations horizontales entre colonnes
+col_left -[hidden]right- col_right
+
+' Accès aux espaces
+client -down-> p_portal : <b>Accède librement</b>\n(sans compte)
+
+p_actors -down-> p_ws : <b>S'authentifient par rôle (RBAC)</b>\n(sessions sécurisées HttpOnly / OTP)
+
+' Relations fonctionnelles internes au portail
+pub_annuaire -down-> pub_vitrine
+pub_vitrine -down-> pub_soumission
+pub_vitrine -down-> pub_tchat
+
+' Interactions transversales entre espaces
+pub_soumission -right-> mod_tickets : <b>Transmet la réclamation</b>\n(création ticket sans compte)
+pub_tchat <-right-> mod_conv : <b>Échanges en direct</b>\n(session sécurisée par jeton)
+
+' Coordination interne Workspace
+mod_conv -down-> mod_tickets : <b>Élève en Ticket SAV</b>
+mod_team -up-> mod_tickets : <b>Affecte selon profil</b>
+
+' Interactions IA RAG (Cible)
+mod_ai .up.> mod_conv : <color:#EB6C36><b>Suggère réponses</b></color>
+mod_ai .up.> mod_tickets : <color:#EB6C36><b>Escalade obligatoire</b></color>
+
+@enduml

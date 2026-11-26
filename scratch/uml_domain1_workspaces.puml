@@ -1,0 +1,151 @@
+@startuml zadesk_domain1_workspaces
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+package "Domaine 1 : Gestion des Entreprises & Multi-Tenant" {
+
+    enum Role <<enumeration>> {
+        OWNER
+        ADMIN
+        MANAGER
+        AGENT
+    }
+
+    enum MembershipStatus <<enumeration>> {
+        ACTIVE
+        SUSPENDED
+        ARCHIVED
+    }
+
+    enum EstablishmentType <<enumeration>> {
+        HEADQUARTERS
+        BRANCH
+        REPAIR_CENTER
+        STORE
+        WAREHOUSE
+        RELAY_POINT
+    }
+
+    class Workspace <<entity>> {
+        - id: CUID {readOnly, unique}
+        - name: String
+        - slug: String {unique}
+        - category: String
+        - description: String?
+        - logoUrl: String?
+        - country: String = "Congo"
+        - currency: String = "XAF"
+        - plan: String = "FREE"
+        - isPublic: Boolean = true
+        - allowCustomerChat: Boolean = true
+        - activeChats: Integer = 0
+        - slaResponseHours: Integer = 2
+        - slaResolutionHours: Integer = 24
+        - operatingHours: Json?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + updateSettings(data: WorkspaceUpdateDTO): Workspace
+        + togglePublicVisibility(isPublic: Boolean): void
+        + getCapacityMetrics(): CapacityMetricsDTO
+        + checkSlaCompliance(ticket: Ticket): Boolean
+    }
+
+    class User <<entity>> {
+        - id: CUID {readOnly, unique}
+        - email: String {unique}
+        - firstName: String
+        - lastName: String
+        - avatarUrl: String?
+        - passwordHash: String?
+        - googleId: String? {unique}
+        - emailVerified: Boolean = false
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + verifyEmail(): void
+        + updateProfile(firstName: String, lastName: String): void
+        + changePassword(newPasswordHash: String): void
+        + getActiveMemberships(): List<Membership>
+    }
+
+    class Membership <<entity>> {
+        - id: CUID {readOnly, unique}
+        - userId: String
+        - workspaceId: String
+        - role: Role
+        - status: MembershipStatus = ACTIVE
+        - joinedAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + changeRole(newRole: Role): void
+        + suspend(reason: String): void
+        + reactivate(): void
+        + archive(): void
+    }
+
+    class WorkspaceInvitation <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - invitedById: String
+        - email: String
+        - role: Role = AGENT
+        - token: String {unique}
+        - status: String = "PENDING"
+        - expiresAt: DateTime
+        - createdAt: DateTime {readOnly}
+        --
+        + accept(userId: String): Membership
+        + cancel(): void
+        + isExpired(): Boolean
+    }
+
+    class Establishment <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - name: String
+        - type: EstablishmentType = BRANCH
+        - description: String?
+        - isMain: Boolean = false
+        - isPublic: Boolean = true
+        - isActive: Boolean = true
+        - address: String
+        - city: String = "Brazzaville"
+        - country: String = "Congo"
+        - phone: String?
+        - email: String?
+        - whatsapp: String?
+        - openingHours: String?
+        - businessHours: Json?
+        - services: Json?
+        - createdAt: DateTime {readOnly}
+        --
+        + updateDetails(data: EstablishmentDTO): void
+        + toggleStatus(isActive: Boolean): void
+        + setAsMainBranch(): void
+    }
+
+    ' Relations du Domaine 1
+    User "1" -- "0..*" Membership : possède >
+    Workspace "1" *-- "0..*" Membership : contient >
+    Workspace "1" *-- "0..*" WorkspaceInvitation : émet >
+    Workspace "1" *-- "0..*" Establishment : possède >
+}
+@enduml

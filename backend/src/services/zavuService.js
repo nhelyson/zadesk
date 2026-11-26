@@ -303,3 +303,77 @@ export async function sendInvitationEmail({
     };
   }
 }
+
+/**
+ * Send a conversation alert email (customer reply or agent incoming message fallback)
+ * using Zavu REST API.
+ */
+export async function sendNotificationAlertEmail({
+  to,
+  subject,
+  heading,
+  body,
+  ctaLabel = "Ouvrir la conversation",
+  ctaUrl,
+  workspaceName = "Zalisk",
+}) {
+  if (!to || !subject || !body) {
+    return { success: false, status: 400, temporary: false, error: "Paramètres email incomplets." };
+  }
+
+  const textLines = [
+    heading || subject,
+    "",
+    body,
+    "",
+    ctaUrl ? `${ctaLabel} : ${ctaUrl}` : "",
+    "",
+    `— ${workspaceName} via Zalisk`,
+  ].filter((line) => line !== undefined);
+
+  if (process.env.NODE_ENV === "test") {
+    logger.info(`[ZAVU:TEST] Envoi alerte email simulé (${maskEmail(to)})`);
+    return { success: true, status: 200, data: { simulated: true } };
+  }
+
+  if (!env.ZAVUDEV_API_KEY) {
+    logger.warn("[ZAVU] ZAVUDEV_API_KEY absent — notification email ignorée.");
+    return { success: false, status: 500, temporary: true, error: "Clé API Zavu non configurée." };
+  }
+
+  try {
+    const senderId = env.ZAVU_SENDER_ID || "kd7a0za0kdsrc381rvnfp3nszd8ds0c6";
+    const response = await fetch("https://api.zavu.dev/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.ZAVUDEV_API_KEY}`,
+        "Zavu-Sender": senderId,
+      },
+      body: JSON.stringify({
+        to,
+        channel: "email",
+        subject,
+        text: textLines.join("\n"),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorJson = await response.json().catch(() => ({}));
+      const errorMsg = errorJson.message || `HTTP ${response.status}`;
+      logger.warn(`[ZAVU] Notification email non envoyée (${response.status}): ${errorMsg}`);
+      return {
+        success: false,
+        status: response.status,
+        temporary: response.status === 429 || response.status >= 500,
+        error: errorMsg,
+      };
+    }
+
+    const result = await response.json().catch(() => ({}));
+    return { success: true, status: response.status, data: result };
+  } catch (error) {
+    logger.warn(`[ZAVU] Erreur réseau alerte email: ${error.message}`);
+    return { success: false, status: 500, temporary: true, error: error.message };
+  }
+}

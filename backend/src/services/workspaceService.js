@@ -8,7 +8,17 @@ import { createOutboxEvent, dispatchOutboxEvents } from "../outbox/outboxDispatc
 import { QUEUE_NAMES } from "../queues/queueManager.js";
 import { logger } from "../utils/logger.js";
 import { listEstablishments } from "./establishmentService.js";
-import { getWorkspaceActivePlan, OFFICIAL_PLANS } from "./commercialService.js";
+import {
+  getWorkspacePresenceMap,
+  normalizeAvailability,
+  PRESENCE_STATES,
+} from "./presenceService.js";
+import {
+  getWorkspaceActivePlan,
+  OFFICIAL_PLANS,
+  prepareLegacyWorkspaceDecouverteSubscription,
+  createUpgradeIntent,
+} from "./commercialService.js";
 
 /**
  * Generate a clean URL slug from name
@@ -246,9 +256,29 @@ export async function createWorkspaceForUser(userId, data = {}) {
       }
     }
 
-    // Persist commercial intent in OnboardingDraft store (compatible with current unmigrated PostgreSQL)
+    // 1. Initialiser systématiquement la souscription canonique DECOUVERTE active par défaut
+    try {
+      await prepareLegacyWorkspaceDecouverteSubscription(workspace.id, { tx });
+    } catch (subErr) {
+      logger.warn(`[WorkspaceService] Notice initialisation souscription DECOUVERTE: ${subErr.message}`);
+    }
+
+    // 2. Traitement du forfait commercial sélectionné
     if (draftPlan && draftPlan !== "DECOUVERTE") {
       const priceXaf = OFFICIAL_PLANS[draftPlan]?.priceXaf || 0;
+      
+      // Enregistrement formel de l'intention d'upgrade dans PostgreSQL (SubscriptionIntent & PaymentAttempt)
+      try {
+        await createUpgradeIntent(userId, {
+          workspaceId: workspace.id,
+          targetPlanId: draftPlan,
+          tx,
+        });
+      } catch (intentErr) {
+        logger.warn(`[WorkspaceService] Notice enregistrement SubscriptionIntent pour ${draftPlan}: ${intentErr.message}`);
+      }
+
+      // Persistance de l'état d'onboarding (Étape 5 = Récapitulatif commercial & SasPay)
       const currentDraftData = (existingDraft?.data && typeof existingDraft.data === "object")
         ? existingDraft.data
         : {};
@@ -256,7 +286,7 @@ export async function createWorkspaceForUser(userId, data = {}) {
       await tx.onboardingDraft.upsert({
         where: { userId },
         update: {
-          step: 4, // Step 4 = Commercial Recap
+          step: 5,
           data: {
             ...currentDraftData,
             workspaceId: workspace.id,
@@ -277,7 +307,7 @@ export async function createWorkspaceForUser(userId, data = {}) {
         },
         create: {
           userId,
-          step: 4,
+          step: 5,
           data: {
             workspaceId: workspace.id,
             workspaceName: workspace.name,
@@ -297,7 +327,7 @@ export async function createWorkspaceForUser(userId, data = {}) {
         },
       });
     } else {
-      // Découverte plan: onboarding is completely finished, remove temporary draft
+      // Forfait Découverte : onboarding terminé avec succès, nettoyage du brouillon temporaire
       await tx.onboardingDraft.deleteMany({
         where: { userId },
       });
@@ -454,6 +484,24 @@ export async function getWorkspaceById(workspaceId) {
 export const getDashboardStatsCacheKey = (workspaceId) => `workspace:${workspaceId}:dashboard`;
 
 /**
+ * Invalide immédiatement les caches opérationnels chauds lors d'une mutation (tickets, conversations, clients)
+ */
+export async function invalidateWorkspaceDataCache(workspaceId) {
+  if (!workspaceId) return;
+  try {
+    await Promise.all([
+      cacheService.del(`workspace:${workspaceId}:dashboard`),
+      cacheService.del(`workspace:${workspaceId}:analytics`),
+      cacheService.del(`workspace:${workspaceId}:tickets`),
+      cacheService.del(`workspace:${workspaceId}:conversations`),
+      cacheService.del(`workspace:${workspaceId}:customers`),
+    ]);
+  } catch (err) {
+    console.warn(`[Cache] Échec d'invalidation du workspace ${workspaceId}:`, err.message);
+  }
+}
+
+/**
  * Get live SAV Operational Dashboard statistics
  */
 export async function getWorkspaceDashboardStats(workspaceId) {
@@ -468,8 +516,10 @@ export async function getWorkspaceDashboardStats(workspaceId) {
         waitingAgentCount,
         openTicketsCount,
         totalTicketsCount,
+        ticketCountsByStatus,
         realConversations,
         recentTickets,
+        recentActivitiesRaw,
       ] = await Promise.all([
         prisma.conversation.count({
           where: { workspaceId, status: "ACTIVE" },
@@ -486,10 +536,15 @@ export async function getWorkspaceDashboardStats(workspaceId) {
         prisma.ticket.count({
           where: { workspaceId },
         }),
+        prisma.ticket.groupBy({
+          by: ["status"],
+          where: { workspaceId },
+          _count: { id: true },
+        }),
         prisma.conversation.findMany({
           where: { workspaceId, status: "ACTIVE" },
           orderBy: [{ priority: "desc" }, { lastMessageAt: "desc" }],
-          take: 5,
+          take: 6,
           include: {
             messages: {
               take: 1,
@@ -511,11 +566,38 @@ export async function getWorkspaceDashboardStats(workspaceId) {
             createdAt: true,
           },
         }),
+        prisma.ticketActivity.findMany({
+          where: { ticket: { workspaceId } },
+          orderBy: { createdAt: "desc" },
+          take: 6,
+          include: {
+            ticket: {
+              select: {
+                id: true,
+                reference: true,
+                title: true,
+              },
+            },
+          },
+        }),
       ]);
+
+      const ticketBreakdown = {
+        OPEN: 0,
+        IN_PROGRESS: 0,
+        WAITING_CUSTOMER: 0,
+        RESOLVED: 0,
+        CLOSED: 0,
+      };
+      ticketCountsByStatus.forEach((g) => {
+        if (g.status && ticketBreakdown[g.status] !== undefined) {
+          ticketBreakdown[g.status] = g._count.id;
+        }
+      });
 
       const priorityQueue = realConversations.map((c) => ({
         id: c.id,
-        customerName: c.customerName || "Visiteur web",
+        customerName: c.customerName || "Client Zadesk",
         phone: c.customerPhone || null,
         channel: c.channel || "PORTAL",
         lastMessage: c.messages[0]?.content || "Conversation initiée",
@@ -526,13 +608,32 @@ export async function getWorkspaceDashboardStats(workspaceId) {
         unreadCount: 0,
       }));
 
-      const recentActivity = recentTickets.map((t) => ({
-        id: `act-${t.id}`,
-        type: "TICKET_EVENT",
-        title: `Ticket ${t.reference} : ${t.title}`,
-        description: `Catégorie : ${t.category || "Général"} • Statut : ${t.status}`,
-        timestamp: new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-      }));
+      // Fusionner les activités réelles (affectations, résolutions, créations)
+      const recentActivity = recentActivitiesRaw.length > 0
+        ? recentActivitiesRaw.map((a) => {
+            const typeLabel =
+              a.type === "ASSIGNMENT"
+                ? "Affectation"
+                : a.type === "RESOLUTION"
+                ? "Résolution"
+                : a.type === "STATUS_CHANGE"
+                ? "Changement statut"
+                : "Note dossier";
+            return {
+              id: a.id,
+              type: a.type,
+              title: `${typeLabel} • ${a.ticket?.reference || "SAV"}`,
+              description: a.content || a.ticket?.title || "Mise à jour du dossier",
+              timestamp: new Date(a.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+            };
+          })
+        : recentTickets.map((t) => ({
+            id: `act-${t.id}`,
+            type: "TICKET_EVENT",
+            title: `Dossier créé • ${t.reference}`,
+            description: `${t.title} (${t.status})`,
+            timestamp: new Date(t.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+          }));
 
       return {
         overview: {
@@ -540,6 +641,7 @@ export async function getWorkspaceDashboardStats(workspaceId) {
           waitingAgent: waitingAgentCount,
           openTickets: openTicketsCount,
           totalTickets: totalTicketsCount,
+          ticketBreakdown,
           aiResolutionRate: null, // Moteur IA en préparation (non simulé)
           avgResolutionTimeMinutes: null, // Données insuffisantes pour un calcul de durée moyen
           customerSatisfactionScore: null, // Enquête CSAT en préparation
@@ -715,12 +817,12 @@ export async function getWorkspaceCustomers(workspaceId) {
 }
 
 /**
- * Get Workspace Agents (Real dynamic team members, profiles & skills)
+ * Get Workspace Agents (Real dynamic team members, profiles, active skills & live Redis presence)
  */
 export async function getWorkspaceAgents(workspaceId) {
   const cacheKey = `workspace:${workspaceId}:agents`;
 
-  return cacheService.wrap(
+  const baseAgents = await cacheService.wrap(
     cacheKey,
     async () => {
       // 1. Query all members of this workspace
@@ -746,7 +848,7 @@ export async function getWorkspaceAgents(workspaceId) {
 
       const userIds = members.map((m) => m.userId);
 
-      // 2. Query agent profiles with validated skills
+      // 2. Query agent profiles with active validated skills
       const profiles = await prisma.agentProfile.findMany({
         where: {
           workspaceId,
@@ -790,7 +892,7 @@ export async function getWorkspaceAgents(workspaceId) {
       const activeMap = new Map(activeTicketsByAgent.map((t) => [t.assignedAgentId, t._count.id]));
       const resolvedMap = new Map(resolvedTodayByAgent.map((t) => [t.assignedAgentId, t._count.id]));
 
-      // 4. Map and auto-create missing profiles
+      // 4. Map and auto-create missing profiles (availability separate from presence)
       const agents = await Promise.all(
         members.map(async (m) => {
           let profile = profiles.find((p) => p.userId === m.userId);
@@ -803,7 +905,12 @@ export async function getWorkspaceAgents(workspaceId) {
                 availability: "AVAILABLE",
                 maxCapacity: 10,
                 autoAssignmentEnabled: true,
-                title: m.role === "MANAGER" ? "Superviseur SAV" : m.role === "ADMIN" || m.role === "OWNER" ? "Responsable SAV" : "Conseiller SAV",
+                title:
+                  m.role === "MANAGER"
+                    ? "Superviseur SAV"
+                    : m.role === "ADMIN" || m.role === "OWNER"
+                    ? "Responsable SAV"
+                    : "Conseiller SAV",
               },
               update: {},
               include: {
@@ -816,39 +923,78 @@ export async function getWorkspaceAgents(workspaceId) {
 
           const activeChats = activeMap.get(m.userId) || 0;
           const resolvedToday = resolvedMap.get(m.userId) || 0;
-          const skills = (profile.skills || []).map((s) => s.skill.name);
+          const activeSkillLinks = (profile.skills || []).filter(
+            (s) => s.skill && s.skill.isActive !== false
+          );
+          const skillNames = activeSkillLinks.map((s) => s.skill.name);
+          const normalizedAvailability = normalizeAvailability(profile.availability);
 
           return {
             id: m.user.id,
+            membershipId: m.id,
             profileId: profile.id,
-            name: `${m.user.firstName || ''} ${m.user.lastName || ''}`.trim() || m.user.email.split('@')[0],
+            hasAgentProfile: true,
+            firstName: m.user.firstName,
+            lastName: m.user.lastName,
+            name:
+              `${m.user.firstName || ""} ${m.user.lastName || ""}`.trim() ||
+              m.user.email.split("@")[0],
             email: m.user.email,
             avatarUrl: m.user.avatarUrl,
-            phone: profile.phone || '',
-            title: profile.title || 'Conseiller SAV',
+            phone: profile.phone || "",
+            title: profile.title || "Conseiller SAV",
             role: m.role,
-            status: profile.availability || 'AVAILABLE', // AVAILABLE, BUSY, AWAY, OFFLINE
+            accountStatus: m.status || "ACTIVE", // ACTIVE, SUSPENDED, ARCHIVED
+            availability: normalizedAvailability, // AVAILABLE, BUSY, DND
+            status: normalizedAvailability, // Legacy alias kept strictly as availability
             maxCapacity: profile.maxCapacity || 10,
             autoAssignmentEnabled: profile.autoAssignmentEnabled !== false,
-            specialties: skills.length > 0 ? skills : ['Support Général'],
-            skills: (profile.skills || []).map((s) => ({
+            specialties: skillNames, // Empty array when company configures no skills
+            skills: activeSkillLinks.map((s) => ({
               id: s.skill.id,
               name: s.skill.name,
               description: s.skill.description,
+              isActive: s.skill.isActive,
               validatedAt: s.validatedAt,
             })),
             activeChats,
             resolvedToday,
-            rating: 5.0,
-            joinedAt: m.joinedAt,
+            joinedAt: m.createdAt,
           };
         })
       );
 
       return agents;
     },
-    15 // Cache for 15 seconds to remain fresh
+    15 // DB team structure cached for 15s
   );
+
+  // Overlay fresh real-time presence from Redis outside the DB cache
+  const userIds = baseAgents.map((a) => a.id);
+  const presenceMap = await getWorkspacePresenceMap({ workspaceId, userIds });
+
+  return baseAgents.map((agent) => {
+    const isAccountBlocked = agent.accountStatus !== "ACTIVE";
+    const pInfo = isAccountBlocked
+      ? {
+          state: PRESENCE_STATES.OFFLINE,
+          activeSessions: 0,
+          lastHeartbeatAt: null,
+          lastActivityAt: null,
+        }
+      : presenceMap.get(agent.id) || {
+          state: PRESENCE_STATES.OFFLINE,
+          activeSessions: 0,
+          lastHeartbeatAt: null,
+          lastActivityAt: null,
+        };
+
+    return {
+      ...agent,
+      presence: pInfo.state,
+      presenceInfo: pInfo,
+    };
+  });
 }
 
 /**
@@ -1463,61 +1609,56 @@ export async function cancelWorkspaceInvitation(workspaceId, invitationId) {
 }
 
 /**
- * Get all available skills in a workspace (with auto-seeding if empty)
+ * Get workspace skills (strictly tenant-isolated; optional — returns [] if none configured)
  */
-export async function getWorkspaceSkills(workspaceId) {
-  let skills = await prisma.skill.findMany({
-    where: { workspaceId },
+export async function getWorkspaceSkills(workspaceId, { includeInactive = false } = {}) {
+  return prisma.skill.findMany({
+    where: {
+      workspaceId,
+      ...(includeInactive ? {} : { isActive: true }),
+    },
     include: {
       _count: {
         select: { agents: true },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: [{ isActive: "desc" }, { name: "asc" }],
   });
-
-  if (skills.length === 0) {
-    const defaultSkills = [
-      { name: "Support Mobile Money & Paiement", description: "Déblocage, vérification de transactions Wave, Orange Money, MoMo" },
-      { name: "Assistance Matérielle & SAV", description: "Diagnostic pannes, échange standard, retours et garanties" },
-      { name: "Facturation & Litiges", description: "Régularisation comptes, avoirs, contestations et remboursements" },
-      { name: "Support Réseau & Fibre", description: "Configuration routeurs, suivi des coupures et de la qualité de service" },
-      { name: "Commandes & Expéditions", description: "Suivi livraison colis, retards transporteurs et réclamations" },
-    ];
-
-    for (const ds of defaultSkills) {
-      await prisma.skill.upsert({
-        where: { workspaceId_name: { workspaceId, name: ds.name } },
-        create: { workspaceId, name: ds.name, description: ds.description },
-        update: {},
-      });
-    }
-
-    skills = await prisma.skill.findMany({
-      where: { workspaceId },
-      include: {
-        _count: { select: { agents: true } },
-      },
-      orderBy: { name: "asc" },
-    });
-  }
-
-  return skills;
 }
 
 /**
  * Create a new custom skill in a workspace
  */
-export async function createWorkspaceSkill(workspaceId, { name, description }) {
+export async function createWorkspaceSkill(workspaceId, { name, description } = {}) {
   if (!name || !name.trim()) {
-    throw new Error("Le nom de la compétence est requis.");
+    const err = new Error("Le nom de la compétence est requis.");
+    err.status = 400;
+    throw err;
+  }
+
+  const trimmedName = name.trim();
+  const existing = await prisma.skill.findFirst({
+    where: {
+      workspaceId,
+      name: { equals: trimmedName, mode: "insensitive" },
+    },
+  });
+
+  if (existing) {
+    const err = new Error("Une compétence avec ce nom existe déjà dans cet espace.");
+    err.status = 409;
+    throw err;
   }
 
   const skill = await prisma.skill.create({
     data: {
       workspaceId,
-      name: name.trim(),
+      name: trimmedName,
       description: description ? description.trim() : null,
+      isActive: true,
+    },
+    include: {
+      _count: { select: { agents: true } },
     },
   });
 
@@ -1526,9 +1667,93 @@ export async function createWorkspaceSkill(workspaceId, { name, description }) {
 }
 
 /**
- * Assign a skill to an agent
+ * Update or deactivate/reactivate a skill inside its owning workspace
+ */
+export async function updateWorkspaceSkill(workspaceId, skillId, { name, description, isActive } = {}) {
+  const existing = await prisma.skill.findFirst({
+    where: { id: skillId, workspaceId },
+  });
+
+  if (!existing) {
+    const err = new Error("Compétence introuvable dans cet espace de travail.");
+    err.status = 404;
+    throw err;
+  }
+
+  const updateData = {};
+  if (typeof name === "string") {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      const err = new Error("Le nom de la compétence ne peut pas être vide.");
+      err.status = 400;
+      throw err;
+    }
+    const conflict = await prisma.skill.findFirst({
+      where: {
+        workspaceId,
+        id: { not: skillId },
+        name: { equals: trimmed, mode: "insensitive" },
+      },
+    });
+    if (conflict) {
+      const err = new Error("Une autre compétence porte déjà ce nom.");
+      err.status = 409;
+      throw err;
+    }
+    updateData.name = trimmed;
+  }
+
+  if (description !== undefined) {
+    updateData.description = typeof description === "string" && description.trim() ? description.trim() : null;
+  }
+
+  if (typeof isActive === "boolean") {
+    updateData.isActive = isActive;
+  }
+
+  const updated = await prisma.skill.update({
+    where: { id: skillId },
+    data: updateData,
+    include: {
+      _count: { select: { agents: true } },
+    },
+  });
+
+  await cacheService.del(`workspace:${workspaceId}:agents`);
+  return updated;
+}
+
+/**
+ * Assign an active workspace skill to a member of the same workspace
  */
 export async function assignAgentSkill(workspaceId, agentUserId, skillId, validatedById) {
+  const [skill, membership] = await Promise.all([
+    prisma.skill.findFirst({
+      where: { id: skillId, workspaceId },
+    }),
+    prisma.membership.findUnique({
+      where: { userId_workspaceId: { userId: agentUserId, workspaceId } },
+    }),
+  ]);
+
+  if (!skill) {
+    const err = new Error("Compétence introuvable dans cet espace de travail.");
+    err.status = 404;
+    throw err;
+  }
+
+  if (!skill.isActive) {
+    const err = new Error("Impossible d'attribuer une compétence désactivée.");
+    err.status = 400;
+    throw err;
+  }
+
+  if (!membership) {
+    const err = new Error("Collaborateur introuvable dans cet espace de travail.");
+    err.status = 404;
+    throw err;
+  }
+
   let profile = await prisma.agentProfile.findUnique({
     where: { workspaceId_userId: { workspaceId, userId: agentUserId } },
   });
@@ -1593,15 +1818,37 @@ export async function removeAgentSkill(workspaceId, agentUserId, skillId) {
 }
 
 /**
- * Update agent availability / capacity / settings
+ * Update agent operational settings (capacity, auto-assign, title, phone).
+ * STRICT RULE: Managers CANNOT override presence or another advisor's availability.
  */
-export async function updateAgentStatus(workspaceId, agentUserId, data = {}) {
+export async function updateAgentStatus(workspaceId, agentUserId, data = {}, actingUserId = null) {
+  if (data.presence !== undefined) {
+    const err = new Error(
+      "La présence est détectée automatiquement par Zalisk et ne peut pas être modifiée manuellement."
+    );
+    err.status = 403;
+    throw err;
+  }
+
+  if (data.availability !== undefined && (!actingUserId || actingUserId !== agentUserId)) {
+    const err = new Error(
+      "La disponibilité ne peut être modifiée que par le conseiller lui-même depuis son espace personnel."
+    );
+    err.status = 403;
+    throw err;
+  }
+
   const updateData = {};
-  if (data.availability && ["AVAILABLE", "BUSY", "AWAY", "OFFLINE"].includes(data.availability)) {
+  if (data.availability !== undefined) {
+    if (!["AVAILABLE", "BUSY", "DND"].includes(data.availability)) {
+      const err = new Error("Disponibilité invalide (AVAILABLE, BUSY ou DND attendu).");
+      err.status = 400;
+      throw err;
+    }
     updateData.availability = data.availability;
   }
-  if (typeof data.maxCapacity === "number" && data.maxCapacity > 0) {
-    updateData.maxCapacity = data.maxCapacity;
+  if (typeof data.maxCapacity === "number" && data.maxCapacity >= 1 && data.maxCapacity <= 30) {
+    updateData.maxCapacity = Math.round(data.maxCapacity);
   }
   if (typeof data.autoAssignmentEnabled === "boolean") {
     updateData.autoAssignmentEnabled = data.autoAssignmentEnabled;
@@ -1818,7 +2065,7 @@ export async function reactivateCommercialSuspensions(actingUserId, { workspaceI
     }
 
     // 3. Compute available seats under lock
-    const activePlan = await getWorkspaceActivePlan(workspaceId);
+    const activePlan = await getWorkspaceActivePlan(workspaceId, { tx });
     const activeCount = await tx.membership.count({
       where: { workspaceId, status: "ACTIVE" },
     });

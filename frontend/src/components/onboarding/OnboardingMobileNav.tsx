@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 
 export interface OnboardingMobileNavProps {
-  currentStep: number; // 1, 2, 3
+  currentStep: number; // 1, 2, 3, 4
   isSubmitting?: boolean;
   canProceed: boolean;
   customSubmitLabel?: string;
@@ -55,7 +55,7 @@ export const OnboardingMobileNav: React.FC<OnboardingMobileNavProps> = ({
               <Loader2 className="w-4 h-4 animate-spin" />
               <span>Création en cours...</span>
             </>
-          ) : currentStep === 3 ? (
+          ) : currentStep === 4 ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>{customSubmitLabel || "Activer mon espace"}</span>

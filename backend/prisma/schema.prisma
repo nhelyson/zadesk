@@ -79,8 +79,14 @@ enum MessageType {
 enum AgentAvailability {
   AVAILABLE
   BUSY
+  DND
   AWAY
   OFFLINE
+}
+
+enum PushRecipientType {
+  CUSTOMER
+  AGENT
 }
 
 model User {
@@ -112,6 +118,7 @@ model User {
   messages                 ConversationMessage[]
   receivedConvShares       ConversationShare[]   @relation("ReceivedConversationShares")
   createdConvShares        ConversationShare[]   @relation("CreatedConversationShares")
+  pushSubscriptions        PushSubscription[]
   auditLogs                AuditLog[]
   onboardingDraft          OnboardingDraft?
 
@@ -160,6 +167,7 @@ model Workspace {
   skills            Skill[]
   tickets           Ticket[]
   conversations     Conversation[]
+  pushSubscriptions PushSubscription[]
   auditLogs         AuditLog[]
   outboxEvents      OutboxEvent[]
   establishments    Establishment[]
@@ -375,6 +383,7 @@ model Skill {
   workspaceId String
   name        String
   description String?
+  isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -383,6 +392,7 @@ model Skill {
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
+  @@index([workspaceId, isActive])
   @@map("skills")
 }
 
@@ -515,6 +525,7 @@ model Conversation {
   messages        ConversationMessage[]
   shares          ConversationShare[]
   tickets         Ticket[]
+  pushSubscriptions PushSubscription[]
 
   @@index([workspaceId])
   @@index([workspaceId, assignedAgentId])
@@ -555,6 +566,38 @@ model ConversationShare {
   @@unique([conversationId, agentId])
   @@index([agentId])
   @@map("conversation_shares")
+}
+
+model PushSubscription {
+  id             String            @id @default(cuid())
+  subKey         String            @unique
+  recipientType  PushRecipientType
+  workspaceId    String
+  userId         String?
+  conversationId String?
+  endpoint       String
+  p256dh         String
+  auth           String
+  userAgent      String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user           User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation   Conversation?     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, recipientType])
+  @@index([userId])
+  @@index([conversationId])
+  @@map("push_subscriptions")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
 }
 
 model AuditLog {
@@ -991,6 +1034,27 @@ model CommercialDowngradeRequest {
   @@index([effectiveDate, status])
   @@map("commercial_downgrade_requests")
 }
+
+model ConsumedFinancialProof {
+  id                    String   @id @default(cuid())
+  proofId               String   @unique
+  intentId              String
+  workspaceId           String
+  provider              String   @default("SASPAY")
+  providerTransactionId String
+  amountXaf             Int
+  currency              String   @default("XAF")
+  source                String
+  issuedAt              DateTime
+  expiresAt             DateTime
+  consumedAt            DateTime @default(now())
+  consumedBy            String?
+
+  @@index([workspaceId, intentId])
+  @@index([expiresAt])
+  @@map("consumed_financial_proofs")
+}
+
 
 
 

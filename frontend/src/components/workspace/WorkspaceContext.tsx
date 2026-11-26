@@ -1,9 +1,22 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { apiRequest } from '@/lib/api';
-import { Workspace, User, Role } from '@/types/workspace';
+import { apiRequest, agentApi, commercialApi } from '@/lib/api';
+import {
+  Workspace,
+  User,
+  Role,
+  PresenceState,
+  WorkspaceUsageSummary,
+} from '@/types/workspace';
+import { usePulseStream, PulseNotificationItem, PulseEventData } from '@/hooks/usePulseStream';
+
+export const notifyWorkspaceDataUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('zadesk:data-invalidated'));
+  }
+};
 
 interface WorkspaceContextType {
   user: User | null;
@@ -12,6 +25,8 @@ interface WorkspaceContextType {
   isLoading: boolean;
   loading: boolean;
   userRole: Role;
+  actualRole: Role;
+  isActualAdminOrOwner: boolean;
   isEnterprise: boolean;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -26,6 +41,14 @@ interface WorkspaceContextType {
   setCreateModalOpen: (open: boolean) => void;
   setUserRole: (role: Role) => void;
   logout: () => Promise<void>;
+  sseStatus: 'connecting' | 'connected' | 'disconnected';
+  pulseNotifications: PulseNotificationItem[];
+  dismissPulseNotification: (id: string) => void;
+  dismissPulseConversationNotifications: (conversationId: string) => void;
+  setActiveViewedConversationId: (conversationId: string | null) => void;
+  myPresence: PresenceState;
+  workspaceUsage: WorkspaceUsageSummary | null;
+  refreshWorkspaceUsage: () => Promise<void>;
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextType>({
@@ -35,6 +58,8 @@ export const WorkspaceContext = createContext<WorkspaceContextType>({
   isLoading: true,
   loading: true,
   userRole: 'AGENT',
+  actualRole: 'OWNER',
+  isActualAdminOrOwner: true,
   isEnterprise: true,
   sidebarCollapsed: false,
   setSidebarCollapsed: () => {},
@@ -49,6 +74,14 @@ export const WorkspaceContext = createContext<WorkspaceContextType>({
   setCreateModalOpen: () => {},
   setUserRole: () => {},
   logout: async () => {},
+  sseStatus: 'disconnected',
+  pulseNotifications: [],
+  dismissPulseNotification: () => {},
+  dismissPulseConversationNotifications: () => {},
+  setActiveViewedConversationId: () => {},
+  myPresence: 'OFFLINE',
+  workspaceUsage: null,
+  refreshWorkspaceUsage: async () => {},
 });
 
 export const useWorkspace = () => useContext(WorkspaceContext);
@@ -138,6 +171,8 @@ export const WorkspacePreviewProvider: React.FC<WorkspacePreviewProviderProps> =
     isLoading: false,
     loading: false,
     userRole,
+    actualRole: initialRole,
+    isActualAdminOrOwner: initialRole === 'OWNER' || initialRole === 'ADMIN' || initialRole === 'MANAGER',
     isEnterprise: true,
     sidebarCollapsed,
     setSidebarCollapsed,
@@ -152,6 +187,14 @@ export const WorkspacePreviewProvider: React.FC<WorkspacePreviewProviderProps> =
     setCreateModalOpen: () => {},
     setUserRole,
     logout: async () => {},
+    sseStatus: 'connected',
+    pulseNotifications: [],
+    dismissPulseNotification: () => {},
+    dismissPulseConversationNotifications: () => {},
+    setActiveViewedConversationId: () => {},
+    myPresence: 'ONLINE',
+    workspaceUsage: null,
+    refreshWorkspaceUsage: async () => {},
   };
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
@@ -176,10 +219,10 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   };
   const [roleOverride, setRoleOverride] = useState<Role | null>(null);
 
+  // Élimine toute persistance résiduelle de prévisualisation dans localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('zadesk_role_preview') as Role | null;
-      if (saved) setRoleOverride(saved);
+      localStorage.removeItem('zadesk_role_preview');
     }
   }, []);
 
@@ -188,11 +231,202 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     const actualRole = currentWorkspace?.role || 'OWNER';
     if (actualRole === 'AGENT') return;
 
+    // Prévisualisation purement volatile en mémoire (jamais persistée en localStorage)
     setRoleOverride(role);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('zadesk_role_preview', role);
-    }
   };
+
+  const activeViewedConvIdRef = useRef<string | null>(null);
+  const setActiveViewedConversationId = useCallback((conversationId: string | null) => {
+    activeViewedConvIdRef.current = conversationId;
+  }, []);
+
+  const handleGlobalPulseEvent = useCallback((event: PulseEventData) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('zadesk:pulse-event', { detail: event }));
+      notifyWorkspaceDataUpdated();
+    }
+  }, []);
+
+  const handleGlobalPulseSync = useCallback(async () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('zadesk:pulse-sync'));
+      notifyWorkspaceDataUpdated();
+    }
+  }, []);
+
+  const shouldSuppressGlobalToast = useCallback(
+    (event: PulseEventData) => {
+      if (typeof document === 'undefined') return false;
+      if (document.hidden) return false;
+      if (
+        pathname === '/app/conversations' &&
+        event.type === 'PULSE_MESSAGE_CREATED' &&
+        event.conversationId &&
+        activeViewedConvIdRef.current === event.conversationId
+      ) {
+        return true;
+      }
+      return false;
+    },
+    [pathname]
+  );
+
+  const {
+    status: sseStatus,
+    notifications: pulseNotifications,
+    dismissNotification: dismissPulseNotification,
+    dismissConversationNotifications: dismissPulseConversationNotifications,
+  } = usePulseStream({
+    workspaceId: currentWorkspace?.id,
+    enabled: Boolean(currentWorkspace?.id) && !pathname?.startsWith('/app/onboarding'),
+    onEvent: handleGlobalPulseEvent,
+    onFullSyncNeeded: handleGlobalPulseSync,
+    shouldSuppressNotification: shouldSuppressGlobalToast,
+  });
+
+  // Détection automatique de présence multi-onglets (Heartbeat 30s + activité utilisateur + sendBeacon à la fermeture)
+  const [myPresence, setMyPresence] = useState<PresenceState>('OFFLINE');
+  const [workspaceUsage, setWorkspaceUsage] = useState<WorkspaceUsageSummary | null>(null);
+  const lastActivityAtRef = useRef<number>(Date.now());
+  const tabIdRef = useRef<string>('');
+
+  const refreshWorkspaceUsage = useCallback(async () => {
+    const wsId = currentWorkspace?.id;
+    if (!wsId || pathname?.startsWith('/app/onboarding')) {
+      setWorkspaceUsage(null);
+      return;
+    }
+    try {
+      const usage = await commercialApi.getUsage(wsId);
+      setWorkspaceUsage(usage);
+    } catch {
+      // Keep prior state silently on transient failures
+    }
+  }, [currentWorkspace?.id, pathname]);
+
+  useEffect(() => {
+    refreshWorkspaceUsage();
+  }, [refreshWorkspaceUsage]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !currentWorkspace?.id) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const handleDataInvalidated = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        refreshWorkspaceUsage();
+      }, 600);
+    };
+    window.addEventListener('zadesk:data-invalidated', handleDataInvalidated);
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener('zadesk:data-invalidated', handleDataInvalidated);
+    };
+  }, [currentWorkspace?.id, refreshWorkspaceUsage]);
+
+  useEffect(() => {
+    const wsId = currentWorkspace?.id;
+    const isOnboarding = pathname?.startsWith('/app/onboarding');
+    if (!wsId || !user?.id || isOnboarding || typeof window === 'undefined') {
+      setMyPresence('OFFLINE');
+      return;
+    }
+
+    if (!tabIdRef.current) {
+      let storedTabId = sessionStorage.getItem('zadesk_presence_tab_id');
+      if (!storedTabId) {
+        storedTabId =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        sessionStorage.setItem('zadesk_presence_tab_id', storedTabId);
+      }
+      tabIdRef.current = storedTabId;
+    }
+
+    let lastActivityRecorded = Date.now();
+    lastActivityAtRef.current = lastActivityRecorded;
+
+    const markActivity = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (now - lastActivityRecorded > 3000) {
+        lastActivityRecorded = now;
+        lastActivityAtRef.current = now;
+      }
+    };
+
+    const activityEvents = ['pointerdown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+    activityEvents.forEach((evt) =>
+      window.addEventListener(evt, markActivity, { passive: true })
+    );
+
+    let lastSentAt = 0;
+    const sendHeartbeat = async (force = false) => {
+      const now = Date.now();
+      if (!force && now - lastSentAt < 5000) return;
+      if (!navigator.onLine) return;
+      lastSentAt = now;
+      try {
+        const idleMs = Math.max(0, now - lastActivityAtRef.current);
+        const res = await agentApi.sendPresenceHeartbeat(wsId, {
+          tabId: tabIdRef.current,
+          idleMs,
+        });
+        if (res?.presence?.state) {
+          setMyPresence(res.presence.state);
+        }
+      } catch {}
+    };
+
+    // Signal initial immédiat
+    sendHeartbeat(true);
+
+    // Heartbeat périodique toutes les 30 secondes
+    const interval = setInterval(() => {
+      sendHeartbeat(true);
+    }, 30000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        lastActivityAtRef.current = Date.now();
+        lastActivityRecorded = lastActivityAtRef.current;
+        sendHeartbeat(true);
+      }
+    };
+
+    const handleOnline = () => {
+      lastActivityAtRef.current = Date.now();
+      sendHeartbeat(true);
+    };
+
+    const handleLeave = () => {
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
+        const url = `${apiBase}/workspaces/${encodeURIComponent(wsId)}/agent/presence/leave`;
+        const payload = new Blob([JSON.stringify({ tabId: tabIdRef.current })], {
+          type: 'application/json',
+        });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url, payload);
+        }
+      } catch {}
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('pagehide', handleLeave);
+
+    return () => {
+      clearInterval(interval);
+      activityEvents.forEach((evt) => window.removeEventListener(evt, markActivity));
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('pagehide', handleLeave);
+    };
+  }, [currentWorkspace?.id, user?.id, pathname]);
 
   // Load user & workspaces
   const loadInitialData = useCallback(async () => {
@@ -342,6 +576,8 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
         isLoading,
         loading: isLoading,
         userRole,
+        actualRole,
+        isActualAdminOrOwner,
         isEnterprise: true,
         sidebarCollapsed,
         setSidebarCollapsed,
@@ -356,6 +592,14 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
         setCreateModalOpen,
         setUserRole,
         logout,
+        sseStatus,
+        pulseNotifications,
+        dismissPulseNotification,
+        dismissPulseConversationNotifications,
+        setActiveViewedConversationId,
+        myPresence,
+        workspaceUsage,
+        refreshWorkspaceUsage,
       }}
     >
       {children}

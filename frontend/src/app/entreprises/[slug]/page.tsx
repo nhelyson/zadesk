@@ -15,18 +15,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!company) {
     return {
-      title: "Entreprise introuvable — Zadesk",
+      title: "Entreprise introuvable — Zalisk",
     };
   }
 
   return {
-    title: `SAV Officiel ${company.name} — Assistance Conversationnelle & Support`,
+    title: `Service Client ${company.name} — Assistance en ligne | Zalisk`,
     description: `Posez directement votre question au service après-vente officiel de ${company.name}. Assistance interactive en ligne, coordonnées certifiées et prise en charge rapide sans inscription.`,
     openGraph: {
-      title: `SAV Officiel ${company.name} — Assistance Conversationnelle Zadesk`,
+      title: `Service Client ${company.name} — Assistance Zalisk`,
       description:
         company.description ||
-        `Contactez directement le service après-vente de ${company.name} sur Zadesk.`,
+        `Contactez directement le service après-vente de ${company.name} sur Zalisk.`,
       images: company.logoUrl ? [company.logoUrl] : company.coverUrl ? [company.coverUrl] : [],
     },
   };
@@ -54,7 +54,7 @@ export default async function CompanyProfilePage({ params }: PageProps) {
   return (
     <div
       style={brandStyles}
-      className="h-screen max-h-screen flex flex-col bg-[#F5F5F7] text-[#1D1D1F] overflow-hidden antialiased"
+      className="h-[100dvh] max-h-[100dvh] flex flex-col bg-[#F5F5F7] text-[#1D1D1F] overflow-hidden antialiased"
     >
       {/* 1. Main Full-Screen Conversational Experience (with integrated SAV header) */}
       <CompanyConversationalView company={company} />

@@ -1,0 +1,6 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+
+rectangle "Test Box" as b1
+@enduml

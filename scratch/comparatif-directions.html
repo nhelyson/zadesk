@@ -1,0 +1,736 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zadesk — Espace de Comparaison Visuelle des 4 Directions Artistiques</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-studio: #0B1120;
+      --surface-bar: #111827;
+      --border-bar: rgba(255, 255, 255, 0.08);
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --accent-emerald: #22C55E;
+      --accent-navy: #0D1B3D;
+      --accent-amber: #F59E0B;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-studio);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* BARRE D'OUTILS ET DE NAVIGATION SUPÉRIEURE */
+    .studio-header {
+      background: var(--surface-bar);
+      border-bottom: 1px solid var(--border-bar);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 50;
+      height: 64px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      background: #0D1B3D;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-emerald);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .studio-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+    .studio-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* COMMUTATEUR D'ONGLETS MAÎTRES (DESKTOP / MOBILE / MOSAÏQUE) */
+    .view-tabs {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--border-bar);
+    }
+    .view-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .view-tab-btn:hover {
+      color: #FFFFFF;
+    }
+    .view-tab-btn.active {
+      background: #1F2937;
+      color: #FFFFFF;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* CONTRÔLES SPÉCIFIQUES & ACTIONS */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .scale-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-bar);
+    }
+    .scale-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .scale-btn.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+    }
+    .btn-open-external {
+      background: #0D1B3D;
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-open-external:hover {
+      background: #152C61;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* BARRE DE SOUS-NAVIGATION POUR LE SÉLECTEUR DE DIRECTIONS */
+    .subnav-bar {
+      background: #0F172A;
+      border-bottom: 1px solid var(--border-bar);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      min-height: 48px;
+    }
+    .direction-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dir-pill-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-bar);
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .dir-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+    .dir-pill-btn.active {
+      background: #22C55E;
+      color: #064E3B;
+      font-weight: 700;
+      border-color: #22C55E;
+    }
+    .dir-pill-btn.active.primary-gold {
+      background: #F59E0B;
+      color: #78350F;
+      border-color: #F59E0B;
+    }
+    .dir-pill-btn .dir-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .dir-concept-desc {
+      font-size: 12px;
+      color: #CBD5E1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 680px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .concept-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #94A3B8;
+      flex-shrink: 0;
+    }
+
+    /* SOUS-BARRE SPÉCIFIQUE MOBILE */
+    .mobile-subnav-bar {
+      background: #0F172A;
+      border-bottom: 1px solid var(--border-bar);
+      padding: 8px 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      min-height: 48px;
+    }
+    .mob-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ZONE DE VISUALISATION PRINCIPALE */
+    .viewport-canvas {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #090D16;
+    }
+
+    /* CONTENEUR DESKTOP 1440x900 */
+    .desktop-frame-wrapper {
+      position: relative;
+      background: #FFFFFF;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      width: 1440px;
+      height: 900px;
+      flex-shrink: 0;
+      transform-origin: top center;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .desktop-iframe {
+      width: 1440px;
+      height: 900px;
+      border: none;
+      display: block;
+      background: #FAFAF8;
+    }
+
+    /* CONTENEUR MOBILE 390x844 (CHÂSSIS SMARTPHONE) */
+    .mobile-frame-wrapper {
+      position: relative;
+      width: 414px; /* 390 + 24px bezel */
+      height: 874px; /* 844 + 30px bezel */
+      background: #1E293B;
+      border-radius: 46px;
+      padding: 12px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mobile-notch {
+      width: 100px;
+      height: 20px;
+      background: #0B1120;
+      border-radius: 20px;
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      pointer-events: none;
+    }
+    .mobile-screen-bezel {
+      width: 390px;
+      height: 844px;
+      border-radius: 36px;
+      overflow: hidden;
+      background: #FAFAF8;
+      position: relative;
+    }
+    .mobile-iframe {
+      width: 390px;
+      height: 844px;
+      border: none;
+      display: block;
+    }
+
+    /* MODE MOSAÏQUE COMPARATIVE (4 VUES EN 4 COLONNES OU 2x2) */
+    .mosaic-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 1860px;
+      height: 100%;
+      align-items: center;
+    }
+    .mosaic-card {
+      background: #111827;
+      border: 1px solid var(--border-bar);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      height: 100%;
+      max-height: 780px;
+    }
+    .mosaic-card-header {
+      padding: 10px 14px;
+      background: #1F2937;
+      border-bottom: 1px solid var(--border-bar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mosaic-card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mosaic-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #FAFAF8;
+    }
+    .mosaic-iframe {
+      width: 1440px;
+      height: 900px;
+      border: none;
+      transform-origin: top left;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* RÈGLES DE VISIBILITÉ DES MODES */
+    .view-mode-panel {
+      display: none;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+    }
+    .view-mode-panel.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRE SUPÉRIEURE PRINCIPALE DU STUDIO -->
+  <header class="studio-header">
+    <div class="brand-section">
+      <div class="logo-badge">Z</div>
+      <div>
+        <h1 class="studio-title">ZADESK • STUDIO DE COMPARAISON</h1>
+        <p class="studio-subtitle">Arbitrage des 4 directions esthétiques Dashboard & Mobile</p>
+      </div>
+    </div>
+
+    <!-- COMMUTATEUR DES MODES D'OBSERVATION -->
+    <div class="view-tabs">
+      <button class="view-tab-btn active" id="tab-desktop" onclick="switchMainView('desktop')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        Desktop (1440×900)
+      </button>
+
+      <button class="view-tab-btn" id="tab-mosaic" onclick="switchMainView('mosaic')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        Grille 4-en-1 (Mosaïque)
+      </button>
+
+      <button class="view-tab-btn" id="tab-mobile" onclick="switchMainView('mobile')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        Mobile (390×844)
+      </button>
+    </div>
+
+    <!-- ACTIONS RAPIDES & ZOOM -->
+    <div class="header-actions">
+      <div class="scale-selector" id="scale-controls">
+        <span>Échelle :</span>
+        <button class="scale-btn active" id="btn-scale-fit" onclick="setScaleMode('fit')">Ajuster</button>
+        <button class="scale-btn" id="btn-scale-100" onclick="setScaleMode('100')">100%</button>
+      </div>
+
+      <a id="btn-external-link" href="./mockup_dir4_editorial.html" target="_blank" class="btn-open-external">
+        <span>Ouvrir seul</span>
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- SOUS-BARRE DE NAVIGATION : SÉLECTEUR DE DIRECTIONS (VISIBLE EN MODE DESKTOP) -->
+  <nav class="subnav-bar" id="desktop-subnav">
+    <div class="direction-pills">
+      <button class="dir-pill-btn active primary-gold" id="pill-dir4" onclick="selectDirection(4)">
+        <span class="dir-badge">DIR 4</span>
+        <span>Operational Editorial System (Nouvelle Référence)</span>
+      </button>
+
+      <button class="dir-pill-btn" id="pill-dir2" onclick="selectDirection(2)">
+        <span class="dir-badge">DIR 2</span>
+        <span>Le Pupitre Focal</span>
+      </button>
+
+      <button class="dir-pill-btn" id="pill-dir1" onclick="selectDirection(1)">
+        <span class="dir-badge">DIR 1</span>
+        <span>Le Registre Asymétrique</span>
+      </button>
+
+      <button class="dir-pill-btn" id="pill-dir3" onclick="selectDirection(3)">
+        <span class="dir-badge">DIR 3</span>
+        <span>La Trame Typographique</span>
+      </button>
+    </div>
+
+    <div class="dir-concept-desc" id="concept-summary">
+      <span class="concept-tag" id="concept-tag">Dual-Plane Console</span>
+      <span id="concept-text">Grille suisse à double plan (68% Flux opérationnel / 32% Régulation) avec bulletin narratif, îlot d'intervention intégré et gestion de l'état calme.</span>
+    </div>
+  </nav>
+
+  <!-- SOUS-BARRE MOBILE : CHOIX DU PROTOTYPE MOBILE -->
+  <nav class="mobile-subnav-bar" id="mobile-subnav">
+    <div class="mob-selector-group">
+      <span style="font-size: 11px; color: var(--text-muted);">Prototype Mobile :</span>
+      <button class="dir-pill-btn active" id="pill-mob-dir4" onclick="selectMobilePrototype(4)">
+        <span class="dir-badge">DIR 4</span>
+        <span>Direction 4 Mobile (PWA Native - Recommandée)</span>
+      </button>
+      <button class="dir-pill-btn" id="pill-mob-dir2" onclick="selectMobilePrototype(2)">
+        <span class="dir-badge">DIR 2</span>
+        <span>Direction 2 Mobile (Pupitre Focal)</span>
+      </button>
+    </div>
+    <div style="font-size: 11px; color: #94A3B8;">
+      Châssis iPhone 390 × 844 px (Viewport réel 100dvh)
+    </div>
+  </nav>
+
+  <!-- ESPACE DE RENDU (CANVAS) -->
+  <main class="viewport-canvas" id="canvas-area">
+    
+    <!-- 1. VUE DESKTOP UNIQUE (1440x900) -->
+    <div class="view-mode-panel active" id="panel-desktop">
+      <div class="desktop-frame-wrapper" id="desktop-frame">
+        <iframe id="main-desktop-iframe" class="desktop-iframe" src="./mockup_dir4_editorial.html"></iframe>
+      </div>
+    </div>
+
+    <!-- 2. VUE GRILLE 4-EN-1 COMPARATIVE (MOSAÏQUE) -->
+    <div class="view-mode-panel" id="panel-mosaic">
+      <div class="mosaic-grid" id="mosaic-grid">
+        
+        <!-- CARTE MOSAÏQUE 4 (NOUVELLE RÉFÉRENCE MISE EN VALEUR) -->
+        <div class="mosaic-card" style="border-color: rgba(245, 158, 11, 0.5);">
+          <div class="mosaic-card-header" style="background: rgba(245, 158, 11, 0.12);">
+            <span class="mosaic-card-title" style="color: #F59E0B;">4. Operational Editorial (Nouveau)</span>
+            <a href="./mockup_dir4_editorial.html" target="_blank" style="color: #F59E0B; text-decoration: none; font-size: 11px; font-weight: 700;">Ouvrir ↗</a>
+          </div>
+          <div class="mosaic-viewport" id="mv-4">
+            <iframe class="mosaic-iframe" id="m-iframe-4" src="./mockup_dir4_editorial.html"></iframe>
+          </div>
+        </div>
+
+        <!-- CARTE MOSAÏQUE 2 -->
+        <div class="mosaic-card" style="border-color: rgba(34, 197, 94, 0.3);">
+          <div class="mosaic-card-header" style="background: rgba(34, 197, 94, 0.08);">
+            <span class="mosaic-card-title" style="color: #22C55E;">2. Le Pupitre Focal</span>
+            <a href="./mockup_dir2_monolith.html" target="_blank" style="color: #22C55E; text-decoration: none; font-size: 11px;">Ouvrir ↗</a>
+          </div>
+          <div class="mosaic-viewport" id="mv-2">
+            <iframe class="mosaic-iframe" id="m-iframe-2" src="./mockup_dir2_monolith.html"></iframe>
+          </div>
+        </div>
+
+        <!-- CARTE MOSAÏQUE 1 -->
+        <div class="mosaic-card">
+          <div class="mosaic-card-header">
+            <span class="mosaic-card-title">1. Le Registre Asymétrique</span>
+            <a href="./mockup_dir1_ledger.html" target="_blank" style="color: #9CA3AF; text-decoration: none; font-size: 11px;">Ouvrir ↗</a>
+          </div>
+          <div class="mosaic-viewport" id="mv-1">
+            <iframe class="mosaic-iframe" id="m-iframe-1" src="./mockup_dir1_ledger.html"></iframe>
+          </div>
+        </div>
+
+        <!-- CARTE MOSAÏQUE 3 -->
+        <div class="mosaic-card">
+          <div class="mosaic-card-header">
+            <span class="mosaic-card-title">3. La Trame Typographique</span>
+            <a href="./mockup_dir3_canvas.html" target="_blank" style="color: #9CA3AF; text-decoration: none; font-size: 11px;">Ouvrir ↗</a>
+          </div>
+          <div class="mosaic-viewport" id="mv-3">
+            <iframe class="mosaic-iframe" id="m-iframe-3" src="./mockup_dir3_canvas.html"></iframe>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. VUE MOBILE (390x844 DANS CHÂSSIS DÉDIÉ) -->
+    <div class="view-mode-panel" id="panel-mobile">
+      <div class="mobile-frame-wrapper">
+        <div class="mobile-notch"></div>
+        <div class="mobile-screen-bezel">
+          <iframe id="mobile-iframe" class="mobile-iframe" src="./mockup_dir4_mobile.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- LOGIQUE JS DE COMMUTATION ET D'ÉCHELLE DYNAMIQUE -->
+  <script>
+    // Configuration des 4 directions
+    const directionsData = {
+      1: {
+        title: "Direction 1 : Le Registre Asymétrique",
+        file: "./mockup_dir1_ledger.html",
+        tag: "Autorité & Journal de bord",
+        desc: "Colonne sombre Midnight Navy d'ancrage à gauche (30%) + Table de registre chirurgicale au centre + Fil d'activité à droite."
+      },
+      2: {
+        title: "Direction 2 : Le Pupitre Focal",
+        file: "./mockup_dir2_monolith.html",
+        tag: "Triage Chirurgical",
+        desc: "Le dossier prioritaire n°1 est monté sur le pupitre central pour arbitrage immédiat, complété par la file continue haute densité."
+      },
+      3: {
+        title: "Direction 3 : La Trame Typographique",
+        file: "./mockup_dir3_canvas.html",
+        tag: "Pureté Éditoriale",
+        desc: "Zéro boîte fermée. Structure dessinée exclusivement par le contraste typographique Outfit/Inter, l'air et des chiffres sculpturaux."
+      },
+      4: {
+        title: "Direction 4 : Operational Editorial System (Nouvelle Référence)",
+        file: "./mockup_dir4_editorial.html",
+        tag: "Dual-Plane Console",
+        desc: "Grille suisse à double plan (68% Flux opérationnel continu / 32% Régulation) avec bulletin narratif, îlot d'intervention intégré et gestion de l'état calme."
+      }
+    };
+
+    let currentDirection = 4; // Défaut sur Direction 4
+    let currentMainView = 'desktop';
+    let scaleMode = 'fit';
+    let currentMobileDir = 4;
+
+    function selectDirection(dirNum) {
+      currentDirection = dirNum;
+      const data = directionsData[dirNum];
+
+      // Mise à jour des boutons pilules
+      document.querySelectorAll('.dir-pill-btn').forEach((btn) => {
+        btn.classList.remove('active');
+        btn.classList.remove('primary-gold');
+      });
+
+      const activeBtn = document.getElementById(`pill-dir${dirNum}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        if (dirNum === 4) activeBtn.classList.add('primary-gold');
+      }
+
+      // Mise à jour de l'iframe principal
+      const iframe = document.getElementById('main-desktop-iframe');
+      if (iframe.src !== data.file) {
+        iframe.src = data.file;
+      }
+
+      // Mise à jour de la description et du bouton externe
+      document.getElementById('concept-tag').textContent = data.tag;
+      document.getElementById('concept-text').textContent = data.desc;
+      document.getElementById('btn-external-link').href = data.file;
+    }
+
+    function selectMobilePrototype(dirNum) {
+      currentMobileDir = dirNum;
+      document.getElementById('pill-mob-dir4').classList.toggle('active', dirNum === 4);
+      document.getElementById('pill-mob-dir2').classList.toggle('active', dirNum === 2);
+
+      const targetFile = (dirNum === 4) ? './mockup_dir4_mobile.html' : './mockup_mobile_best.html';
+      document.getElementById('mobile-iframe').src = targetFile;
+      document.getElementById('btn-external-link').href = targetFile;
+    }
+
+    function switchMainView(mode) {
+      currentMainView = mode;
+
+      // Boutons onglets
+      document.getElementById('tab-desktop').classList.toggle('active', mode === 'desktop');
+      document.getElementById('tab-mosaic').classList.toggle('active', mode === 'mosaic');
+      document.getElementById('tab-mobile').classList.toggle('active', mode === 'mobile');
+
+      // Sous-barres
+      document.getElementById('desktop-subnav').style.display = (mode === 'desktop') ? 'flex' : 'none';
+      document.getElementById('mobile-subnav').style.display = (mode === 'mobile') ? 'flex' : 'none';
+      document.getElementById('scale-controls').style.display = (mode === 'desktop') ? 'flex' : 'none';
+
+      // Panneaux
+      document.getElementById('panel-desktop').classList.toggle('active', mode === 'desktop');
+      document.getElementById('panel-mosaic').classList.toggle('active', mode === 'mosaic');
+      document.getElementById('panel-mobile').classList.toggle('active', mode === 'mobile');
+
+      // Bouton externe
+      if (mode === 'mobile') {
+        document.getElementById('btn-external-link').href = (currentMobileDir === 4) ? './mockup_dir4_mobile.html' : './mockup_mobile_best.html';
+      } else {
+        document.getElementById('btn-external-link').href = directionsData[currentDirection].file;
+      }
+
+      // Ré-ajustement des échelles
+      requestAnimationFrame(() => {
+        applyScale();
+        if (mode === 'mosaic') {
+          applyMosaicScale();
+        }
+      });
+    }
+
+    function setScaleMode(mode) {
+      scaleMode = mode;
+      document.getElementById('btn-scale-fit').classList.toggle('active', mode === 'fit');
+      document.getElementById('btn-scale-100').classList.toggle('active', mode === '100');
+      applyScale();
+    }
+
+    function applyScale() {
+      const wrapper = document.getElementById('desktop-frame');
+      if (!wrapper || currentMainView !== 'desktop') return;
+
+      if (scaleMode === '100') {
+        wrapper.style.transform = 'scale(1)';
+        wrapper.style.marginTop = '0px';
+      } else {
+        const canvas = document.getElementById('canvas-area');
+        const availWidth = canvas.clientWidth - 48;
+        const availHeight = canvas.clientHeight - 48;
+
+        const scaleX = availWidth / 1440;
+        const scaleY = availHeight / 900;
+        const scale = Math.min(scaleX, scaleY, 1);
+
+        wrapper.style.transform = `scale(${scale})`;
+      }
+    }
+
+    function applyMosaicScale() {
+      for (const i of [1, 2, 3, 4]) {
+        const vp = document.getElementById(`mv-${i}`);
+        const iframe = document.getElementById(`m-iframe-${i}`);
+        if (!vp || !iframe) continue;
+
+        const vpW = vp.clientWidth;
+        const vpH = vp.clientHeight;
+
+        const scale = Math.min(vpW / 1440, vpH / 900);
+        iframe.style.transform = `scale(${scale})`;
+      }
+    }
+
+    // Gestion du redimensionnement de fenêtre
+    window.addEventListener('resize', () => {
+      applyScale();
+      if (currentMainView === 'mosaic') applyMosaicScale();
+    });
+
+    // Raccourcis clavier (1, 2, 3, 4 pour les directions, D, M, G pour les vues)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '1') selectDirection(1);
+      if (e.key === '2') selectDirection(2);
+      if (e.key === '3') selectDirection(3);
+      if (e.key === '4') selectDirection(4);
+      if (e.key.toLowerCase() === 'm') switchMainView('mobile');
+      if (e.key.toLowerCase() === 'd') switchMainView('desktop');
+      if (e.key.toLowerCase() === 'g') switchMainView('mosaic');
+    });
+
+    // Initialisation au chargement
+    window.addEventListener('DOMContentLoaded', () => {
+      selectDirection(4);
+      applyScale();
+    });
+  </script>
+</body>
+</html>

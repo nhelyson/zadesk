@@ -14,6 +14,7 @@ import { verifyTurnstileToken } from "../services/turnstileService.js";
 import { cacheService } from "../cache/cacheService.js";
 import { formatPublicUser, successResponse } from "../utils/response.js";
 import { env } from "../config/env.js";
+import { revokeSessionPresence } from "../services/presenceService.js";
 import { logger } from "../utils/logger.js";
 
 const MAX_FAILED_LOGINS_BEFORE_CAPTCHA = 3;
@@ -231,7 +232,10 @@ export async function logout(req, res, next) {
   try {
     const sessionToken = req.sessionToken;
     if (sessionToken) {
-      await logoutUser(sessionToken);
+      await Promise.all([
+        logoutUser(sessionToken),
+        revokeSessionPresence(sessionToken).catch(() => {}),
+      ]);
     }
 
     clearSessionCookie(res);

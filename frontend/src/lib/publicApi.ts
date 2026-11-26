@@ -104,10 +104,18 @@ export async function fetchCompanyBySlug(slug: string): Promise<PublicCompany | 
 /**
  * Send real chat message to company SAV desk from public portal
  */
+export interface PublicChatAttachmentPayload {
+  name: string;
+  type: string;
+  size: number;
+  dataBase64: string;
+}
+
 export async function sendPublicChatMessage(
   slug: string,
   data: {
     message: string;
+    attachments?: PublicChatAttachmentPayload[];
     conversationId?: string | null;
     customerName?: string;
     customerPhone?: string;
@@ -125,6 +133,7 @@ export async function sendPublicChatMessage(
       headers,
       body: JSON.stringify({
         message: data.message,
+        attachments: data.attachments,
         conversationId: data.conversationId,
         customerName: data.customerName,
         customerPhone: data.customerPhone,
@@ -161,6 +170,85 @@ export async function fetchPublicChatMessages(
     return await res.json();
   } catch (err: any) {
     console.error(`Failed to fetch public chat messages for ${slug}:`, err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function fetchPublicPushVapidKey(): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_BASE}/push/vapid-key`, { cache: "no-store" });
+    const json = await res.json();
+    return json.publicKey || json.data?.publicKey || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function subscribePublicChatPush(
+  slug: string,
+  conversationId: string,
+  subscription: PushSubscriptionJSON,
+  token?: string | null
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["x-conversation-token"] = token;
+    const res = await fetch(
+      `${API_BASE}/companies/${encodeURIComponent(slug)}/chat/${encodeURIComponent(conversationId)}/push-subscribe`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ subscription }),
+      }
+    );
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function unsubscribePublicChatPush(
+  slug: string,
+  conversationId: string,
+  endpoint: string,
+  token?: string | null
+): Promise<{ success: boolean }> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["x-conversation-token"] = token;
+    const res = await fetch(
+      `${API_BASE}/companies/${encodeURIComponent(slug)}/chat/${encodeURIComponent(conversationId)}/push-subscribe`,
+      {
+        method: "DELETE",
+        headers,
+        body: JSON.stringify({ endpoint }),
+      }
+    );
+    return await res.json();
+  } catch {
+    return { success: false };
+  }
+}
+
+export async function savePublicChatNotificationEmail(
+  slug: string,
+  conversationId: string,
+  email: string,
+  token?: string | null
+): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["x-conversation-token"] = token;
+    const res = await fetch(
+      `${API_BASE}/companies/${encodeURIComponent(slug)}/chat/${encodeURIComponent(conversationId)}/notify-email`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ email }),
+      }
+    );
+    return await res.json();
+  } catch (err: any) {
     return { success: false, error: err.message };
   }
 }

@@ -3,7 +3,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = "zadesk-app-v1.0.1";
+const CACHE_NAME = "zadesk-app-v1.0.2";
 const OFFLINE_URL = "/offline";
 
 // Static App Shell assets to pre-cache on install
@@ -183,6 +183,57 @@ self.addEventListener("fetch", (event) => {
         if (cached) return cached;
         return new Response("", { status: 408, statusText: "Network Request Failed" });
       })
+  );
+});
+
+// Web Push Event: Show system notification even when app/tab is closed
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload = {};
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "Zalisk", body: event.data.text() };
+  }
+
+  const title = payload.title || "Nouveau message · Zalisk";
+  const options = {
+    body: payload.body || "Vous avez reçu une nouvelle réponse.",
+    icon: payload.icon || "/icons/icon-192x192.png",
+    badge: "/icons/favicon-32x32.png",
+    tag: payload.tag || "zalisk-notification",
+    renotify: true,
+    data: {
+      url: payload.url || "/",
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Notification Click: Focus matching tab or open target conversation URL
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        try {
+          const clientUrl = new URL(client.url);
+          if (clientUrl.origin === self.location.origin) {
+            if ("navigate" in client) {
+              return client.navigate(targetUrl).then((c) => (c ? c.focus() : client.focus()));
+            }
+            return client.focus();
+          }
+        } catch {}
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
   );
 });
 

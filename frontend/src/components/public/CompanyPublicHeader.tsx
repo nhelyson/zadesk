@@ -46,23 +46,24 @@ export const CompanyPublicHeader: React.FC<CompanyPublicHeaderProps> = ({
 
   return (
     <header
-      className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all"
+      className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-black/[0.06] px-3 sm:px-6 py-2.5 sm:py-3 shrink-0 shadow-sm transition-colors"
       style={{
         paddingLeft: isPreview ? "0.75rem" : "max(0.75rem, env(safe-area-inset-left, 0px))",
         paddingRight: isPreview ? "0.75rem" : "max(0.75rem, env(safe-area-inset-right, 0px))",
       }}
     >
       <div className={`w-full ${isPreview ? "" : "max-w-7xl mx-auto"} flex items-center justify-between gap-2 sm:gap-3`}>
-        {/* Left: Back Link + Company Identity */}
+        {/* Gauche : Retour annuaire + Identité entreprise */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {!isPreview ? (
             <Link
               href={backHref}
-              className="inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-slate-600 hover:text-slate-900 bg-black/[0.03] hover:bg-black/[0.06] active:scale-95 transition-all shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-full text-slate-700 hover:text-slate-950 bg-black/[0.04] hover:bg-black/[0.08] active:scale-95 transition-all shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D]"
               title="Retour à l'annuaire des entreprises"
+              aria-label="Retour à l'annuaire des entreprises"
             >
               <ArrowLeft className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-              <span className="text-xs font-medium hidden md:inline">Annuaire SAV</span>
+              <span className="text-xs font-semibold hidden md:inline">Annuaire</span>
             </Link>
           ) : (
             <div
@@ -75,11 +76,11 @@ export const CompanyPublicHeader: React.FC<CompanyPublicHeaderProps> = ({
 
           <div className="h-4 w-px bg-black/[0.08] hidden sm:block shrink-0" />
 
-          {/* Logo / Monogram */}
+          {/* Logo / Monogramme */}
           <div
             className={`${
               isPreview ? "w-8 h-8 text-xs" : "w-9 h-9 sm:w-10 sm:h-10 text-sm"
-            } rounded-2xl bg-white border shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center overflow-hidden shrink-0 transition-transform`}
+            } rounded-2xl bg-white border shadow-sm flex items-center justify-center overflow-hidden shrink-0`}
             style={{ borderColor: "var(--company-surface-border, rgba(0,0,0,0.08))" }}
           >
             {logoUrl ? (
@@ -101,14 +102,14 @@ export const CompanyPublicHeader: React.FC<CompanyPublicHeaderProps> = ({
             )}
           </div>
 
-          {/* Titles & Real-Time Status */}
+          {/* Titre & Statut temps réel */}
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <h1
                 className={`${
-                  isPreview ? "text-xs font-bold" : "text-xs sm:text-base font-semibold"
+                  isPreview ? "text-xs font-bold" : "text-sm sm:text-base font-bold"
                 } tracking-tight text-[#1D1D1F] truncate ${
-                  isPreview ? "max-w-[130px] sm:max-w-[170px]" : "max-w-[120px] xs:max-w-[180px] sm:max-w-none"
+                  isPreview ? "max-w-[130px] sm:max-w-[170px]" : "max-w-[140px] sm:max-w-none"
                 }`}
                 title={displayName}
               >
@@ -117,68 +118,54 @@ export const CompanyPublicHeader: React.FC<CompanyPublicHeaderProps> = ({
 
               {verified && (
                 <span
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/60 shrink-0"
-                  title="Service client certifié Zadesk"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shrink-0"
+                  title="Service client certifié Zalisk"
                 >
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                   <span className={isPreview ? "hidden" : "hidden sm:inline"}>Certifié</span>
                 </span>
               )}
-
-              <span
-                className={`${
-                  isPreview ? "hidden" : "hidden sm:inline-flex"
-                } items-center px-2 py-0.5 rounded-full text-[10px] font-medium border shrink-0`}
-                style={{
-                  backgroundColor: "var(--company-secondary, #F1F5F9)",
-                  borderColor: "var(--company-surface-border, #E2E8F0)",
-                  color: "var(--company-text, #0F172A)",
-                }}
-              >
-                SAV Officiel
-              </span>
             </div>
 
             {statusBadge ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-[#86868B] truncate mt-0.5">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] text-slate-600 truncate mt-0.5">
                 <span className="inline-flex items-center gap-1.5 truncate">
                   <span className={`w-2 h-2 rounded-full shrink-0 ${statusBadge.dotColor}`} />
-                  <span className={`font-medium ${statusBadge.textColor}`}>
+                  <span className={`font-semibold ${statusBadge.textColor}`}>
                     {statusBadge.label}
                   </span>
                 </span>
                 {!isPreview && humanAvailabilityText && (
                   <>
                     <span className="hidden md:inline text-black/20">•</span>
-                    <span className="hidden md:inline truncate text-[#86868B]" title={humanAvailabilityText}>
+                    <span className="hidden md:inline truncate text-slate-600" title={humanAvailabilityText}>
                       {humanAvailabilityText}
                     </span>
                   </>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#86868B] truncate mt-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-600 truncate mt-0.5">
                 <span className="truncate">{category || "Guichet SAV"}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right: Actions */}
+        {/* Droite : Actions panneau contextuel / tiroir mobile */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {!isPreview ? (
             <>
-              {/* Desktop: Toggle Context Panel */}
               {onToggleContextPanel && (
                 <button
                   type="button"
                   onClick={onToggleContextPanel}
-                  className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all active:scale-95 cursor-pointer"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all active:scale-95 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D]"
                   style={{
                     backgroundColor: showContextPanel
                       ? "var(--company-secondary, rgba(0,0,0,0.04))"
                       : "rgba(0,0,0,0.04)",
-                    borderColor: "var(--company-surface-border, rgba(0,0,0,0.06))",
+                    borderColor: "var(--company-surface-border, rgba(0,0,0,0.08))",
                     color: showContextPanel ? "var(--company-text, #1D1D1F)" : "#1D1D1F",
                   }}
                   title={showContextPanel ? "Masquer les informations" : "Afficher les informations"}
@@ -186,46 +173,46 @@ export const CompanyPublicHeader: React.FC<CompanyPublicHeaderProps> = ({
                 >
                   {showContextPanel ? (
                     <>
-                      <PanelRightClose className="w-3.5 h-3.5 text-[#86868B]" />
+                      <PanelRightClose className="w-3.5 h-3.5 text-slate-600" />
                       <span>Masquer détails</span>
                     </>
                   ) : (
                     <>
-                      <PanelRightOpen className="w-3.5 h-3.5 text-[#86868B]" />
+                      <PanelRightOpen className="w-3.5 h-3.5 text-slate-600" />
                       <span>Détails & Contacts</span>
                     </>
                   )}
                 </button>
               )}
 
-              {/* Mobile / Tablet: Open Slide-Over Drawer */}
               {onOpenDrawer && (
                 <button
                   type="button"
                   onClick={onOpenDrawer}
-                  className="lg:hidden inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-2 sm:py-1.5 rounded-full border text-xs font-medium transition-all active:scale-95 cursor-pointer"
+                  className="lg:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all active:scale-95 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D]"
                   style={{
                     backgroundColor: "var(--company-secondary, rgba(0,0,0,0.04))",
-                    borderColor: "var(--company-surface-border, rgba(0,0,0,0.06))",
+                    borderColor: "var(--company-surface-border, rgba(0,0,0,0.08))",
                     color: "var(--company-text, #1D1D1F)",
                   }}
+                  aria-label="Ouvrir les informations, horaires et contacts"
                 >
-                  <Building2 className="w-3.5 h-3.5 text-[#86868B]" />
-                  <span className="hidden xs:inline">Horaires & Contacts</span>
-                  <span className="xs:hidden">Infos</span>
+                  <Building2 className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="hidden sm:inline">Horaires & Contacts</span>
+                  <span className="sm:hidden">Infos</span>
                 </button>
               )}
             </>
           ) : (
             <div
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-medium"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-medium"
               style={{
                 backgroundColor: "var(--company-secondary, rgba(0,0,0,0.04))",
                 borderColor: "var(--company-surface-border, rgba(0,0,0,0.06))",
                 color: "var(--company-text, #1D1D1F)",
               }}
             >
-              <Building2 className="w-3 h-3 text-[#86868B]" />
+              <Building2 className="w-3 h-3 text-slate-600" />
               <span>Infos SAV</span>
             </div>
           )}

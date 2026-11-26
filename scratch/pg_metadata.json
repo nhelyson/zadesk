@@ -1,0 +1,4539 @@
+{
+  "columns": [
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "id",
+      "data_type": "character varying",
+      "udt_name": "varchar",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "checksum",
+      "data_type": "character varying",
+      "udt_name": "varchar",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "finished_at",
+      "data_type": "timestamp with time zone",
+      "udt_name": "timestamptz",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "migration_name",
+      "data_type": "character varying",
+      "udt_name": "varchar",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "logs",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "rolled_back_at",
+      "data_type": "timestamp with time zone",
+      "udt_name": "timestamptz",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "started_at",
+      "data_type": "timestamp with time zone",
+      "udt_name": "timestamptz",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "applied_steps_count",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "availability",
+      "data_type": "USER-DEFINED",
+      "udt_name": "AgentAvailability",
+      "is_nullable": "NO",
+      "column_default": "'AVAILABLE'::\"AgentAvailability\""
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "maxCapacity",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "10"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "autoAssignmentEnabled",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "title",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": "'Agent SAV'::text"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "phone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "notificationEmail",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "notificationApp",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "agentProfileId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "skillId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "validatedById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "validatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "action",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "entityType",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "entityId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "details",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "ipAddress",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "requestedByUserId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "subscriptionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "currentPlanId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "targetPlanId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "DowngradeRequestStatus",
+      "is_nullable": "NO",
+      "column_default": "'DRAFT'::\"DowngradeRequestStatus\""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "effectiveDate",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "isBlocked",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "blockedReason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "retainedMemberIds",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "retainedEstablishmentIds",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "revokedInvitationIds",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "cancelledAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "cancelledByUserId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "appliedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "proofId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "intentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "providerTransactionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "amountXaf",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "currency",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'XAF'::text"
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "source",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "issuedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "consumedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "consumedBy",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "conversationId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "senderId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "senderType",
+      "data_type": "USER-DEFINED",
+      "udt_name": "MessageType",
+      "is_nullable": "NO",
+      "column_default": "'CUSTOMER'::\"MessageType\""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "senderName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "content",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "isInternalNote",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "conversationId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "agentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "sharedById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "accessLevel",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ShareAccessLevel",
+      "is_nullable": "NO",
+      "column_default": "'READ_ONLY'::\"ShareAccessLevel\""
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "assignedAgentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "customerName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "customerPhone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "customerEmail",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "channel",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'PORTAL'::text"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ConversationStatus",
+      "is_nullable": "NO",
+      "column_default": "'ACTIVE'::\"ConversationStatus\""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "priority",
+      "data_type": "USER-DEFINED",
+      "udt_name": "TicketPriority",
+      "is_nullable": "NO",
+      "column_default": "'MEDIUM'::\"TicketPriority\""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "lastMessageAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "category",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "publicTokenHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "type",
+      "data_type": "USER-DEFINED",
+      "udt_name": "EstablishmentType",
+      "is_nullable": "NO",
+      "column_default": "'BRANCH'::\"EstablishmentType\""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "description",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "isMain",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "isPublic",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "isActive",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "address",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "city",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'Brazzaville'::text"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "country",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'Congo'::text"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "addressDetails",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "phone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "email",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "whatsapp",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "openingHours",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "businessHours",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "services",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "practicalInfo",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "galleryImages",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "imageUrl",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "role",
+      "data_type": "USER-DEFINED",
+      "udt_name": "Role",
+      "is_nullable": "NO",
+      "column_default": "'AGENT'::\"Role\""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "MembershipStatus",
+      "is_nullable": "NO",
+      "column_default": "'ACTIVE'::\"MembershipStatus\""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "suspendedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "suspendedReason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "step",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "data",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "otpHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "purpose",
+      "data_type": "USER-DEFINED",
+      "udt_name": "OtpPurpose",
+      "is_nullable": "NO",
+      "column_default": "'LOGIN'::\"OtpPurpose\""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "attempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "maxAttempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "5"
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "verifiedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "eventType",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "queueName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "jobName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "payload",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "OutboxStatus",
+      "is_nullable": "NO",
+      "column_default": "'PENDING'::\"OutboxStatus\""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "jobId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "attempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "maxAttempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "5"
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "lastError",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "lockedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "lockedBy",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "publishedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "intentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "attemptNumber",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "providerSessionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "checkoutUrl",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "AttemptStatus",
+      "is_nullable": "NO",
+      "column_default": "'INITIATED'::\"AttemptStatus\""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "localAttemptKey",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "failureReason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "receiptId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "subscriptionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "intentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "attemptId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "providerTransactionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "amountXaf",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "currency",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'XAF'::text"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "paymentMethod",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "operatorReference",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "TransactionApplicationStatus",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "paidAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "email",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "firstName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "lastName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "passwordHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "otpHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "attempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "maxAttempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "5"
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "eventKey",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "eventType",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "processedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "status",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "providerTransactionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "providerReference",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "amountRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "currencyRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "paidAtRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "amountXaf",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "currency",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "paidAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "paymentMethod",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "operatorReference",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "validationStatus",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ReceiptValidationStatus",
+      "is_nullable": "NO",
+      "column_default": "'VALID'::\"ReceiptValidationStatus\""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "reconciliationStatus",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ReceiptReconciliationStatus",
+      "is_nullable": "NO",
+      "column_default": "'PENDING_MATCHING'::\"ReceiptReconciliationStatus\""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "diagnosticNotes",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "intentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "attemptId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "rawPayload",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "receiptId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "actorUserId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "previousReconciliation",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ReceiptReconciliationStatus",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "newReconciliation",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ReceiptReconciliationStatus",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "reason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "decisionNotes",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "receiptId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "eventKey",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "eventType",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "rawHeaders",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "rawBodyText",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "payloadHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "amountRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "currencyRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "paidAtRaw",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "providerReference",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "rawPayload",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "isIdenticalToReceipt",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "discrepancyNotes",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "provider",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'SASPAY'::text"
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "payloadHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "rawHeaders",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "rawBodyText",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "rejectionReason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "retryCount",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "lastSeenAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "sessionToken",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "skills",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "skills",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "skills",
+      "column_name": "name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "skills",
+      "column_name": "description",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "skills",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "skills",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "subscriptionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "actorUserId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "fromPlan",
+      "data_type": "USER-DEFINED",
+      "udt_name": "PlanType",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "toPlan",
+      "data_type": "USER-DEFINED",
+      "udt_name": "PlanType",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "reason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "periodStart",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "periodEnd",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "subscriptionId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "userId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "intentType",
+      "data_type": "USER-DEFINED",
+      "udt_name": "IntentType",
+      "is_nullable": "NO",
+      "column_default": "'INITIAL_PURCHASE'::\"IntentType\""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "targetPlan",
+      "data_type": "USER-DEFINED",
+      "udt_name": "PlanType",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "priceXaf",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "currency",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'XAF'::text"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "IntentStatus",
+      "is_nullable": "NO",
+      "column_default": "'PENDING'::\"IntentStatus\""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "clientMutationKey",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "expectedSubscriptionVersion",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "plan",
+      "data_type": "USER-DEFINED",
+      "udt_name": "PlanType",
+      "is_nullable": "NO",
+      "column_default": "'DECOUVERTE'::\"PlanType\""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "SubscriptionStatus",
+      "is_nullable": "NO",
+      "column_default": "'ACTIVE'::\"SubscriptionStatus\""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "activePriceXaf",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "currentPeriodStart",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "currentPeriodEnd",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "gracePeriodEnd",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "billingAnchorDay",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "version",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "lastNoticeSentAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "noticeCount",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "ticketId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "authorId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "type",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "content",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "ticketId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "previousAgentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "newAgentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "assignedById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "reason",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "ticketId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "agentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "sharedById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "accessLevel",
+      "data_type": "USER-DEFINED",
+      "udt_name": "ShareAccessLevel",
+      "is_nullable": "NO",
+      "column_default": "'READ_ONLY'::\"ShareAccessLevel\""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "reference",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "assignedAgentId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "createdById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "title",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "description",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "category",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "priority",
+      "data_type": "USER-DEFINED",
+      "udt_name": "TicketPriority",
+      "is_nullable": "NO",
+      "column_default": "'MEDIUM'::\"TicketPriority\""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "udt_name": "TicketStatus",
+      "is_nullable": "NO",
+      "column_default": "'OPEN'::\"TicketStatus\""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "customerName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "customerPhone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "customerEmail",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "slaDueAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "resolvedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "closedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "conversationId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "metadata",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "googleId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "email",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "firstName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "lastName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "avatarUrl",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "passwordHash",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "users",
+      "column_name": "emailVerified",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "users",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "users",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "wabaId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "phoneNumberId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "displayPhoneNumber",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "verifiedName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "accessToken",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "status",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": "'CONNECTED'::text"
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "email",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "workspaceId",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "role",
+      "data_type": "USER-DEFINED",
+      "udt_name": "Role",
+      "is_nullable": "NO",
+      "column_default": "'AGENT'::\"Role\""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "token",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "invitedById",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "expiresAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "acceptedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "dispatchAttempts",
+      "data_type": "integer",
+      "udt_name": "int4",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "dispatchError",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "dispatchLockedBy",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "dispatchStartedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "dispatchStatus",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": "'PENDING'::text"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "nextRetryAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "revokedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "slug",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "NO",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "address",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "category",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": "'Autre'::text"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "city",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": "'Brazzaville'::text"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "country",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": "'Congo'::text"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "coverUrl",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "description",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "isPublic",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "logoUrl",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "openingHours",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "supportCategories",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "supportEmail",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "supportPhone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "supportWhatsApp",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "verified",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "website",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "normalizedName",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "hasExistingSav",
+      "data_type": "boolean",
+      "udt_name": "bool",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "brandColor",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "brandPalette",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "businessHours",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "cannedResponses",
+      "data_type": "jsonb",
+      "udt_name": "jsonb",
+      "is_nullable": "YES",
+      "column_default": ""
+    }
+  ],
+  "fks": [
+    {
+      "table_name": "agent_profiles",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "agent_profiles_userId_fkey"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "agent_profiles_workspaceId_fkey"
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "agentProfileId",
+      "foreign_table_name": "agent_profiles",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "agent_skills_agentProfileId_fkey"
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "skillId",
+      "foreign_table_name": "skills",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "agent_skills_skillId_fkey"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "audit_logs_userId_fkey"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "audit_logs_workspaceId_fkey"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "cancelledByUserId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "commercial_downgrade_requests_cancelledByUserId_fkey"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "requestedByUserId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "commercial_downgrade_requests_requestedByUserId_fkey"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "subscriptionId",
+      "foreign_table_name": "subscriptions",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "commercial_downgrade_requests_subscriptionId_fkey"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "commercial_downgrade_requests_workspaceId_fkey"
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "conversationId",
+      "foreign_table_name": "conversations",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "conversation_messages_conversationId_fkey"
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "senderId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "conversation_messages_senderId_fkey"
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "agentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "conversation_shares_agentId_fkey"
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "conversationId",
+      "foreign_table_name": "conversations",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "conversation_shares_conversationId_fkey"
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "sharedById",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "conversation_shares_sharedById_fkey"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "assignedAgentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "conversations_assignedAgentId_fkey"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "conversations_workspaceId_fkey"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "establishments_workspaceId_fkey"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "memberships_userId_fkey"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "memberships_workspaceId_fkey"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "onboarding_drafts_userId_fkey"
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "otp_tokens_userId_fkey"
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "outbox_events_workspaceId_fkey"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "intentId",
+      "foreign_table_name": "subscription_intents",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_attempts_intentId_fkey"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_attempts_workspaceId_fkey"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "attemptId",
+      "foreign_table_name": "payment_attempts",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "payment_transactions_attemptId_fkey"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "intentId",
+      "foreign_table_name": "subscription_intents",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_transactions_intentId_fkey"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "receiptId",
+      "foreign_table_name": "provider_payment_receipts",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_transactions_receiptId_fkey"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "subscriptionId",
+      "foreign_table_name": "subscriptions",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_transactions_subscriptionId_fkey"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "payment_transactions_workspaceId_fkey"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "attemptId",
+      "foreign_table_name": "payment_attempts",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "provider_payment_receipts_attemptId_fkey"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "intentId",
+      "foreign_table_name": "subscription_intents",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "provider_payment_receipts_intentId_fkey"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "provider_payment_receipts_workspaceId_fkey"
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "actorUserId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "provider_receipt_audit_logs_actorUserId_fkey"
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "receiptId",
+      "foreign_table_name": "provider_payment_receipts",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "provider_receipt_audit_logs_receiptId_fkey"
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "receiptId",
+      "foreign_table_name": "provider_payment_receipts",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "provider_receipt_events_receiptId_fkey"
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "sessions_userId_fkey"
+    },
+    {
+      "table_name": "skills",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "skills_workspaceId_fkey"
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "actorUserId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "subscription_history_logs_actorUserId_fkey"
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "subscriptionId",
+      "foreign_table_name": "subscriptions",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscription_history_logs_subscriptionId_fkey"
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscription_history_logs_workspaceId_fkey"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "subscriptionId",
+      "foreign_table_name": "subscriptions",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscription_intents_subscriptionId_fkey"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "userId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscription_intents_userId_fkey"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscription_intents_workspaceId_fkey"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "RESTRICT",
+      "constraint_name": "subscriptions_workspaceId_fkey"
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "authorId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "ticket_activities_authorId_fkey"
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "ticketId",
+      "foreign_table_name": "tickets",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "ticket_activities_ticketId_fkey"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "assignedById",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "ticket_assignments_assignedById_fkey"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "newAgentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "ticket_assignments_newAgentId_fkey"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "previousAgentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "ticket_assignments_previousAgentId_fkey"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "ticketId",
+      "foreign_table_name": "tickets",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "ticket_assignments_ticketId_fkey"
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "agentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "ticket_shares_agentId_fkey"
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "sharedById",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "ticket_shares_sharedById_fkey"
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "ticketId",
+      "foreign_table_name": "tickets",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "ticket_shares_ticketId_fkey"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "assignedAgentId",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "tickets_assignedAgentId_fkey"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "conversationId",
+      "foreign_table_name": "conversations",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "tickets_conversationId_fkey"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "createdById",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "SET NULL",
+      "constraint_name": "tickets_createdById_fkey"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "tickets_workspaceId_fkey"
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "whatsapp_connections_workspaceId_fkey"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "invitedById",
+      "foreign_table_name": "users",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "workspace_invitations_invitedById_fkey"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "workspaceId",
+      "foreign_table_name": "workspaces",
+      "foreign_column_name": "id",
+      "update_rule": "CASCADE",
+      "delete_rule": "CASCADE",
+      "constraint_name": "workspace_invitations_workspaceId_fkey"
+    }
+  ],
+  "uniques": [
+    {
+      "table_name": "_prisma_migrations",
+      "column_name": "id",
+      "constraint_name": "_prisma_migrations_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "agent_profiles",
+      "column_name": "id",
+      "constraint_name": "agent_profiles_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "agent_skills",
+      "column_name": "id",
+      "constraint_name": "agent_skills_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "id",
+      "constraint_name": "audit_logs_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "commercial_downgrade_requests",
+      "column_name": "id",
+      "constraint_name": "commercial_downgrade_requests_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "consumed_financial_proofs",
+      "column_name": "id",
+      "constraint_name": "consumed_financial_proofs_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "conversation_messages",
+      "column_name": "id",
+      "constraint_name": "conversation_messages_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "conversation_shares",
+      "column_name": "id",
+      "constraint_name": "conversation_shares_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "conversations",
+      "column_name": "id",
+      "constraint_name": "conversations_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "establishments",
+      "column_name": "id",
+      "constraint_name": "establishments_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "memberships",
+      "column_name": "id",
+      "constraint_name": "memberships_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "id",
+      "constraint_name": "onboarding_drafts_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "onboarding_drafts",
+      "column_name": "userId",
+      "constraint_name": "onboarding_drafts_userId_key",
+      "constraint_type": "UNIQUE"
+    },
+    {
+      "table_name": "otp_tokens",
+      "column_name": "id",
+      "constraint_name": "otp_tokens_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "outbox_events",
+      "column_name": "id",
+      "constraint_name": "outbox_events_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "payment_attempts",
+      "column_name": "id",
+      "constraint_name": "payment_attempts_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "payment_transactions",
+      "column_name": "id",
+      "constraint_name": "payment_transactions_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "pending_registrations",
+      "column_name": "id",
+      "constraint_name": "pending_registrations_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "processed_webhook_events",
+      "column_name": "id",
+      "constraint_name": "processed_webhook_events_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "provider_payment_receipts",
+      "column_name": "id",
+      "constraint_name": "provider_payment_receipts_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "provider_receipt_audit_logs",
+      "column_name": "id",
+      "constraint_name": "provider_receipt_audit_logs_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "provider_receipt_events",
+      "column_name": "id",
+      "constraint_name": "provider_receipt_events_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "quarantined_webhook_payloads",
+      "column_name": "id",
+      "constraint_name": "quarantined_webhook_payloads_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "sessions",
+      "column_name": "id",
+      "constraint_name": "sessions_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "skills",
+      "column_name": "id",
+      "constraint_name": "skills_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "subscription_history_logs",
+      "column_name": "id",
+      "constraint_name": "subscription_history_logs_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "subscription_intents",
+      "column_name": "id",
+      "constraint_name": "subscription_intents_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "subscriptions",
+      "column_name": "id",
+      "constraint_name": "subscriptions_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "ticket_activities",
+      "column_name": "id",
+      "constraint_name": "ticket_activities_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "ticket_assignments",
+      "column_name": "id",
+      "constraint_name": "ticket_assignments_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "ticket_shares",
+      "column_name": "id",
+      "constraint_name": "ticket_shares_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "tickets",
+      "column_name": "id",
+      "constraint_name": "tickets_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "users",
+      "column_name": "id",
+      "constraint_name": "users_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "whatsapp_connections",
+      "column_name": "id",
+      "constraint_name": "whatsapp_connections_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "workspace_invitations",
+      "column_name": "id",
+      "constraint_name": "workspace_invitations_pkey",
+      "constraint_type": "PRIMARY KEY"
+    },
+    {
+      "table_name": "workspaces",
+      "column_name": "id",
+      "constraint_name": "workspaces_pkey",
+      "constraint_type": "PRIMARY KEY"
+    }
+  ],
+  "pg_enums": [
+    {
+      "enum_name": "AgentAvailability",
+      "enum_value": "AVAILABLE",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "AgentAvailability",
+      "enum_value": "BUSY",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "AgentAvailability",
+      "enum_value": "AWAY",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "AgentAvailability",
+      "enum_value": "OFFLINE",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "INITIATED",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "CHECKOUT_CREATED",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "PAYMENT_PENDING",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "RESULT_UNKNOWN",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "RECONCILIATION_REQUIRED",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "PAYMENT_CONFIRMED",
+      "sort_order": "6"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "CONFIRMED_FAILURE",
+      "sort_order": "7"
+    },
+    {
+      "enum_name": "AttemptStatus",
+      "enum_value": "SESSION_EXPIRED",
+      "sort_order": "8"
+    },
+    {
+      "enum_name": "ConversationStatus",
+      "enum_value": "WAITING_ASSIGNMENT",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "ConversationStatus",
+      "enum_value": "ACTIVE",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "ConversationStatus",
+      "enum_value": "WAITING_CUSTOMER",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "ConversationStatus",
+      "enum_value": "RESOLVED",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "ConversationStatus",
+      "enum_value": "CLOSED",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "DRAFT",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "READY",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "BLOCKED",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "SCHEDULED",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "APPLIED",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "CANCELLED",
+      "sort_order": "6"
+    },
+    {
+      "enum_name": "DowngradeRequestStatus",
+      "enum_value": "OBSOLETE_CANCELLED",
+      "sort_order": "7"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "HEADQUARTERS",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "BRANCH",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "STORE",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "POINT_OF_SALE",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "SERVICE_POINT",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "PICKUP_POINT",
+      "sort_order": "6"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "TECH_CENTER",
+      "sort_order": "7"
+    },
+    {
+      "enum_name": "EstablishmentType",
+      "enum_value": "OTHER",
+      "sort_order": "8"
+    },
+    {
+      "enum_name": "IntentStatus",
+      "enum_value": "PENDING",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "IntentStatus",
+      "enum_value": "COMPLETED",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "IntentStatus",
+      "enum_value": "ABANDONED",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "IntentStatus",
+      "enum_value": "EXPIRED",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "IntentType",
+      "enum_value": "INITIAL_PURCHASE",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "IntentType",
+      "enum_value": "RENEWAL",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "IntentType",
+      "enum_value": "UPGRADE",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "IntentType",
+      "enum_value": "DOWNGRADE",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "MembershipStatus",
+      "enum_value": "ACTIVE",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "MembershipStatus",
+      "enum_value": "SUSPENDED",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "MembershipStatus",
+      "enum_value": "ARCHIVED",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "MessageType",
+      "enum_value": "CUSTOMER",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "MessageType",
+      "enum_value": "AGENT_REPLY",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "MessageType",
+      "enum_value": "INTERNAL_NOTE",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "MessageType",
+      "enum_value": "SYSTEM",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "OtpPurpose",
+      "enum_value": "REGISTRATION",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "OtpPurpose",
+      "enum_value": "LOGIN",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "OtpPurpose",
+      "enum_value": "EMAIL_VERIFICATION",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "OtpPurpose",
+      "enum_value": "PASSWORD_RESET",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "OutboxStatus",
+      "enum_value": "PENDING",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "OutboxStatus",
+      "enum_value": "PROCESSING",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "OutboxStatus",
+      "enum_value": "PUBLISHED",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "OutboxStatus",
+      "enum_value": "FAILED",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "PlanType",
+      "enum_value": "DECOUVERTE",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "PlanType",
+      "enum_value": "STARTER",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "PlanType",
+      "enum_value": "PRO",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "PlanType",
+      "enum_value": "ENTREPRISE",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "PENDING_MATCHING",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "MATCHED_AND_APPLIED",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "DUPLICATE_PAYMENT",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "AMOUNT_MISMATCH",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "UNMATCHED_METADATA",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "EXPIRED_INTENT_PAID",
+      "sort_order": "6"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "ABANDONED_INTENT_PAID",
+      "sort_order": "7"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "CONFLICTING_ATTEMPT_STATUS",
+      "sort_order": "8"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "INVESTIGATION_REQUIRED",
+      "sort_order": "9"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "MANUALLY_RESOLVED",
+      "sort_order": "10"
+    },
+    {
+      "enum_name": "ReceiptReconciliationStatus",
+      "enum_value": "REFUNDED",
+      "sort_order": "11"
+    },
+    {
+      "enum_name": "ReceiptValidationStatus",
+      "enum_value": "VALID",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "ReceiptValidationStatus",
+      "enum_value": "INVALID_AMOUNT",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "ReceiptValidationStatus",
+      "enum_value": "INVALID_CURRENCY",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "ReceiptValidationStatus",
+      "enum_value": "INVALID_PAID_AT",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "ReceiptValidationStatus",
+      "enum_value": "MALFORMED_DATA",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "Role",
+      "enum_value": "OWNER",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "Role",
+      "enum_value": "ADMIN",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "Role",
+      "enum_value": "MANAGER",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "Role",
+      "enum_value": "AGENT",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "ShareAccessLevel",
+      "enum_value": "READ_ONLY",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "ShareAccessLevel",
+      "enum_value": "CONTRIBUTE",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "SubscriptionStatus",
+      "enum_value": "ACTIVE",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "SubscriptionStatus",
+      "enum_value": "RENEWAL_DUE",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "SubscriptionStatus",
+      "enum_value": "GRACE_PERIOD",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "SubscriptionStatus",
+      "enum_value": "EXPIRED",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "SubscriptionStatus",
+      "enum_value": "CANCELLED",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "TicketPriority",
+      "enum_value": "LOW",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "TicketPriority",
+      "enum_value": "MEDIUM",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "TicketPriority",
+      "enum_value": "HIGH",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "TicketPriority",
+      "enum_value": "URGENT",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "PENDING_ASSIGNMENT",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "OPEN",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "IN_PROGRESS",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "WAITING_CUSTOMER",
+      "sort_order": "4"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "RESOLVED",
+      "sort_order": "5"
+    },
+    {
+      "enum_name": "TicketStatus",
+      "enum_value": "CLOSED",
+      "sort_order": "6"
+    },
+    {
+      "enum_name": "TransactionApplicationStatus",
+      "enum_value": "APPLIED_TO_SUBSCRIPTION",
+      "sort_order": "1"
+    },
+    {
+      "enum_name": "TransactionApplicationStatus",
+      "enum_value": "DUPLICATE_PAYMENT_RECORDED",
+      "sort_order": "2"
+    },
+    {
+      "enum_name": "TransactionApplicationStatus",
+      "enum_value": "MANUAL_ADJUSTMENT",
+      "sort_order": "3"
+    },
+    {
+      "enum_name": "TransactionApplicationStatus",
+      "enum_value": "REFUNDED",
+      "sort_order": "4"
+    }
+  ]
+}

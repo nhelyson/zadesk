@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import Link from 'next/link';
+import gsap from 'gsap';
 import {
   Building2,
   Plus,
@@ -9,76 +11,42 @@ import {
   Phone,
   Mail,
   Search,
-  Filter,
   Trash2,
   Edit3,
   Star,
-  Eye,
-  EyeOff,
   CheckCircle2,
   AlertCircle,
   X,
   Store,
   Compass,
   MessageCircle,
-  Info,
-  ShieldCheck,
   RefreshCw,
-  ExternalLink,
   Camera,
   Upload,
   Globe,
   Lock,
-  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  LayoutList,
+  GalleryHorizontalEnd,
+  Check,
 } from 'lucide-react';
-import { useWorkspace } from '@/components/workspace/WorkspaceContext';
+import { useWorkspace, notifyWorkspaceDataUpdated } from '@/components/workspace/WorkspaceContext';
 import { workspaceApi } from '@/lib/api';
 import { Establishment, EstablishmentType } from '@/types/workspace';
 
 const TYPE_CONFIG: Record<
   EstablishmentType,
-  { label: string; badgeClass: string; icon: React.FC<{ className?: string }> }
+  { label: string; icon: React.FC<{ className?: string }> }
 > = {
-  HEADQUARTERS: {
-    label: 'Siège social',
-    badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
-    icon: Building2,
-  },
-  BRANCH: {
-    label: 'Agence',
-    badgeClass: 'bg-sky-50 text-sky-700 border-sky-200/80',
-    icon: Building2,
-  },
-  STORE: {
-    label: 'Boutique',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-    icon: Store,
-  },
-  POINT_OF_SALE: {
-    label: 'Point de vente',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/80',
-    icon: Store,
-  },
-  SERVICE_POINT: {
-    label: 'Comptoir SAV',
-    badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
-    icon: Compass,
-  },
-  PICKUP_POINT: {
-    label: 'Point relais',
-    badgeClass: 'bg-purple-50 text-purple-700 border-purple-200/80',
-    icon: MapPin,
-  },
-  TECH_CENTER: {
-    label: 'Centre technique',
-    badgeClass: 'bg-teal-50 text-teal-700 border-teal-200/80',
-    icon: Building2,
-  },
-  OTHER: {
-    label: 'Autre site',
-    badgeClass: 'bg-slate-50 text-slate-700 border-slate-200/80',
-    icon: Building2,
-  },
+  HEADQUARTERS: { label: 'Siège social', icon: Building2 },
+  BRANCH: { label: 'Agence', icon: Building2 },
+  STORE: { label: 'Boutique', icon: Store },
+  POINT_OF_SALE: { label: 'Point de vente', icon: Store },
+  SERVICE_POINT: { label: 'Comptoir SAV', icon: Compass },
+  PICKUP_POINT: { label: 'Point relais', icon: MapPin },
+  TECH_CENTER: { label: 'Centre technique', icon: Building2 },
+  OTHER: { label: 'Autre site', icon: Building2 },
 };
 
 const COMMON_SERVICES = [
@@ -133,17 +101,39 @@ const DEFAULT_FORM: FormState = {
   galleryImages: [],
 };
 
+type ViewMode = 'carousel' | 'list';
+type ModalTab = 'identity' | 'location' | 'media';
+
 export default function EstablishmentsPage() {
-  const { currentWorkspace, userRole } = useWorkspace();
+  const { currentWorkspace, userRole, workspaceUsage } = useWorkspace();
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [visibilityFilter, setVisibilityFilter] = useState<string>('ALL');
+  const [viewMode, setViewMode] = useState<ViewMode>('carousel');
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [showAllServices, setShowAllServices] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Touch swipe & GSAP motion refs
+  const touchStartXRef = useRef<number | null>(null);
+  const railItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const slideDirectionRef = useRef<1 | -1>(1);
+  const hasPlayedEntranceRef = useRef(false);
+  const previousActiveEstIdRef = useRef<string | null>(null);
+  const carouselScopeRef = useRef<HTMLDivElement | null>(null);
+  const visualStageRef = useRef<HTMLDivElement | null>(null);
+  const detailsStageRef = useRef<HTMLDivElement | null>(null);
+  const photoImgRef = useRef<HTMLImageElement | null>(null);
+  const modalPanelRef = useRef<HTMLDivElement | null>(null);
+  const modalTabContentRef = useRef<HTMLDivElement | null>(null);
 
   // Modal form states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState<ModalTab>('identity');
+  const [modalError, setModalError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormState>(DEFAULT_FORM);
@@ -179,7 +169,6 @@ export default function EstablishmentsPage() {
     fetchEstablishments();
   }, [fetchEstablishments]);
 
-  // Filter establishments
   const filteredEstablishments = useMemo(() => {
     return establishments.filter((est) => {
       if (searchQuery.trim()) {
@@ -189,27 +178,268 @@ export default function EstablishmentsPage() {
         const matchesAddress = est.address.toLowerCase().includes(q);
         if (!matchesName && !matchesCity && !matchesAddress) return false;
       }
-      if (typeFilter !== 'ALL' && est.type !== typeFilter) {
-        return false;
-      }
-      if (visibilityFilter === 'PUBLIC' && !est.isPublic) {
-        return false;
-      }
-      if (visibilityFilter === 'PRIVATE' && est.isPublic) {
-        return false;
-      }
+      if (typeFilter !== 'ALL' && est.type !== typeFilter) return false;
+      if (visibilityFilter === 'PUBLIC' && !est.isPublic) return false;
+      if (visibilityFilter === 'PRIVATE' && est.isPublic) return false;
       return true;
     });
   }, [establishments, searchQuery, typeFilter, visibilityFilter]);
 
+  // Synchronize active carousel slide with filtered results
+  const activeIndex = useMemo(() => {
+    if (filteredEstablishments.length === 0) return 0;
+    if (activeId) {
+      const idx = filteredEstablishments.findIndex((e) => e.id === activeId);
+      if (idx !== -1) return idx;
+    }
+    return 0;
+  }, [filteredEstablishments, activeId]);
+
+  const activeEst = filteredEstablishments[activeIndex] || null;
+
+  useEffect(() => {
+    if (activeEst && activeEst.id !== activeId) {
+      setActiveId(activeEst.id);
+    } else if (!activeEst && activeId !== null) {
+      setActiveId(null);
+    }
+  }, [activeEst, activeId]);
+
+  // Reset per-slide transient state when switching active establishment
+  useEffect(() => {
+    setPhotoIndex(0);
+    setShowAllServices(false);
+    if (activeEst?.id && railItemRefs.current[activeEst.id]) {
+      railItemRefs.current[activeEst.id]?.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'nearest',
+        block: 'nearest',
+      });
+    }
+  }, [activeEst?.id]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (filteredEstablishments.length === 0) return;
+      slideDirectionRef.current = index >= activeIndex ? 1 : -1;
+      const wrapped =
+        (index + filteredEstablishments.length) % filteredEstablishments.length;
+      setActiveId(filteredEstablishments[wrapped].id);
+    },
+    [filteredEstablishments, activeIndex]
+  );
+
+  const selectEstablishment = useCallback(
+    (targetId: string) => {
+      const targetIdx = filteredEstablishments.findIndex((e) => e.id === targetId);
+      if (targetIdx !== -1 && targetIdx !== activeIndex) {
+        slideDirectionRef.current = targetIdx > activeIndex ? 1 : -1;
+      }
+      setActiveId(targetId);
+    },
+    [filteredEstablishments, activeIndex]
+  );
+
+  // GSAP: Entrance choreography when carousel view mounts
+  useEffect(() => {
+    if (isLoading || viewMode !== 'carousel' || !activeEst || hasPlayedEntranceRef.current) return;
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      hasPlayedEntranceRef.current = true;
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.gsap-showcase-enter',
+        { y: 18, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.48,
+          stagger: 0.06,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+        }
+      );
+    }, carouselScopeRef);
+
+    hasPlayedEntranceRef.current = true;
+    previousActiveEstIdRef.current = activeEst.id;
+    return () => ctx.revert();
+  }, [isLoading, viewMode, activeEst]);
+
+  // GSAP: Directional slide choreography when changing active establishment
+  useEffect(() => {
+    if (!activeEst || viewMode !== 'carousel') return;
+    if (previousActiveEstIdRef.current === null) {
+      previousActiveEstIdRef.current = activeEst.id;
+      return;
+    }
+    if (previousActiveEstIdRef.current === activeEst.id) return;
+    previousActiveEstIdRef.current = activeEst.id;
+
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const dir = slideDirectionRef.current;
+    const ctx = gsap.context(() => {
+      if (visualStageRef.current) {
+        gsap.fromTo(
+          visualStageRef.current,
+          { x: dir * 28, opacity: 0.15, scale: 0.98 },
+          {
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.46,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+          }
+        );
+      }
+
+      if (detailsStageRef.current) {
+        const items = detailsStageRef.current.querySelectorAll('.gsap-detail-item');
+        if (items.length > 0) {
+          gsap.fromTo(
+            items,
+            { x: dir * 22, opacity: 0 },
+            {
+              x: 0,
+              opacity: 1,
+              duration: 0.42,
+              stagger: 0.035,
+              delay: 0.04,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity',
+            }
+          );
+        }
+      }
+    }, carouselScopeRef);
+
+    return () => ctx.revert();
+  }, [activeEst, viewMode]);
+
+  // GSAP: Smooth crossfade + subtle settle when cycling establishment gallery photos
+  useEffect(() => {
+    if (!photoImgRef.current || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const tween = gsap.fromTo(
+      photoImgRef.current,
+      { opacity: 0.45, scale: 1.035 },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.48,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity',
+      }
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [photoIndex, activeEst?.id]);
+
+  // GSAP: Modal open & tab transition
+  useEffect(() => {
+    if (!isModalOpen || !modalPanelRef.current || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const tween = gsap.fromTo(
+      modalPanelRef.current,
+      { y: 14, scale: 0.985, opacity: 0 },
+      {
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        duration: 0.28,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity',
+      }
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    if (!isModalOpen || !modalTabContentRef.current || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const tween = gsap.fromTo(
+      modalTabContentRef.current,
+      { x: 10, opacity: 0 },
+      {
+        x: 0,
+        opacity: 1,
+        duration: 0.22,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity',
+      }
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [modalTab, isModalOpen]);
+
+  // Keyboard navigation in carousel mode + Escape to close modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isDeleteModalOpen) {
+          setIsDeleteModalOpen(false);
+          setEstablishmentToDelete(null);
+          return;
+        }
+        if (isModalOpen) {
+          setIsModalOpen(false);
+          return;
+        }
+      }
+      if (viewMode !== 'carousel' || isModalOpen || isDeleteModalOpen) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToSlide(activeIndex + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToSlide(activeIndex - 1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewMode, isModalOpen, isDeleteModalOpen, activeIndex, goToSlide]);
+
+  const activePhotos = useMemo(() => {
+    if (!activeEst) return [];
+    const list = [activeEst.imageUrl, ...(activeEst.galleryImages || [])].filter(
+      (u): u is string => Boolean(u && u.trim())
+    );
+    return Array.from(new Set(list));
+  }, [activeEst]);
+
   const handleOpenCreateModal = () => {
     setIsEditing(false);
     setEditingId(null);
+    setModalTab('identity');
+    setModalError(null);
     setFormData({
       ...DEFAULT_FORM,
       city: currentWorkspace?.city || 'Brazzaville',
       country: currentWorkspace?.country || 'Congo',
-      isMain: establishments.length === 0, // First establishment is default main
+      isMain: establishments.length === 0,
       imageUrl: '',
       galleryImages: [],
     });
@@ -217,9 +447,11 @@ export default function EstablishmentsPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (est: Establishment) => {
+  const handleOpenEditModal = (est: Establishment, initialTab: ModalTab = 'identity') => {
     setIsEditing(true);
     setEditingId(est.id);
+    setModalTab(initialTab);
+    setModalError(null);
     setFormData({
       name: est.name || '',
       type: est.type || 'BRANCH',
@@ -283,7 +515,7 @@ export default function EstablishmentsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setFeedback({ type: 'error', text: 'Veuillez sélectionner un fichier image valide (JPG, PNG, WebP).' });
+      setFeedback({ type: 'error', text: 'Veuillez sélectionner une image valide (JPG, PNG, WebP).' });
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
@@ -298,6 +530,25 @@ export default function EstablishmentsPage() {
     } catch {
       setFeedback({ type: 'error', text: 'Impossible de traiter cette image.' });
     }
+  };
+
+  const handleGalleryImageAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') || file.size > 8 * 1024 * 1024) {
+      setFeedback({ type: 'error', text: 'Image invalide ou supérieure à 8 Mo.' });
+      return;
+    }
+    try {
+      const compressed = await compressImageFile(file, 1200, 0.82);
+      if (compressed) {
+        setFormData((prev) => ({
+          ...prev,
+          galleryImages: [...prev.galleryImages.slice(0, 4), compressed],
+        }));
+      }
+    } catch {}
+    e.target.value = '';
   };
 
   const handleToggleService = (service: string) => {
@@ -329,25 +580,35 @@ export default function EstablishmentsPage() {
   const handleSaveEstablishment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentWorkspace?.id) return;
+    setModalError(null);
 
-    if (!formData.name.trim() || !formData.address.trim() || !formData.city.trim()) {
-      setFeedback({
-        type: 'error',
-        text: 'Veuillez renseigner le nom, l’adresse et la ville de l’établissement.',
-      });
+    if (!formData.name.trim()) {
+      setModalTab('identity');
+      setModalError('Veuillez renseigner le nom de l’établissement.');
+      return;
+    }
+    if (!formData.address.trim() || !formData.city.trim()) {
+      setModalTab('location');
+      setModalError('Veuillez renseigner l’adresse et la ville.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       if (isEditing && editingId) {
-        await workspaceApi.updateEstablishment(currentWorkspace.id, editingId, formData);
+        const updated = await workspaceApi.updateEstablishment(
+          currentWorkspace.id,
+          editingId,
+          formData
+        );
+        if (updated?.id) setActiveId(updated.id);
         setFeedback({
           type: 'success',
-          text: `Établissement « ${formData.name} » mis à jour avec succès.`,
+          text: `Établissement « ${formData.name} » mis à jour.`,
         });
       } else {
-        await workspaceApi.createEstablishment(currentWorkspace.id, formData);
+        const created = await workspaceApi.createEstablishment(currentWorkspace.id, formData);
+        if (created?.id) setActiveId(created.id);
         setFeedback({
           type: 'success',
           text: `Établissement « ${formData.name} » ajouté à votre annuaire.`,
@@ -355,11 +616,9 @@ export default function EstablishmentsPage() {
       }
       setIsModalOpen(false);
       await fetchEstablishments();
+      notifyWorkspaceDataUpdated();
     } catch (err: any) {
-      setFeedback({
-        type: 'error',
-        text: err.message || 'Erreur lors de l’enregistrement de l’établissement.',
-      });
+      setModalError(err.message || 'Erreur lors de l’enregistrement de l’établissement.');
     } finally {
       setIsSubmitting(false);
     }
@@ -372,11 +631,12 @@ export default function EstablishmentsPage() {
       await workspaceApi.deleteEstablishment(currentWorkspace.id, establishmentToDelete.id);
       setFeedback({
         type: 'success',
-        text: `Établissement « ${establishmentToDelete.name} » retiré avec succès.`,
+        text: `Établissement « ${establishmentToDelete.name} » supprimé.`,
       });
       setIsDeleteModalOpen(false);
       setEstablishmentToDelete(null);
       await fetchEstablishments();
+      notifyWorkspaceDataUpdated();
     } catch (err: any) {
       setFeedback({
         type: 'error',
@@ -387,29 +647,26 @@ export default function EstablishmentsPage() {
     }
   };
 
-  const handleQuickTogglePublic = async (est: Establishment) => {
-    if (!currentWorkspace?.id) return;
-    const newStatus = !est.isPublic;
+  const handleQuickTogglePublic = async (est: Establishment, targetPublic: boolean) => {
+    if (!currentWorkspace?.id || est.isPublic === targetPublic) return;
 
-    // Optimistic local update (Apple response: instantaneous feedback)
     setEstablishments((prev) =>
-      prev.map((item) => (item.id === est.id ? { ...item, isPublic: newStatus } : item))
+      prev.map((item) => (item.id === est.id ? { ...item, isPublic: targetPublic } : item))
     );
 
     try {
       await workspaceApi.updateEstablishment(currentWorkspace.id, est.id, {
-        isPublic: newStatus,
+        isPublic: targetPublic,
       });
       setFeedback({
         type: 'success',
-        text: newStatus
-          ? `L'établissement « ${est.name} » est désormais visible par vos clients sur votre page SAV.`
-          : `L'établissement « ${est.name} » est maintenant en usage interne (masqué aux clients).`,
+        text: targetPublic
+          ? `« ${est.name} » est désormais visible sur votre page SAV.`
+          : `« ${est.name} » est passé en usage interne uniquement.`,
       });
     } catch (err: any) {
-      // Revert if error
       setEstablishments((prev) =>
-        prev.map((item) => (item.id === est.id ? { ...item, isPublic: !newStatus } : item))
+        prev.map((item) => (item.id === est.id ? { ...item, isPublic: !targetPublic } : item))
       );
       setFeedback({
         type: 'error',
@@ -418,97 +675,167 @@ export default function EstablishmentsPage() {
     }
   };
 
+  const publicCount = establishments.filter((e) => e.isPublic).length;
+  const internalCount = establishments.length - publicCount;
+
+  const hasActiveFilters =
+    Boolean(searchQuery.trim()) || typeFilter !== 'ALL' || visibilityFilter !== 'ALL';
+  const estQuota = workspaceUsage?.metrics?.establishments;
+  const isEstQuotaReached = estQuota?.status === 'REACHED';
+
   return (
-    <div className="space-y-6 animate-fade-in pb-16">
-      {/* Feedback Toast */}
+    <div className="space-y-6 pb-12">
+      {isEstQuotaReached && canManage && (
+        <div className="px-4 py-3 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-950 text-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>
+              <strong>Quota d&apos;établissements atteint</strong> ({estQuota?.used}/{estQuota?.limit}{' '}
+              sur la formule {workspaceUsage?.plan?.name}).
+              {['OWNER', 'ADMIN'].includes(userRole)
+                ? ' Passez à une formule supérieure pour ajouter d’autres agences.'
+                : ' Contactez un administrateur pour étendre la limite.'}
+            </span>
+          </div>
+          {['OWNER', 'ADMIN'].includes(userRole) && (
+            <Link
+              href="/app/billing"
+              className="px-3 h-7 rounded-full bg-amber-900 hover:bg-amber-950 text-white text-[11px] font-semibold inline-flex items-center shrink-0"
+            >
+              Voir les offres
+            </Link>
+          )}
+        </div>
+      )}
+      {/* Feedback banner */}
       {feedback && (
         <div
-          className={`p-4 rounded-2xl flex items-center justify-between text-xs font-semibold shadow-sm transition-all ${
+          className={`px-4 py-3 rounded-xl border text-xs flex items-center justify-between gap-3 ${
             feedback.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border border-rose-200'
+              ? 'bg-white border-emerald-200 text-emerald-900'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
           }`}
         >
           <div className="flex items-center gap-2">
             {feedback.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#22C55E] shrink-0" />
             ) : (
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             )}
-            <span>{feedback.text}</span>
+            <span className="font-medium">{feedback.text}</span>
           </div>
           <button
+            type="button"
             onClick={() => setFeedback(null)}
-            className="p-1 hover:bg-black/5 rounded-lg transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-sky-600" />
-            Nos établissements
-          </h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Annuaire de vos boutiques, agences, comptoirs SAV et points de contact physiques. Ces
-            adresses permettent à vos clients de trouver vos locaux officiels depuis votre espace public SAV.
-          </p>
+      {/* Synthèse & actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+          <span>
+            <strong className="text-[#0D1B3D] tabular-nums">{establishments.length}</strong>{' '}
+            implantation{establishments.length > 1 ? 's' : ''}
+          </span>
+          {establishments.length > 0 && (
+            <>
+              <span>·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                <strong className="text-[#0D1B3D] tabular-nums">{publicCount}</strong> visible
+                {publicCount > 1 ? 's' : ''} page SAV
+              </span>
+              <span>·</span>
+              <span>
+                <strong className="text-[#0D1B3D] tabular-nums">{internalCount}</strong> interne
+                {internalCount > 1 ? 's' : ''}
+              </span>
+            </>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          {establishments.length > 0 && (
+            <div className="flex items-center gap-0.5 bg-[#F4F3EF] p-1 rounded-full border border-[#E5E4DF] text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('carousel')}
+                className={`px-3 h-7 rounded-full flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+                  viewMode === 'carousel'
+                    ? 'bg-white text-[#0D1B3D] font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-[#0D1B3D]'
+                }`}
+              >
+                <GalleryHorizontalEnd className="w-3.5 h-3.5" />
+                <span>Carrousel</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`px-3 h-7 rounded-full flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+                  viewMode === 'list'
+                    ? 'bg-white text-[#0D1B3D] font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-[#0D1B3D]'
+                }`}
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+                <span>Liste</span>
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={fetchEstablishments}
+            disabled={isLoading}
+            title="Actualiser"
+            className="w-9 h-9 rounded-full bg-white hover:bg-[#F4F3EF] text-slate-600 border border-[#E5E4DF] transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#0D1B3D]' : ''}`} />
+          </button>
+
           {canManage && (
             <button
+              type="button"
               onClick={handleOpenCreateModal}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/10 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              className="px-4 h-9 rounded-full bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Ajouter un établissement</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Case A: Empty State when 0 establishments */}
+      {/* Empty state: 0 establishments */}
       {!isLoading && establishments.length === 0 && (
-        <div className="p-8 sm:p-12 rounded-3xl bg-white border border-slate-200/90 shadow-sm text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mx-auto text-sky-600">
-            <Building2 className="w-8 h-8" />
+        <div className="p-8 sm:p-10 rounded-xl bg-white border border-[#E5E4DF] text-center space-y-5">
+          <div className="w-12 h-12 rounded-xl bg-[#F4F3EF] border border-[#E5E4DF] flex items-center justify-center mx-auto text-[#0D1B3D]">
+            <Building2 className="w-6 h-6" />
           </div>
 
-          <div className="max-w-md mx-auto space-y-2">
-            <h2 className="text-base font-bold text-slate-900">
+          <div className="max-w-md mx-auto space-y-1.5">
+            <h2 className="text-base font-bold text-[#0D1B3D]">
               Votre entreprise fonctionne exclusivement en ligne ?
             </h2>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Zadesk est parfaitement adapté aux commerces 100% digitaux, boutiques Instagram ou
-              services WhatsApp. Aucun établissement physique n’est requis pour piloter votre SAV et
-              vos dossiers clients.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-left max-w-lg mx-auto text-xs text-slate-600 space-y-2">
-            <div className="flex items-center gap-2 font-semibold text-slate-800">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>À quoi sert ce module ?</span>
-            </div>
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              Si vous disposez d’une boutique, d’un atelier, d’un point relais ou d’un siège où vos
-              clients peuvent déposer du matériel ou retirer un colis, ajoutez-le ici pour l’afficher sur
-              votre fiche SAV officielle.
+              Zalisk fonctionne parfaitement sans point d’accueil physique. Vous pourrez ajouter une
+              agence, un comptoir SAV ou un point relais ici dès que nécessaire.
             </p>
           </div>
 
           {canManage && (
             <div>
               <button
+                type="button"
                 onClick={handleOpenCreateModal}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 h-9 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
                 <span>Ajouter un premier établissement (facultatif)</span>
               </button>
             </div>
@@ -516,33 +843,31 @@ export default function EstablishmentsPage() {
         </div>
       )}
 
-      {/* Case B & C: Establishments List */}
+      {/* Search & Filters + Showcase */}
       {(isLoading || establishments.length > 0) && (
         <>
-          {/* Search & Filters Bar */}
-          <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-            <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-[#E5E4DF] pb-3.5">
+            <div className="relative w-full md:w-72">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Rechercher par nom, ville, adresse..."
+                placeholder="Rechercher nom, ville, adresse…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
+                className="w-full h-9 pl-9 pr-3.5 rounded-full bg-white border border-[#E5E4DF] text-xs text-[#0D1B3D] placeholder:text-slate-400 focus:outline-none focus:border-[#0D1B3D] transition-colors"
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-              {/* Type Filter */}
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
+                className="h-9 px-3.5 rounded-full bg-white border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] cursor-pointer"
               >
                 <option value="ALL">Tous les types ({establishments.length})</option>
                 <option value="HEADQUARTERS">Sièges sociaux</option>
-                <option value="STORE">Boutiques</option>
                 <option value="BRANCH">Agences</option>
+                <option value="STORE">Boutiques</option>
                 <option value="SERVICE_POINT">Comptoirs SAV</option>
                 <option value="PICKUP_POINT">Points relais</option>
                 <option value="TECH_CENTER">Centres techniques</option>
@@ -550,785 +875,1143 @@ export default function EstablishmentsPage() {
                 <option value="OTHER">Autres sites</option>
               </select>
 
-              {/* Visibility Filter */}
               <select
                 value={visibilityFilter}
                 onChange={(e) => setVisibilityFilter(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
+                className="h-9 px-3.5 rounded-full bg-white border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] cursor-pointer"
               >
                 <option value="ALL">Toutes visibilités</option>
-                <option value="PUBLIC">Visible SAV public</option>
+                <option value="PUBLIC">Visible page SAV</option>
                 <option value="PRIVATE">Usage interne uniquement</option>
               </select>
 
-              <button
-                onClick={fetchEstablishments}
-                title="Actualiser"
-                className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-600 transition-colors shrink-0"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </button>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setTypeFilter('ALL');
+                    setVisibilityFilter('ALL');
+                  }}
+                  className="h-9 px-3 rounded-full text-xs text-slate-600 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] transition-colors cursor-pointer"
+                >
+                  Réinitialiser
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredEstablishments.map((est) => {
-              const typeCfg = TYPE_CONFIG[est.type] || TYPE_CONFIG.OTHER;
-              const TypeIcon = typeCfg.icon;
-
-              return (
+          {isLoading && establishments.length === 0 ? (
+            <div className="p-10 rounded-xl bg-white border border-[#E5E4DF] text-center text-xs text-slate-500">
+              Chargement des établissements…
+            </div>
+          ) : filteredEstablishments.length === 0 ? (
+            <div className="p-10 rounded-xl bg-white border border-[#E5E4DF] text-center space-y-3">
+              <p className="text-xs font-semibold text-[#0D1B3D]">
+                Aucun établissement ne correspond aux filtres sélectionnés.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setTypeFilter('ALL');
+                  setVisibilityFilter('ALL');
+                }}
+                className="px-3 h-8 rounded-lg border border-[#E5E4DF] bg-[#FAFAF8] hover:bg-[#F4F3EF] text-xs font-medium text-[#0D1B3D] cursor-pointer"
+              >
+                Effacer les filtres
+              </button>
+            </div>
+          ) : viewMode === 'carousel' && activeEst ? (
+            <div ref={carouselScopeRef} className="space-y-4">
+              {/* CAROUSEL SHOWCASE STAGE */}
+              <div className="gsap-showcase-enter relative">
                 <div
-                  key={est.id}
-                  className={`p-6 rounded-3xl bg-white border shadow-sm transition-all relative flex flex-col justify-between gap-5 group hover:shadow-md ${
-                    est.isMain ? 'border-indigo-200 bg-gradient-to-b from-indigo-50/10 to-white' : 'border-slate-200/90'
-                  }`}
+                  onTouchStart={(e) => {
+                    touchStartXRef.current = e.touches[0]?.clientX ?? null;
+                  }}
+                  onTouchEnd={(e) => {
+                    if (touchStartXRef.current === null) return;
+                    const endX = e.changedTouches[0]?.clientX ?? touchStartXRef.current;
+                    const diff = touchStartXRef.current - endX;
+                    touchStartXRef.current = null;
+                    if (Math.abs(diff) > 45 && filteredEstablishments.length > 1) {
+                      goToSlide(diff > 0 ? activeIndex + 1 : activeIndex - 1);
+                    }
+                  }}
+                  className="rounded-[26px] bg-white border border-[#E5E4DF]/90 shadow-[0_14px_38px_rgba(13,27,61,0.04)] overflow-hidden"
                 >
-                  <div className="space-y-4">
-                    {/* Photo Banner if available */}
-                    {est.imageUrl && (
-                      <div className="relative h-44 w-full rounded-2xl overflow-hidden bg-slate-100 group/img border border-slate-100 shadow-inner">
-                        <img
-                          src={est.imageUrl}
-                          alt={est.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 flex-wrap">
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md bg-white/90 shadow-sm border ${typeCfg.badgeClass}`}
-                          >
-                            <TypeIcon className="w-3 h-3 inline mr-1" />
-                            {typeCfg.label}
-                          </span>
-                          {est.isMain && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white backdrop-blur-md shadow-sm flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-white text-white" />
-                              Siège Principal
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Top status badges */}
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {!est.imageUrl && (
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${typeCfg.badgeClass}`}
-                          >
-                            <TypeIcon className="w-3 h-3" />
-                            <span>{typeCfg.label}</span>
-                          </span>
-                        )}
-
-                        {!est.imageUrl && est.isMain && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                  {/* Stage Top Navigation Bar */}
+                  <div className="px-6 py-3.5 bg-[#FAFAF8]/80 border-b border-[#E5E4DF]/70 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#E5E4DF] font-semibold text-[#0D1B3D] tabular-nums">
+                        {String(activeIndex + 1).padStart(2, '0')} /{' '}
+                        {String(filteredEstablishments.length).padStart(2, '0')}
+                      </span>
+                      <span className="text-slate-600 font-medium pl-1">
+                        {(TYPE_CONFIG[activeEst.type] || TYPE_CONFIG.OTHER).label}
+                      </span>
+                      {activeEst.isMain && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span className="inline-flex items-center gap-1 font-medium text-[#0D1B3D]">
                             <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                            <span>Siège Principal</span>
+                            Siège principal
                           </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {est.isPublic ? (
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              title="Cet établissement est visible par vos clients sur votre page publique SAV"
-                              className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center gap-1 shadow-2xs"
-                            >
-                              <Eye className="w-3 h-3 text-emerald-600" />
-                              <span>Visible sur la page SAV</span>
-                            </span>
-                            {canManage && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleQuickTogglePublic(est);
-                                }}
-                                className="px-2 py-0.5 rounded-full text-[9px] font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-                                title="Passer en usage interne (masquer aux clients)"
-                              >
-                                Masquer
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              title="Établissement à usage interne (masqué aux clients)"
-                              className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200/80 flex items-center gap-1 shadow-2xs"
-                            >
-                              <Lock className="w-3 h-3 text-amber-600" />
-                              <span>Masqué aux clients</span>
-                            </span>
-                            {canManage && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleQuickTogglePublic(est);
-                                }}
-                                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-all active:scale-95 flex items-center gap-1 cursor-pointer"
-                                title="Rendre cet établissement visible aux clients sur la page SAV"
-                              >
-                                <Eye className="w-3 h-3" />
-                                <span>Publier sur la page SAV</span>
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {!est.isActive && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        </>
+                      )}
+                      {!activeEst.isActive && (
+                        <>
+                          <span className="text-slate-300">·</span>
+                          <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px] font-medium">
                             Fermé / Inactif
                           </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Establishment Name & Description */}
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-sky-950 transition-colors">
-                        {est.name}
-                      </h3>
-                      {est.description && (
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                          {est.description}
-                        </p>
+                        </>
                       )}
                     </div>
 
-                    {/* Address details */}
-                    <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5">
-                      <div className="flex items-start gap-2 text-xs text-slate-700">
-                        <MapPin className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-semibold">{est.address}</p>
-                          <p className="text-[11px] text-slate-500">
-                            {[est.addressDetails, est.city, est.country].filter(Boolean).join(', ')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact chips */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      {est.phone && (
-                        <a
-                          href={`tel:${est.phone}`}
-                          className="px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-mono text-[11px] border border-slate-200 flex items-center gap-1.5 transition-colors"
-                        >
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{est.phone}</span>
-                        </a>
-                      )}
-                      {est.whatsapp && (
-                        <a
-                          href={`https://wa.me/${est.whatsapp.replace(/[^0-9]/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-medium border border-emerald-200 flex items-center gap-1.5 transition-colors"
-                        >
-                          <MessageCircle className="w-3 h-3 text-emerald-600" />
-                          <span>WhatsApp</span>
-                        </a>
-                      )}
-                      {est.email && (
-                        <a
-                          href={`mailto:${est.email}`}
-                          className="px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-[11px] border border-slate-200 flex items-center gap-1.5 transition-colors"
-                        >
-                          <Mail className="w-3 h-3 text-slate-400" />
-                          <span>{est.email}</span>
-                        </a>
-                      )}
-                    </div>
-
-                    {/* Opening Hours */}
-                    {est.openingHours && (
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="font-medium text-[11px]">{est.openingHours}</span>
-                      </div>
-                    )}
-
-                    {/* Services on site */}
-                    {est.services && est.services.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          Services disponibles sur place
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {est.services.map((srv, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-medium"
-                            >
-                              {srv}
-                            </span>
+                    {filteredEstablishments.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-1 mr-1">
+                          {filteredEstablishments.map((est, idx) => (
+                            <button
+                              key={est.id}
+                              type="button"
+                              onClick={() => selectEstablishment(est.id)}
+                              aria-label={`Aller à ${est.name}`}
+                              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                                idx === activeIndex
+                                  ? 'w-5 bg-[#0D1B3D]'
+                                  : 'w-1.5 bg-slate-300 hover:bg-slate-400'
+                              }`}
+                            />
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Practical info / Access notes */}
-                    {est.practicalInfo && (
-                      <div className="flex items-start gap-1.5 text-[11px] text-slate-500 italic bg-amber-50/50 p-2.5 rounded-xl border border-amber-100">
-                        <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <span>{est.practicalInfo}</span>
+                        <button
+                          type="button"
+                          onClick={() => goToSlide(activeIndex - 1)}
+                          aria-label="Établissement précédent"
+                          title="Précédent (←)"
+                          className="w-8 h-8 rounded-full bg-white hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => goToSlide(activeIndex + 1)}
+                          aria-label="Établissement suivant"
+                          title="Suivant (→)"
+                          className="w-8 h-8 rounded-full bg-white hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions for Manager / Admin */}
-                  {canManage && (
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs">
-                      <span className="text-[10px] text-slate-400">
-                        Modifié le {new Date(est.updatedAt).toLocaleDateString('fr-FR')}
+                  {/* Split Showcase Body (fluid without harsh vertical divider) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+                    {/* Left: Floating Rounded Photo Stage */}
+                    <div className="lg:col-span-5 p-4 sm:p-5 flex">
+                      <div
+                        ref={visualStageRef}
+                        className="relative w-full min-h-[250px] lg:min-h-[340px] rounded-2xl overflow-hidden bg-[#F4F3EF] border border-[#E5E4DF]/80 shadow-[0_12px_30px_rgba(13,27,61,0.06)] flex flex-col justify-between"
+                      >
+                        {activePhotos.length > 0 ? (
+                          <>
+                            <img
+                              ref={photoImgRef}
+                              key={activePhotos[photoIndex] || activeEst.id}
+                              src={activePhotos[photoIndex] || activePhotos[0]}
+                              alt={activeEst.name}
+                              className="w-full h-64 lg:h-full lg:max-h-[400px] object-cover"
+                            />
+                            {activePhotos.length > 1 && (
+                              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md">
+                                  {activePhotos.map((_, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => setPhotoIndex(idx)}
+                                      aria-label={`Photo ${idx + 1}`}
+                                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                                        idx === photoIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPhotoIndex(
+                                        (p) => (p - 1 + activePhotos.length) % activePhotos.length
+                                      )
+                                    }
+                                    className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-md text-white hover:bg-black/75 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                                  >
+                                    <ChevronLeft className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPhotoIndex((p) => (p + 1) % activePhotos.length)
+                                    }
+                                    className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-md text-white hover:bg-black/75 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                                  >
+                                    <ChevronRight className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-gradient-to-b from-[#FAFAF8] to-[#F4F3EF]">
+                            {(() => {
+                              const TypeIcon =
+                                (TYPE_CONFIG[activeEst.type] || TYPE_CONFIG.OTHER).icon;
+                              return (
+                                <div className="w-14 h-14 rounded-full bg-white border border-[#E5E4DF] shadow-2xs flex items-center justify-center text-[#0D1B3D]">
+                                  <TypeIcon className="w-5 h-5" />
+                                </div>
+                              );
+                            })()}
+                            <div className="space-y-1">
+                              <p className="text-xs font-semibold text-[#0D1B3D]">
+                                Aucune photo de façade
+                              </p>
+                              <p className="text-[11px] text-slate-500 max-w-[220px]">
+                                Ajoutez une photo pour aider vos clients à identifier ce site sur place.
+                              </p>
+                            </div>
+                            {canManage && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditModal(activeEst, 'media')}
+                                className="px-3.5 h-8 rounded-full bg-white hover:bg-[#FAFAF8] border border-[#E5E4DF] text-xs font-medium text-[#0D1B3D] inline-flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                              >
+                                <Camera className="w-3.5 h-3.5" />
+                                <span>Ajouter une photo</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: Airy Typographic Details */}
+                    <div
+                      ref={detailsStageRef}
+                      className="lg:col-span-7 px-5 pb-6 pt-1 lg:py-6 lg:pr-7 lg:pl-2 flex flex-col justify-between gap-5"
+                    >
+                      <div className="space-y-5">
+                        {/* Title + Public/Internal Pill Switch */}
+                        <div className="gsap-detail-item flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h2 className="text-lg font-bold text-[#0D1B3D] tracking-tight">
+                              {activeEst.name}
+                            </h2>
+                            {activeEst.description && (
+                              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                {activeEst.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {canManage ? (
+                            <div
+                              className="inline-flex items-center p-1 rounded-full bg-[#F4F3EF] border border-[#E5E4DF] shrink-0 text-[11px]"
+                              role="group"
+                              aria-label="Visibilité sur la page SAV"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleQuickTogglePublic(activeEst, true)}
+                                className={`px-3 h-7 rounded-full flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                                  activeEst.isPublic
+                                    ? 'bg-white text-[#0D1B3D] font-semibold shadow-xs'
+                                    : 'text-slate-500 hover:text-[#0D1B3D]'
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    activeEst.isPublic ? 'bg-[#22C55E]' : 'bg-slate-300'
+                                  }`}
+                                />
+                                <span>Public SAV</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleQuickTogglePublic(activeEst, false)}
+                                className={`px-3 h-7 rounded-full flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                                  !activeEst.isPublic
+                                    ? 'bg-white text-[#0D1B3D] font-semibold shadow-xs'
+                                    : 'text-slate-500 hover:text-[#0D1B3D]'
+                                }`}
+                              >
+                                <Lock className="w-3 h-3" />
+                                <span>Interne</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-slate-600 shrink-0">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  activeEst.isPublic ? 'bg-[#22C55E]' : 'bg-slate-300'
+                                }`}
+                              />
+                              {activeEst.isPublic ? 'Visible page SAV' : 'Usage interne'}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Open, unboxed Location & Hours rows */}
+                        <div className="gsap-detail-item grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+                          <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#F4F3EF] flex items-center justify-center text-[#0D1B3D] shrink-0">
+                              <MapPin className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-medium text-slate-400">Localisation</p>
+                              <p className="font-semibold text-[#0D1B3D] mt-0.5 leading-snug">
+                                {activeEst.address}
+                              </p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">
+                                {[activeEst.addressDetails, activeEst.city, activeEst.country]
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#F4F3EF] flex items-center justify-center text-[#0D1B3D] shrink-0">
+                              <Clock className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-medium text-slate-400">
+                                Horaires d’ouverture
+                              </p>
+                              <p className="font-medium text-[#0D1B3D] mt-0.5 leading-relaxed">
+                                {activeEst.openingHours || 'Horaires non renseignés'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Direct Contacts Pills */}
+                        {(activeEst.phone || activeEst.whatsapp || activeEst.email) && (
+                          <div className="gsap-detail-item flex flex-wrap items-center gap-2 text-xs">
+                            {activeEst.phone && (
+                              <a
+                                href={`tel:${activeEst.phone}`}
+                                className="h-8 px-3.5 rounded-full bg-[#FAFAF8] hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] inline-flex items-center gap-1.5 font-mono text-[11px] transition-colors"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{activeEst.phone}</span>
+                              </a>
+                            )}
+                            {activeEst.whatsapp && (
+                              <a
+                                href={`https://wa.me/${activeEst.whatsapp.replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="h-8 px-3.5 rounded-full bg-[#FAFAF8] hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5 text-slate-500" />
+                                <span>WhatsApp : {activeEst.whatsapp}</span>
+                              </a>
+                            )}
+                            {activeEst.email && (
+                              <a
+                                href={`mailto:${activeEst.email}`}
+                                className="h-8 px-3.5 rounded-full bg-[#FAFAF8] hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] inline-flex items-center gap-1.5 text-[11px] transition-colors"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{activeEst.email}</span>
+                              </a>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Soft Services Pills */}
+                        {activeEst.services && activeEst.services.length > 0 && (
+                          <div className="gsap-detail-item space-y-2">
+                            <p className="text-[11px] font-medium text-slate-400">
+                              Services sur place
+                            </p>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {(showAllServices
+                                ? activeEst.services
+                                : activeEst.services.slice(0, 4)
+                              ).map((srv, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-3 py-1 rounded-full bg-[#F4F3EF] text-slate-700 text-[11px] font-medium"
+                                >
+                                  {srv}
+                                </span>
+                              ))}
+                              {!showAllServices && activeEst.services.length > 4 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAllServices(true)}
+                                  className="px-2.5 py-1 rounded-full text-[11px] font-medium text-[#0D1B3D] hover:bg-[#F4F3EF] transition-colors cursor-pointer"
+                                >
+                                  +{activeEst.services.length - 4} autres
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Practical note */}
+                        {activeEst.practicalInfo && (
+                          <p className="gsap-detail-item text-[11px] text-slate-600 border-l-2 border-[#0D1B3D]/20 pl-3 py-0.5 leading-relaxed">
+                            {activeEst.practicalInfo}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Footer actions */}
+                      <div className="gsap-detail-item pt-4 border-t border-[#E5E4DF]/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span className="text-[11px] text-slate-400">
+                          Mis à jour le {new Date(activeEst.updatedAt).toLocaleDateString('fr-FR')}
+                        </span>
+
+                        {canManage && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(activeEst)}
+                              className="h-8 px-3.5 rounded-full bg-white hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] text-xs font-semibold inline-flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Modifier</span>
+                            </button>
+
+                            {canDelete && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEstablishmentToDelete(activeEst);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="h-8 w-8 rounded-full text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-all active:scale-95 cursor-pointer inline-flex items-center justify-center"
+                                title="Supprimer cet établissement"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subtle layered card-stack peek below active showcase */}
+                {filteredEstablishments.length > 1 && (
+                  <div
+                    aria-hidden="true"
+                    className="h-2 mx-6 rounded-b-2xl bg-[#F4F3EF]/90 border-x border-b border-[#E5E4DF]/80"
+                  />
+                )}
+              </div>
+
+              {/* SYNCHRONIZED FLOATING RAIL */}
+              {filteredEstablishments.length > 1 && (
+                <div className="gsap-showcase-enter space-y-2 pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Accès rapide ({filteredEstablishments.length})</span>
+                    <span className="hidden sm:inline">Utilisez ← → pour naviguer</span>
+                  </div>
+
+                  <div className="flex items-stretch gap-3 overflow-x-auto py-1 px-0.5 snap-x">
+                    {filteredEstablishments.map((est) => {
+                      const isSelected = est.id === activeEst.id;
+                      const typeLabel = (TYPE_CONFIG[est.type] || TYPE_CONFIG.OTHER).label;
+                      const TypeIcon = (TYPE_CONFIG[est.type] || TYPE_CONFIG.OTHER).icon;
+
+                      return (
+                        <button
+                          key={est.id}
+                          ref={(el) => {
+                            railItemRefs.current[est.id] = el;
+                          }}
+                          type="button"
+                          onClick={() => selectEstablishment(est.id)}
+                          className={`min-w-[215px] max-w-[245px] snap-start p-2.5 pr-3.5 rounded-2xl border text-left transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center gap-3 shrink-0 ${
+                            isSelected
+                              ? 'bg-white border-[#0D1B3D] -translate-y-0.5 shadow-[0_10px_22px_rgba(13,27,61,0.08)]'
+                              : 'bg-[#FAFAF8] border-[#E5E4DF] hover:bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#F4F3EF] border border-[#E5E4DF] shrink-0 flex items-center justify-center text-slate-500">
+                            {est.imageUrl ? (
+                              <img
+                                src={est.imageUrl}
+                                alt={est.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <TypeIcon className="w-4 h-4" />
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                  est.isPublic && est.isActive ? 'bg-[#22C55E]' : 'bg-slate-300'
+                                }`}
+                              />
+                              <p className="text-xs font-semibold text-[#0D1B3D] truncate">
+                                {est.name}
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                              {est.city} · {typeLabel}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* COMPACT LIST VIEW */
+            <div className="rounded-2xl bg-white border border-[#E5E4DF] divide-y divide-[#E5E4DF] overflow-hidden">
+              {filteredEstablishments.map((est) => {
+                const typeCfg = TYPE_CONFIG[est.type] || TYPE_CONFIG.OTHER;
+                const TypeIcon = typeCfg.icon;
+
+                return (
+                  <div
+                    key={est.id}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#FAFAF8] transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#F4F3EF] border border-[#E5E4DF] shrink-0 flex items-center justify-center text-slate-500">
+                        {est.imageUrl ? (
+                          <img
+                            src={est.imageUrl}
+                            alt={est.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <TypeIcon className="w-4 h-4" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-sm font-semibold text-[#0D1B3D] truncate">
+                            {est.name}
+                          </h3>
+                          {est.isMain && (
+                            <span className="inline-flex items-center gap-1 text-[11px] text-[#0D1B3D] font-medium">
+                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                              Siège
+                            </span>
+                          )}
+                          <span className="text-[11px] text-slate-400">· {typeCfg.label}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">
+                          {est.address}, {est.city}
+                          {est.phone ? ` · ${est.phone}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 px-2">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            est.isPublic ? 'bg-[#22C55E]' : 'bg-slate-300'
+                          }`}
+                        />
+                        {est.isPublic ? 'Public SAV' : 'Interne'}
                       </span>
 
-                      <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          selectEstablishment(est.id);
+                          setViewMode('carousel');
+                        }}
+                        className="h-8 px-3 rounded-full bg-[#FAFAF8] hover:bg-[#F4F3EF] border border-[#E5E4DF] text-xs font-medium text-[#0D1B3D] cursor-pointer transition-all active:scale-95"
+                      >
+                        Vitrine
+                      </button>
+
+                      {canManage && (
                         <button
+                          type="button"
                           onClick={() => handleOpenEditModal(est)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                          className="h-8 px-3 rounded-full bg-white hover:bg-[#F4F3EF] border border-[#E5E4DF] text-xs font-medium text-[#0D1B3D] inline-flex items-center gap-1 cursor-pointer transition-all active:scale-95"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                           <span>Modifier</span>
                         </button>
+                      )}
 
-                        {canDelete && (
-                          <button
-                            onClick={() => {
-                              setEstablishmentToDelete(est);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                            title="Supprimer cet établissement"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEstablishmentToDelete(est);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="h-8 w-8 rounded-full text-slate-400 hover:text-rose-700 hover:bg-rose-50 inline-flex items-center justify-center cursor-pointer transition-all active:scale-95"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {filteredEstablishments.length === 0 && (
-            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200/80 text-slate-500 text-xs space-y-2">
-              <Search className="w-8 h-8 mx-auto text-slate-300" />
-              <p className="font-semibold text-slate-700">Aucun établissement ne correspond aux filtres.</p>
-              <p className="text-[11px]">Essayez de modifier votre mot-clé ou le filtre de type.</p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </>
       )}
 
-      {/* MODAL: CREATE / EDIT ESTABLISHMENT */}
+      {/* MODAL: CREATE / EDIT ESTABLISHMENT (3-TAB CLEAN LAYOUT) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden my-8">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                  <Building2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">
-                    {isEditing ? 'Modifier l’établissement' : 'Ajouter un établissement'}
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Renseignez les détails pratiques de votre implantation physique.
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+          <div
+            ref={modalPanelRef}
+            className="w-full max-w-2xl bg-white rounded-[22px] shadow-2xl border border-[#E5E4DF] overflow-hidden my-8"
+          >
+            <div className="px-6 py-4 border-b border-[#E5E4DF] bg-[#FAFAF8] flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-[#0D1B3D]">
+                  {isEditing ? 'Modifier l’établissement' : 'Ajouter un établissement'}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configurez l’identité, la visibilité et les coordonnées pratiques.
+                </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 hover:text-slate-700"
+                className="p-1.5 hover:bg-[#F4F3EF] rounded-full text-slate-400 hover:text-[#0D1B3D] cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEstablishment} className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-              {/* Identité & Type */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  1. Identification de l’implantation
-                </h3>
+            {/* Modal Step Tabs */}
+            <div className="px-6 pt-3 border-b border-[#E5E4DF] flex items-center gap-5 text-xs">
+              {(
+                [
+                  { id: 'identity', label: '1. Identité & Visibilité' },
+                  { id: 'location', label: '2. Adresse & Contacts' },
+                  { id: 'media', label: '3. Photo, Horaires & Services' },
+                ] as const
+              ).map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setModalTab(t.id)}
+                  className={`pb-2.5 border-b-2 transition-colors cursor-pointer ${
+                    modalTab === t.id
+                      ? 'border-[#0D1B3D] text-[#0D1B3D] font-semibold'
+                      : 'border-transparent text-slate-500 hover:text-[#0D1B3D] font-medium'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Type d’établissement *
-                    </label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) =>
-                        setFormData({ ...formData, type: e.target.value as EstablishmentType })
-                      }
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    >
-                      <option value="HEADQUARTERS">Siège social</option>
-                      <option value="STORE">Boutique commerciale</option>
-                      <option value="BRANCH">Agence locale</option>
-                      <option value="SERVICE_POINT">Comptoir SAV & Dépose</option>
-                      <option value="PICKUP_POINT">Point relais & Retrait</option>
-                      <option value="TECH_CENTER">Centre technique & Atelier</option>
-                      <option value="POINT_OF_SALE">Point de vente</option>
-                      <option value="OTHER">Autre implantation</option>
-                    </select>
+            <form onSubmit={handleSaveEstablishment}>
+              <div ref={modalTabContentRef} className="p-6 space-y-5 max-h-[62vh] overflow-y-auto">
+                {modalError && (
+                  <div className="px-3.5 py-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{modalError}</span>
                   </div>
+                )}
+                {modalTab === 'identity' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Type d’établissement *
+                        </label>
+                        <select
+                          value={formData.type}
+                          onChange={(e) =>
+                            setFormData({ ...formData, type: e.target.value as EstablishmentType })
+                          }
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        >
+                          <option value="HEADQUARTERS">Siège social</option>
+                          <option value="BRANCH">Agence locale</option>
+                          <option value="STORE">Boutique commerciale</option>
+                          <option value="SERVICE_POINT">Comptoir SAV & Dépose</option>
+                          <option value="PICKUP_POINT">Point relais & Retrait</option>
+                          <option value="TECH_CENTER">Centre technique & Atelier</option>
+                          <option value="POINT_OF_SALE">Point de vente</option>
+                          <option value="OTHER">Autre implantation</option>
+                        </select>
+                      </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Nom de l’établissement *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: Boutique Centre-Ville, Agence Bacongo..."
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-                </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Nom de l’établissement *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Ex : Agence Centre-Ville"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Description ou rôle (facultatif)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Showroom et dépose rapide des appareils en panne"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  />
-                </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                        Description courte (facultatif)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex : Accueil clients, dépôt et reprise matériel"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                      />
+                    </div>
 
-                {/* Visibilité & Publication (Apple / Antigravity Segmented Cards) */}
-                <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-800">
-                      Visibilité client & Publication SAV *
-                    </label>
-                    <span className="text-[10px] text-slate-400">
-                      Choisissez où cet établissement apparaît
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {/* Option 1 : Public SAV (Recommandé) */}
-                    <div
-                      onClick={() => setFormData({ ...formData, isPublic: true })}
-                      className={`relative p-3.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer active:scale-[0.98] flex flex-col justify-between ${
-                        formData.isPublic
-                          ? 'bg-emerald-50/70 border-emerald-500 shadow-sm ring-2 ring-emerald-500/10'
-                          : 'bg-slate-50/60 border-slate-200/80 hover:border-slate-300 opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                            formData.isPublic ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'
-                          }`}>
-                            <Globe className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-xs text-slate-900 block leading-tight">
+                    <div className="space-y-2 pt-2 border-t border-[#E5E4DF]">
+                      <label className="block text-xs font-semibold text-[#0D1B3D]">
+                        Visibilité sur la page publique SAV
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, isPublic: true })}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                            formData.isPublic
+                              ? 'bg-white border-[#0D1B3D] ring-1 ring-[#0D1B3D]'
+                              : 'bg-[#FAFAF8] border-[#E5E4DF] hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0D1B3D]">
+                              <Globe className="w-3.5 h-3.5" />
                               Visible sur la page SAV
                             </span>
-                            <span className="text-[9.5px] font-semibold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-md inline-block mt-0.5">
-                              Recommandé pour recevoir les clients
-                            </span>
+                            {formData.isPublic && <Check className="w-3.5 h-3.5 text-[#0D1B3D]" />}
                           </div>
-                        </div>
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
-                          formData.isPublic ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'
-                        }`}>
-                          {formData.isPublic && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
-                        L’agence sera affichée sur votre page publique avec ses photos, ses horaires et ses contacts directs.
-                      </p>
-                    </div>
+                          <p className="text-[11px] text-slate-500 mt-1">
+                            Affiché aux clients avec adresse, horaires et contacts directs.
+                          </p>
+                        </button>
 
-                    {/* Option 2 : Interne uniquement */}
-                    <div
-                      onClick={() => setFormData({ ...formData, isPublic: false })}
-                      className={`relative p-3.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer active:scale-[0.98] flex flex-col justify-between ${
-                        !formData.isPublic
-                          ? 'bg-amber-50/70 border-amber-500 shadow-sm ring-2 ring-amber-500/10'
-                          : 'bg-slate-50/60 border-slate-200/80 hover:border-slate-300 opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                            !formData.isPublic ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'
-                          }`}>
-                            <Lock className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-xs text-slate-900 block leading-tight">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, isPublic: false })}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                            !formData.isPublic
+                              ? 'bg-white border-[#0D1B3D] ring-1 ring-[#0D1B3D]'
+                              : 'bg-[#FAFAF8] border-[#E5E4DF] hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0D1B3D]">
+                              <Lock className="w-3.5 h-3.5" />
                               Usage interne uniquement
                             </span>
-                            <span className="text-[9.5px] font-semibold text-amber-900 bg-amber-100/90 px-1.5 py-0.5 rounded-md inline-block mt-0.5">
-                              Masqué aux clients
-                            </span>
+                            {!formData.isPublic && <Check className="w-3.5 h-3.5 text-[#0D1B3D]" />}
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-1">
+                            Masqué aux clients (atelier privé, entrepôt ou siège administratif).
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAFAF8] border border-[#E5E4DF] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isMain}
+                          onChange={(e) => setFormData({ ...formData, isMain: e.target.checked })}
+                          className="w-4 h-4 rounded accent-[#0D1B3D]"
+                        />
+                        <div className="text-xs">
+                          <span className="font-semibold text-[#0D1B3D] block">Siège principal</span>
+                          <span className="text-[11px] text-slate-500">
+                            Implantation n°1 de l’entreprise
+                          </span>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAFAF8] border border-[#E5E4DF] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isActive}
+                          onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                          className="w-4 h-4 rounded accent-[#0D1B3D]"
+                        />
+                        <div className="text-xs">
+                          <span className="font-semibold text-[#0D1B3D] block">
+                            Établissement actif
+                          </span>
+                          <span className="text-[11px] text-slate-500">Ouvert et opérationnel</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {modalTab === 'location' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                        Adresse complète *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex : 45 Avenue Amilcar Cabral"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Ville *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Brazzaville, Pointe-Noire…"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Pays
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.country}
+                          onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                        Complément d’adresse / repères (facultatif)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex : 1er étage, en face de l’Hôtel de Ville"
+                        value={formData.addressDetails}
+                        onChange={(e) =>
+                          setFormData({ ...formData, addressDetails: e.target.value })
+                        }
+                        className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[#E5E4DF]">
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Téléphone direct
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="+242 06 000 00 00"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="+242 06 111 22 33"
+                          value={formData.whatsapp}
+                          onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="agence@entreprise.cg"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {modalTab === 'media' && (
+                  <div className="space-y-5">
+                    {/* Main facade image */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-[#0D1B3D]">
+                          Photo principale / Façade
+                        </label>
+                        {formData.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData((prev) => ({ ...prev, imageUrl: '' }))}
+                            className="text-[11px] text-rose-600 hover:text-rose-700 font-medium cursor-pointer"
+                          >
+                            Supprimer la photo
+                          </button>
+                        )}
+                      </div>
+
+                      {formData.imageUrl ? (
+                        <div className="relative h-44 w-full rounded-xl overflow-hidden border border-[#E5E4DF] group bg-[#F4F3EF]">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Aperçu façade"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <label className="px-3 h-8 rounded-lg bg-white text-[#0D1B3D] text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5">
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Remplacer</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageFileChange}
+                                className="hidden"
+                              />
+                            </label>
                           </div>
                         </div>
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
-                          !formData.isPublic ? 'border-amber-600 bg-amber-600' : 'border-slate-300'
-                        }`}>
-                          {!formData.isPublic && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      ) : (
+                        <div className="space-y-2">
+                          <label className="border border-dashed border-[#D5D3CC] hover:border-[#0D1B3D] rounded-xl p-5 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors bg-[#FAFAF8]">
+                            <Upload className="w-5 h-5 text-slate-500" />
+                            <p className="text-xs font-medium text-[#0D1B3D]">
+                              Choisir une image (JPG, PNG, WebP)
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              Compression automatique (max 8 Mo)
+                            </p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageFileChange}
+                              className="hidden"
+                            />
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="Ou coller une URL d’image (https://...)"
+                            value={formData.imageUrl}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))
+                            }
+                            className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                          />
                         </div>
+                      )}
+
+                      {/* Optional multi-photo gallery */}
+                      <div className="pt-1 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-medium text-slate-500">
+                            Galerie complémentaire ({formData.galleryImages.length}/5)
+                          </span>
+                          {formData.galleryImages.length < 5 && (
+                            <label className="text-[11px] font-semibold text-[#0D1B3D] hover:underline cursor-pointer">
+                              + Ajouter une vue
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleGalleryImageAdd}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+                        {formData.galleryImages.length > 0 && (
+                          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                            {formData.galleryImages.map((imgSrc, idx) => (
+                              <div
+                                key={idx}
+                                className="relative w-16 h-16 rounded-lg overflow-hidden border border-[#E5E4DF] shrink-0"
+                              >
+                                <img src={imgSrc} alt="" className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      galleryImages: prev.galleryImages.filter((_, i) => i !== idx),
+                                    }))
+                                  }
+                                  className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/70 text-white flex items-center justify-center cursor-pointer"
+                                >
+                                  <X className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
-                        Réservé à votre équipe (entrepôt, atelier privé, siège administratif non ouvert au public).
-                      </p>
                     </div>
-                  </div>
 
-                  {/* Warning if internal is chosen */}
-                  {!formData.isPublic && (
-                    <div className="p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-[11px] text-amber-900 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>
-                        <strong>Attention :</strong> Cet établissement ne sera <strong>pas affiché</strong> sur votre page publique SAV.
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Statuts complémentaires (Siège & Actif) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                  <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 cursor-pointer hover:bg-slate-100/80 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={formData.isMain}
-                      onChange={(e) => setFormData({ ...formData, isMain: e.target.checked })}
-                      className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500"
-                    />
-                    <div className="text-xs">
-                      <span className="font-bold text-slate-900 block flex items-center gap-1">
-                        <span>★</span> Siège principal
-                      </span>
-                      <span className="text-[10px] text-slate-500">Adresse officielle n°1 de l'entreprise</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/80 cursor-pointer hover:bg-slate-100/80 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
-                    />
-                    <div className="text-xs">
-                      <span className="font-bold text-slate-900 block">Établissement actif</span>
-                      <span className="text-[10px] text-slate-500">Ouvert et opérationnel</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Visuel & Photo de l’établissement */}
-              <div className="space-y-3 pt-2 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Camera className="w-3.5 h-3.5 text-sky-600" />
-                    <span>2. Photo & Façade de l’établissement</span>
-                  </h3>
-                  {formData.imageUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, imageUrl: '' }))}
-                      className="text-[11px] text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      <span>Supprimer la photo</span>
-                    </button>
-                  )}
-                </div>
-
-                {formData.imageUrl ? (
-                  <div className="relative h-48 w-full rounded-2xl overflow-hidden border border-slate-200 group bg-slate-100">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Aperçu devanture"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                      <label className="px-3.5 py-2 rounded-xl bg-white text-slate-800 text-xs font-semibold cursor-pointer shadow-md hover:bg-slate-50 transition-colors flex items-center gap-1.5 active:scale-95">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Changer la photo</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageFileChange}
-                          className="hidden"
-                        />
+                    {/* Hours */}
+                    <div>
+                      <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                        Horaires d’ouverture
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, imageUrl: '' }))}
-                        className="px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold cursor-pointer shadow-md hover:bg-rose-700 transition-colors flex items-center gap-1.5 active:scale-95"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Retirer</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <label className="border-2 border-dashed border-slate-200 hover:border-sky-400 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-slate-50/50 hover:bg-sky-50/20 group">
-                      <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Upload className="w-5 h-5" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-700">
-                          Cliquez pour choisir une photo ou glissez-déposez ici
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          PNG, JPG ou WebP (max 4 Mo). Devanture, vitrine, enseigne ou guichet d’accueil.
-                        </p>
-                      </div>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageFileChange}
-                        className="hidden"
+                        type="text"
+                        placeholder="Ex : Lun - Ven : 08h00 - 18h00 | Sam : 09h00 - 13h00"
+                        value={formData.openingHours}
+                        onChange={(e) =>
+                          setFormData({ ...formData, openingHours: e.target.value })
+                        }
+                        className="w-full h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
                       />
-                    </label>
+                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400 shrink-0">Ou collez une URL :</span>
-                      <input
-                        type="url"
-                        placeholder="https://domaine.com/photo-boutique.jpg"
-                        value={formData.imageUrl}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                        className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                    {/* Services */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium text-[#0D1B3D]">
+                        Services disponibles sur place
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {COMMON_SERVICES.map((srv) => {
+                          const isSelected = formData.services.includes(srv);
+                          return (
+                            <button
+                              key={srv}
+                              type="button"
+                              onClick={() => handleToggleService(srv)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] border transition-colors cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#0D1B3D] text-white border-[#0D1B3D] font-medium'
+                                  : 'bg-[#FAFAF8] text-slate-600 border-[#E5E4DF] hover:border-slate-300'
+                              }`}
+                            >
+                              {isSelected ? '✓ ' : '+ '}
+                              {srv}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex gap-2 pt-1">
+                        <input
+                          type="text"
+                          placeholder="Ajouter un service spécifique…"
+                          value={customServiceInput}
+                          onChange={(e) => setCustomServiceInput(e.target.value)}
+                          onKeyDown={handleAddCustomService}
+                          className="flex-1 h-9 px-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomService}
+                          className="px-3 h-9 rounded-lg bg-[#F4F3EF] hover:bg-[#E5E4DF] text-[#0D1B3D] text-xs font-medium cursor-pointer"
+                        >
+                          Ajouter
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-[#0D1B3D] mb-1.5">
+                        Consignes pratiques d’accès (facultatif)
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Ex : Parking gratuit pour les clients. Accès PMR disponible."
+                        value={formData.practicalInfo}
+                        onChange={(e) =>
+                          setFormData({ ...formData, practicalInfo: e.target.value })
+                        }
+                        className="w-full p-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] text-xs text-[#0D1B3D] focus:outline-none focus:border-[#0D1B3D] resize-none"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Localisation */}
-              <div className="space-y-4 pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  3. Localisation géographique
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Adresse complète *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: 45 Avenue Amilcar Cabral, en face de l’Hôtel de Ville"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Ville *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Brazzaville, Pointe-Noire, Abidjan..."
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Pays
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.country}
-                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Complément d’adresse / Repères (facultatif)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 1er étage droite, Bâtiment B, Porte 12"
-                      value={formData.addressDetails}
-                      onChange={(e) => setFormData({ ...formData, addressDetails: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Coordonnées */}
-              <div className="space-y-4 pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  4. Coordonnées directes de l’établissement
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Téléphone direct
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="+242 06 000 00 00"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      WhatsApp direct
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="+242 06 111 22 33"
-                      value={formData.whatsapp}
-                      onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Email direct
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="agence.centre@entreprise.cg"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Horaires & Services */}
-              <div className="space-y-4 pt-2 border-t border-slate-100">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  5. Horaires & Services sur place
-                </h3>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Horaires d’ouverture
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Lun - Ven : 08h00 - 18h00 | Sam : 09h00 - 13h00"
-                    value={formData.openingHours}
-                    onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Services proposés aux clients sur place
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {COMMON_SERVICES.map((srv) => {
-                      const isSelected = formData.services.includes(srv);
-                      return (
-                        <button
-                          key={srv}
-                          type="button"
-                          onClick={() => handleToggleService(srv)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-sky-50 text-sky-800 border-sky-300 font-semibold'
-                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {isSelected ? '✓ ' : '+ '}
-                          {srv}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Ajouter un autre service spécifique..."
-                      value={customServiceInput}
-                      onChange={(e) => setCustomServiceInput(e.target.value)}
-                      onKeyDown={handleAddCustomService}
-                      className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                    />
+              <div className="px-6 py-4 border-t border-[#E5E4DF] bg-[#FAFAF8] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  {modalTab !== 'identity' && (
                     <button
                       type="button"
-                      onClick={handleAddCustomService}
-                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer"
+                      onClick={() =>
+                        setModalTab(modalTab === 'media' ? 'location' : 'identity')
+                      }
+                      className="px-3 h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#F4F3EF] text-xs font-medium text-[#0D1B3D] cursor-pointer"
                     >
-                      Ajouter
+                      Précédent
                     </button>
-                  </div>
+                  )}
+                  {modalTab !== 'media' && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setModalTab(modalTab === 'identity' ? 'location' : 'media')
+                      }
+                      className="px-3 h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#F4F3EF] text-xs font-medium text-[#0D1B3D] cursor-pointer"
+                    >
+                      Suivant
+                    </button>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Consignes pratiques / Accès client
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Ex: Parking gratuit pour les clients. Accès PMR disponible."
-                    value={formData.practicalInfo}
-                    onChange={(e) => setFormData({ ...formData, practicalInfo: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 resize-none"
-                  />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    disabled={isSubmitting}
+                    className="px-4 h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#F4F3EF] text-slate-600 text-xs font-medium cursor-pointer"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 h-9 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+                  >
+                    {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                    <span>{isEditing ? 'Enregistrer' : 'Créer l’établissement'}</span>
+                  </button>
                 </div>
-              </div>
-
-              {/* Submit / Cancel Buttons */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isSubmitting}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{isEditing ? 'Enregistrer les modifications' : 'Créer l’établissement'}</span>
-                </button>
               </div>
             </form>
           </div>
@@ -1337,30 +2020,19 @@ export default function EstablishmentsPage() {
 
       {/* MODAL: DELETE CONFIRMATION */}
       {isDeleteModalOpen && establishmentToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-5">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
-              <Trash2 className="w-6 h-6" />
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-[#E5E4DF] p-6 space-y-4">
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-bold text-[#0D1B3D]">
                 Supprimer « {establishmentToDelete.name} » ?
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Cet établissement sera définitivement retiré de votre annuaire et de votre fiche
-                publique SAV.
+                Cet établissement sera retiré de votre annuaire et de votre page publique SAV. Aucun
+                ticket, dossier client ou conseiller ne sera affecté.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] text-slate-600 space-y-1">
-              <p className="font-semibold text-slate-800">Garantie d’intégrité Zadesk :</p>
-              <p className="leading-relaxed">
-                Aucun ticket, dossier client ou compte conseiller ne sera modifié ni supprimé.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E4DF]">
               <button
                 type="button"
                 onClick={() => {
@@ -1368,7 +2040,7 @@ export default function EstablishmentsPage() {
                   setEstablishmentToDelete(null);
                 }}
                 disabled={isDeleting}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+                className="px-4 h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#F4F3EF] text-slate-700 text-xs font-medium cursor-pointer"
               >
                 Annuler
               </button>
@@ -1377,7 +2049,7 @@ export default function EstablishmentsPage() {
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-2"
+                className="px-4 h-9 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5"
               >
                 {isDeleting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirmer la suppression</span>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zadesk Design System — Bibliothèque de Composants (Direction 4)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./direction4_tokens.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--z-font-body);
+      background-color: var(--z-color-canvas);
+      color: var(--z-color-navy-900);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* BARRE D'EN-TÊTE DU CATALOGUE */
+    .catalog-header {
+      background: var(--z-color-navy-900);
+      color: #FFFFFF;
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .catalog-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .catalog-logo {
+      width: 32px;
+      height: 32px;
+      background: #FFFFFF;
+      color: var(--z-color-navy-900);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--z-font-brand);
+      font-weight: 900;
+      font-size: 16px;
+    }
+    .catalog-title {
+      font-family: var(--z-font-brand);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .catalog-subtitle {
+      font-size: 11px;
+      color: var(--z-color-text-muted);
+    }
+
+    .catalog-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+    }
+    .catalog-nav-links a {
+      color: #CBD5E1;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .catalog-nav-links a:hover { color: #FFFFFF; }
+
+    /* LAYOUT DU CATALOGUE : SIDEBAR + CONTENU */
+    .catalog-layout {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 65px);
+    }
+    .catalog-sidebar {
+      width: 240px;
+      background: var(--z-color-surface);
+      border-right: 1px solid var(--z-color-hairline);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: sticky;
+      top: 65px;
+      height: calc(100vh - 65px);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .cat-nav-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--z-color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 8px 4px;
+    }
+    .cat-nav-item {
+      display: block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--z-color-text-secondary);
+      text-decoration: none;
+      transition: all 0.12s;
+    }
+    .cat-nav-item:hover {
+      background: var(--z-color-navy-subtle);
+      color: var(--z-color-navy-900);
+    }
+    .cat-nav-item.active {
+      background: var(--z-color-navy-subtle);
+      color: var(--z-color-navy-900);
+      font-weight: 700;
+      border-left: 2px solid var(--z-color-emerald-500);
+    }
+
+    .catalog-main {
+      flex: 1;
+      padding: 40px 48px 80px;
+      max-width: 1160px;
+      overflow-y: auto;
+    }
+
+    /* SECTIONS DU CATALOGUE */
+    .section-block {
+      margin-bottom: 56px;
+      scroll-margin-top: 80px;
+    }
+    .section-header-title {
+      font-family: var(--z-font-brand);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--z-color-navy-900);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .section-header-desc {
+      font-size: 13px;
+      color: var(--z-color-text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .component-spec-card {
+      background: var(--z-color-surface);
+      border: 1px solid var(--z-color-hairline);
+      border-radius: var(--z-radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--z-shadow-subtle);
+    }
+    .spec-card-title {
+      font-family: var(--z-font-brand);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--z-color-navy-900);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .spec-card-tag {
+      font-family: var(--z-font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--z-color-surface-sunken);
+      color: var(--z-color-text-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .spec-card-desc {
+      font-size: 12px;
+      color: var(--z-color-text-muted);
+      margin-bottom: 18px;
+    }
+    .spec-preview-area {
+      padding: 20px;
+      background: #FAFAF8;
+      border: 1px dashed #CBD5E1;
+      border-radius: var(--z-radius-md);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* --------------------------------------------------------------------------
+       STYLES DES COMPOSANTS CANONIQUES ZADESK DIRECTION 4
+       -------------------------------------------------------------------------- */
+    
+    /* BOUTONS */
+    .z-btn-primary {
+      background: var(--z-color-navy-900);
+      color: #FFFFFF;
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      padding: 8px 16px;
+      border-radius: var(--z-radius-sm);
+      border: 1px solid var(--z-color-navy-900);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--z-duration-fast) ease, transform 80ms var(--z-ease-press);
+    }
+    .z-btn-primary:hover { background: var(--z-color-navy-800); }
+    .z-btn-primary:active { transform: scale(0.98); }
+
+    .z-btn-secondary {
+      background: var(--z-color-surface);
+      color: var(--z-color-text-secondary);
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      padding: 8px 16px;
+      border-radius: var(--z-radius-sm);
+      border: 1px solid #CBD5E1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--z-duration-fast) ease;
+    }
+    .z-btn-secondary:hover { background: #F8FAFC; color: var(--z-color-navy-900); }
+    .z-btn-secondary:active { transform: scale(0.98); }
+
+    .z-btn-ghost {
+      background: transparent;
+      color: var(--z-color-text-secondary);
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      padding: 8px 12px;
+      border-radius: var(--z-radius-sm);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .z-btn-ghost:hover { background: var(--z-color-navy-subtle); color: var(--z-color-navy-900); }
+
+    .z-btn-danger {
+      background: var(--z-color-rose-light);
+      color: var(--z-color-rose);
+      border: 1px solid var(--z-color-rose-border);
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      padding: 8px 16px;
+      border-radius: var(--z-radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .z-btn-danger:hover { background: #FEE2E2; }
+
+    .z-btn-disabled {
+      background: #E2E8F0;
+      color: #94A3B8;
+      border: 1px solid #E2E8F0;
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      padding: 8px 16px;
+      border-radius: var(--z-radius-sm);
+      cursor: not-allowed;
+    }
+
+    .z-btn-mobile {
+      width: 100%;
+      height: var(--z-touch-target-min);
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    /* CHAMPS DE FORMULAIRE */
+    .z-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 260px;
+    }
+    .z-label {
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      color: var(--z-color-text-primary);
+    }
+    .z-input {
+      height: 38px;
+      background: var(--z-color-surface);
+      border: 1px solid var(--z-color-border-solid);
+      border-radius: var(--z-radius-sm);
+      padding: 0 12px;
+      font-size: var(--z-text-body);
+      color: var(--z-color-text-primary);
+      font-family: var(--z-font-body);
+      outline: none;
+      transition: border var(--z-duration-fast), box-shadow var(--z-duration-fast);
+    }
+    .z-input:focus {
+      border-color: var(--z-color-navy-900);
+      box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.08);
+    }
+    .z-input.error {
+      border-color: var(--z-color-rose);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    }
+
+    .z-search-bar {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      background: var(--z-color-surface);
+      border: 1px solid var(--z-color-border-solid);
+      border-radius: var(--z-radius-sm);
+      padding: 0 10px;
+      gap: 8px;
+      width: 320px;
+    }
+    .z-search-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: var(--z-text-body-sm);
+      flex: 1;
+    }
+    .z-kbd {
+      font-family: var(--z-font-mono);
+      font-size: 10px;
+      color: var(--z-color-text-muted);
+      background: var(--z-color-surface-sunken);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #CBD5E1;
+    }
+
+    /* STATUS PILLS & BADGES */
+    .z-pill {
+      font-size: 10px;
+      font-weight: var(--z-weight-bold);
+      padding: 3px 8px;
+      border-radius: var(--z-radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .z-pill.amber { background: var(--z-color-amber-light); color: var(--z-color-amber); border: 1px solid var(--z-color-amber-border); }
+    .z-pill.emerald { background: var(--z-color-emerald-50); color: var(--z-color-emerald-text); border: 1px solid var(--z-color-emerald-100); }
+    .z-pill.blue { background: var(--z-color-blue-light); color: var(--z-color-blue); border: 1px solid var(--z-color-blue-border); }
+    .z-pill.neutral { background: var(--z-color-surface-sunken); color: var(--z-color-text-secondary); border: 1px solid var(--z-color-border-solid); }
+
+    .z-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* TABS ET CONTRÔLES SEGMENTÉS */
+    .z-tab-bar {
+      display: inline-flex;
+      background: var(--z-color-surface-sunken);
+      padding: 3px;
+      border-radius: var(--z-radius-md);
+      gap: 2px;
+    }
+    .z-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: var(--z-radius-sm);
+      font-size: var(--z-text-body-sm);
+      font-weight: var(--z-weight-semibold);
+      color: var(--z-color-text-secondary);
+      cursor: pointer;
+      transition: all var(--z-duration-fast);
+    }
+    .z-tab-btn.active {
+      background: var(--z-color-surface);
+      color: var(--z-color-navy-900);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    /* MODALE ET TIROIR INTERACTIFS (DÉMONSTRATION) */
+    .z-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 27, 61, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      display: none;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+    .z-drawer-panel {
+      width: 480px;
+      background: var(--z-color-surface);
+      border-left: 1px solid var(--z-color-hairline);
+      box-shadow: var(--z-shadow-overlay);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 28px;
+      gap: 20px;
+      animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    .drawer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--z-color-hairline);
+      padding-bottom: 14px;
+    }
+    .drawer-title {
+      font-family: var(--z-font-brand);
+      font-size: 18px;
+      font-weight: var(--z-weight-bold);
+      color: var(--z-color-navy-900);
+    }
+    .drawer-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: var(--z-text-body);
+      color: var(--z-color-text-secondary);
+      line-height: 1.5;
+    }
+    .drawer-footer {
+      border-top: 1px solid var(--z-color-hairline);
+      padding-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* TOAST DE NOTIFICATION */
+    .z-toast-box {
+      background: var(--z-color-navy-900);
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: var(--z-radius-md);
+      box-shadow: var(--z-shadow-overlay);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: var(--z-text-body-sm);
+      min-width: 320px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER DU CATALOGUE -->
+  <header class="catalog-header">
+    <div class="catalog-brand">
+      <div class="catalog-logo">Z</div>
+      <div>
+        <div class="catalog-title">ZADESK DESIGN SYSTEM • DIRECTION 4</div>
+        <div class="catalog-subtitle">Catalogue Interactif des Composants Canoniques</div>
+      </div>
+    </div>
+
+    <div class="catalog-nav-links">
+      <a href="#sec-tokens">1. Tokens</a>
+      <a href="#sec-buttons">2. Boutons</a>
+      <a href="#sec-inputs">3. Formulaires</a>
+      <a href="#sec-badges">4. Statuts</a>
+      <a href="#sec-nav">5. Navigation</a>
+      <a href="#sec-drawers">6. Overlays</a>
+      <a href="./comparatif-directions.html" target="_blank" style="color: #22C55E; font-weight: 700;">Studio Comparatif ↗</a>
+    </div>
+  </header>
+
+  <!-- CONTENEUR DU CATALOGUE -->
+  <div class="catalog-layout">
+    
+    <!-- SIDEBAR DU CATALOGUE -->
+    <aside class="catalog-sidebar">
+      <div class="cat-nav-title">FONDATIONS</div>
+      <a href="#sec-tokens" class="cat-nav-item active">Tokens & Couleurs</a>
+      <a href="#sec-typography" class="cat-nav-item">Typographie</a>
+      
+      <div class="cat-nav-title">COMPOSANTS UI</div>
+      <a href="#sec-buttons" class="cat-nav-item">Boutons & Actions</a>
+      <a href="#sec-inputs" class="cat-nav-item">Champs & Recherche</a>
+      <a href="#sec-badges" class="cat-nav-item">Badges & Statuts</a>
+      <a href="#sec-nav" class="cat-nav-item">Navigation & Onglets</a>
+      <a href="#sec-data" class="cat-nav-item">Affichage & Tables</a>
+      
+      <div class="cat-nav-title">OVERLAYS & ÉTATS</div>
+      <a href="#sec-drawers" class="cat-nav-item">Tiroirs & Modales</a>
+      <a href="#sec-states" class="cat-nav-item">États Vides & Calme</a>
+    </aside>
+
+    <!-- ZONE DE CONTENU PRINCIPALE -->
+    <main class="catalog-main">
+      
+      <!-- ====================================================================
+           1. TOKENS DE COULEURS & SURFACES
+           ==================================================================== -->
+      <section id="sec-tokens" class="section-block">
+        <h2 class="section-header-title">1. Tokens de Couleurs & Surfaces (60-28-8-3-1)</h2>
+        <p class="section-header-desc">Palette stricte sans dégradés gratuits. Contrastes fondés sur le Lin chaud (#FAFAF8), les surfaces blanches (#FFFFFF) et l'encre Midnight Navy (#0D1B3D).</p>
+
+        <div class="component-spec-card">
+          <div class="spec-card-title">
+            <span>Swatches Chromatiques Canoniques</span>
+            <span class="spec-card-tag">CSS TOKENS</span>
+          </div>
+          <div class="spec-card-desc">Couleurs de marque, de surfaces et signalétique sémantique d'état.</div>
+          
+          <div class="spec-preview-area" style="gap: 12px;">
+            <div style="background: #FAFAF8; border: 1px solid #E2E8F0; width: 150px; height: 80px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: 700; color: #0D1B3D;">Canvas Lin (60%)</span>
+              <span style="font-family: var(--z-font-mono); font-size: 10px; color: #64748B;">#FAFAF8</span>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; width: 150px; height: 80px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: 700; color: #0D1B3D;">Surface Pure (28%)</span>
+              <span style="font-family: var(--z-font-mono); font-size: 10px; color: #64748B;">#FFFFFF</span>
+            </div>
+
+            <div style="background: #0D1B3D; color: #FFFFFF; width: 150px; height: 80px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: 700;">Midnight Navy (8%)</span>
+              <span style="font-family: var(--z-font-mono); font-size: 10px; color: #94A3B8;">#0D1B3D</span>
+            </div>
+
+            <div style="background: #22C55E; color: #FFFFFF; width: 140px; height: 80px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: 700;">Emerald Zadesk</span>
+              <span style="font-family: var(--z-font-mono); font-size: 10px; color: #ECFDF5;">#22C55E</span>
+            </div>
+
+            <div style="background: #D97706; color: #FFFFFF; width: 140px; height: 80px; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: 700;">Ambre Urgence</span>
+              <span style="font-family: var(--z-font-mono); font-size: 10px; color: #FFFBEB;">#D97706</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           2. TYPOGRAPHIE SUISSE
+           ==================================================================== -->
+      <section id="sec-typography" class="section-block">
+        <h2 class="section-header-title">2. Hiérarchie Typographique Suisse</h2>
+        <p class="section-header-desc">Outfit pour l'autorité statutaire, Inter pour la clarté technique, JetBrains Mono pour les timecodes et identifiants.</p>
+
+        <div class="component-spec-card">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+              <div style="font-size: 10px; font-family: var(--z-font-mono); color: var(--z-color-text-muted);">DISPLAY 1 — OUTFIT 44px (800)</div>
+              <div style="font-family: var(--z-font-brand); font-size: var(--z-text-display-1); font-weight: var(--z-weight-extrabold); color: var(--z-color-navy-900); letter-spacing: var(--z-tracking-display-1); line-height: var(--z-leading-display-1);">
+                14 Dossiers Actifs
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--z-color-hairline); padding-top: 12px;">
+              <div style="font-size: 10px; font-family: var(--z-font-mono); color: var(--z-color-text-muted);">TITRE H1 ÉDITORIAL — OUTFIT 22px (800)</div>
+              <div style="font-family: var(--z-font-brand); font-size: var(--z-text-title-h1); font-weight: var(--z-weight-extrabold); color: var(--z-color-navy-900); letter-spacing: var(--z-tracking-title-h1);">
+                Bulletin du Quart : 1 arbitrage prioritaire requis
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--z-color-hairline); padding-top: 12px;">
+              <div style="font-size: 10px; font-family: var(--z-font-mono); color: var(--z-color-text-muted);">CORPS & INTERFACE — INTER 13px (400 / 600)</div>
+              <div style="font-size: var(--z-text-body); color: var(--z-color-text-secondary); line-height: var(--z-leading-body);">
+                « Bonjour, j'ai passé ma commande hier matin avec retrait prévu à l'agence de Douala Akwa à 11h. »
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--z-color-hairline); padding-top: 12px;">
+              <div style="font-size: 10px; font-family: var(--z-font-mono); color: var(--z-color-text-muted);">MONOSPACE NUMÉRIQUE — JETBRAINS MONO 11px</div>
+              <div style="font-family: var(--z-font-mono); font-size: var(--z-text-meta); color: var(--z-color-text-primary); font-weight: 600;">
+                Réf: #TK-8021 • Attente : 28 min • Horodatage: 12:44:10
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           3. BOUTONS & ACTIONS
+           ==================================================================== -->
+      <section id="sec-buttons" class="section-block">
+        <h2 class="section-header-title">3. Boutons & Déclencheurs d'Action</h2>
+        <p class="section-header-desc">Bouton primaire Navy statutaire unique par écran, boutons secondaires fins à hairlines, et variante mobile 44px.</p>
+
+        <div class="component-spec-card">
+          <div class="spec-card-title">
+            <span>Variantes et États Interactifs</span>
+            <span class="spec-card-tag">BUTTONS</span>
+          </div>
+          <div class="spec-card-desc">Cliquez pour tester le micro-retour tactile au press (:active transform scale 0.98).</div>
+
+          <div class="spec-preview-area">
+            <button class="z-btn-primary">
+              <span>Prendre en charge</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+
+            <button class="z-btn-secondary">Assigner à un conseiller</button>
+
+            <button class="z-btn-ghost">Voir tous les dossiers &rarr;</button>
+
+            <button class="z-btn-danger">Clôturer sans suite</button>
+
+            <button class="z-btn-disabled" disabled>Action verrouillée</button>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--z-color-text-muted); margin-bottom: 8px;">VARIANTE PLEINE LARGEUR MOBILE (44px)</div>
+            <div style="max-width: 320px;">
+              <button class="z-btn-primary z-btn-mobile">Prendre en charge immédiatement</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           4. FORMULAIRES & RECHERCHE
+           ==================================================================== -->
+      <section id="sec-inputs" class="section-block">
+        <h2 class="section-header-title">4. Champs de Formulaire & Recherche</h2>
+        <p class="section-header-desc">Inputs sobres sans fioritures, avec mise en exergue du focus par un halo d'encre Midnight Navy.</p>
+
+        <div class="component-spec-card">
+          <div class="spec-preview-area" style="align-items: flex-start;">
+            <div class="z-input-group">
+              <label class="z-label">Nom du client</label>
+              <input type="text" class="z-input" value="Alain Tchakounte" placeholder="Nom complet">
+            </div>
+
+            <div class="z-input-group">
+              <label class="z-label">Agence de retrait</label>
+              <input type="text" class="z-input" value="Douala Akwa" readonly style="background: #F8FAFC;">
+            </div>
+
+            <div class="z-input-group">
+              <label class="z-label">Champ en erreur</label>
+              <input type="text" class="z-input error" value="Numéro invalide">
+              <span style="font-size: 10.5px; color: var(--z-color-rose);">Veuillez saisir un numéro au format CEMAC (+237 ou +242).</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--z-color-text-muted); margin-bottom: 8px;">BARRE DE RECHERCHE RAPIDE AVEC RACCOURCI (⌘K)</div>
+            <div class="z-search-bar">
+              <svg width="14" height="14" fill="none" stroke="#94A3B8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input type="text" class="z-search-input" placeholder="Rechercher un dossier, un client...">
+              <span class="z-kbd">⌘K</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           5. BADGES & STATUTS SÉMANTIQUES
+           ==================================================================== -->
+      <section id="sec-badges" class="section-block">
+        <h2 class="section-header-title">5. Badges de Statut & Pastilles Sémantiques</h2>
+        <p class="section-header-desc">Signalétique typographique en capitales avec micro-padding, immédiatement identifiable sans icône superflue.</p>
+
+        <div class="component-spec-card">
+          <div class="spec-preview-area">
+            <span class="z-pill amber"><span class="z-pulse-dot"></span>Arbitrage Requis</span>
+            <span class="z-pill blue"><span class="z-pulse-dot"></span>En cours</span>
+            <span class="z-pill emerald"><span class="z-pulse-dot"></span>Résolu ce jour</span>
+            <span class="z-pill neutral">En attente client</span>
+            <span style="font-family: var(--z-font-mono); font-size: 10px; background: #F1F5F9; color: #475569; padding: 2px 6px; border-radius: 4px;">Portail Web</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           6. NAVIGATION & TABS
+           ==================================================================== -->
+      <section id="sec-nav" class="section-block">
+        <h2 class="section-header-title">6. Navigation & Tabs Segmentés</h2>
+        <p class="section-header-desc">Barres d'onglets pour le filtrage continu des files de demandes.</p>
+
+        <div class="component-spec-card">
+          <div class="spec-preview-area">
+            <div class="z-tab-bar">
+              <button class="z-tab-btn active" onclick="switchCatalogTab(this)">Tous (14)</button>
+              <button class="z-tab-btn" onclick="switchCatalogTab(this)">En attente (3)</button>
+              <button class="z-tab-btn" onclick="switchCatalogTab(this)">En cours (7)</button>
+              <button class="z-tab-btn" onclick="switchCatalogTab(this)">Résolus (4)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           7. OVERLAYS, TIROIRS & DIALOGUES
+           ==================================================================== -->
+      <section id="sec-drawers" class="section-block">
+        <h2 class="section-header-title">7. Overlays, Tiroirs d'Inspection & Notifications</h2>
+        <p class="section-header-desc">Tiroir latéral (Slide-over de 480px) pour examiner un dossier sans quitter le flux de travail.</p>
+
+        <div class="component-spec-card">
+          <div class="spec-preview-area">
+            <button class="z-btn-primary" onclick="openDrawerDemo()">
+              <span>Tester l'ouverture du tiroir d'inspection</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
+            <button class="z-btn-secondary" onclick="showToastDemo()">
+              <span>Afficher un toast de notification</span>
+            </button>
+          </div>
+
+          <!-- APERÇU FIXE DU TOAST -->
+          <div style="margin-top: 16px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--z-color-text-muted); margin-bottom: 8px;">APERÇU TOAST CANONIQUE</div>
+            <div class="z-toast-box">
+              <svg width="16" height="16" fill="none" stroke="#22C55E" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+              <span>Dossier #TK-8021 pris en charge avec succès par Aimé Ndongo.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           8. ÉTATS VIDES & SITUATION FLUIDE (CALME)
+           ==================================================================== -->
+      <section id="sec-states" class="section-block">
+        <h2 class="section-header-title">8. États Vides & Situation Sereine</h2>
+        <p class="section-header-desc">Le cockpit doit être élégant et rassurant lorsqu'il n'y a aucune crise en cours.</p>
+
+        <div class="component-spec-card">
+          <div style="background: var(--z-color-surface); border: 1px solid var(--z-color-hairline); border-radius: var(--z-radius-lg); padding: 36px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--z-color-emerald-50); color: var(--z-color-emerald-text); display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h3 style="font-family: var(--z-font-brand); font-size: 17px; font-weight: 700; color: var(--z-color-navy-900);">Toutes les demandes sont traitées</h3>
+            <p style="font-size: 12.5px; color: var(--z-color-text-secondary); max-width: 380px; line-height: 1.5;">Aucun dossier en attente d'arbitrage. Les équipes de Douala et Yaoundé opèrent à charge nominale.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TIROIR D'INSPECTION (SLIDE-OVER DEMO) -->
+  <div class="z-drawer-overlay" id="demo-drawer-overlay" onclick="closeDrawerDemo(event)">
+    <div class="z-drawer-panel" onclick="event.stopPropagation()">
+      <div class="drawer-top">
+        <div>
+          <span style="font-family: var(--z-font-mono); font-size: 11px; color: var(--z-color-amber); font-weight: 700;">#TK-8021 • EN ARBITRAGE</span>
+          <h3 class="drawer-title">Détail du Dossier SAV</h3>
+        </div>
+        <button class="z-btn-ghost" onclick="hideDrawerDemo()">✕ Fermer</button>
+      </div>
+
+      <div class="drawer-body">
+        <div style="background: #F8FAFC; border: 1px solid var(--z-color-hairline); padding: 12px; border-radius: 8px;">
+          <div style="font-weight: 700; color: var(--z-color-navy-900); font-size: 13px;">Alain Tchakounte</div>
+          <div style="font-size: 11px; color: var(--z-color-text-muted);">Portail Client Web • Douala Akwa • 28 min d'attente</div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--z-color-text-muted); text-transform: uppercase; margin-bottom: 6px;">Message du client :</div>
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; padding: 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.5;">
+            « Bonjour, j'ai passé ma commande hier matin avec retrait prévu à l'agence de Douala Akwa à 11h. Arrivé sur place, l'équipe me dit que le carton n'a pas été réceptionné du dépôt central. Pouvez-vous localiser mon colis en urgence ? »
+          </div>
+        </div>
+
+        <div>
+          <label class="z-label" style="display: block; margin-bottom: 6px;">Assigner à un conseiller :</label>
+          <select class="z-input" style="width: 100%;">
+            <option>Marc Eyango (Douala Akwa — 3 dossiers)</option>
+            <option>Sophie Mendomo (Yaoundé Bastos — 2 dossiers)</option>
+            <option>Cédric Bella (Douala Akwa — 2 dossiers)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="z-btn-secondary" onclick="hideDrawerDemo()">Annuler</button>
+        <button class="z-btn-primary" onclick="hideDrawerDemo(); showToastDemo();">Prendre en charge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT DU CATALOGUE -->
+  <script>
+    function switchCatalogTab(btn) {
+      document.querySelectorAll('.z-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function openDrawerDemo() {
+      document.getElementById('demo-drawer-overlay').style.display = 'flex';
+    }
+
+    function hideDrawerDemo() {
+      document.getElementById('demo-drawer-overlay').style.display = 'none';
+    }
+
+    function closeDrawerDemo(e) {
+      if (e.target.id === 'demo-drawer-overlay') {
+        hideDrawerDemo();
+      }
+    }
+
+    function showToastDemo() {
+      alert("Notification Zadesk : Dossier pris en charge avec succès.");
+    }
+  </script>
+</body>
+</html>

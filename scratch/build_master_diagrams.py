@@ -1,0 +1,499 @@
+# -*- coding: utf-8 -*-
+import os
+import subprocess
+import xml.etree.ElementTree as ET
+import html
+
+base_dir = r"livrables_memoire\3.3.2_modele_classes"
+plantuml_dir = os.path.join(base_dir, "plantuml")
+drawio_dir = os.path.join(base_dir, "drawio")
+
+# ==============================================================================
+# 1. PLANTUML GENERATION
+# ==============================================================================
+puml_path = os.path.join(plantuml_dir, "zalisk_modele_classes.puml")
+
+puml_code = """@startuml zalisk_modele_classes
+!theme plain
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI, Helvetica, Arial, sans-serif"
+skinparam defaultFontSize 11
+skinparam defaultFontColor #0F172A
+skinparam roundCorner 4
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam linetype ortho
+
+' Styles des Packages
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #64748B
+  BorderThickness 1.2
+  FontColor #0F172A
+  FontSize 13
+  FontStyle bold
+}
+
+' Styles des Classes
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #334155
+  BorderThickness 1.2
+  FontSize 12
+  FontStyle bold
+  AttributeFontName "Consolas, 'Courier New', monospace"
+  AttributeFontSize 10
+  AttributeFontColor #1E293B
+}
+
+' Styles par Package Métier
+skinparam class<<tenant>> {
+  HeaderBackgroundColor #EFF6FF
+  BorderColor #2563EB
+}
+skinparam class<<sav>> {
+  HeaderBackgroundColor #ECFDF5
+  BorderColor #059669
+}
+skinparam class<<org>> {
+  HeaderBackgroundColor #FFFBEB
+  BorderColor #D97706
+}
+skinparam class<<billing>> {
+  HeaderBackgroundColor #FAF5FF
+  BorderColor #7C3AED
+}
+
+' Styles des Relations
+skinparam arrow {
+  Color #1E293B
+  Thickness 1.2
+  FontColor #334155
+  FontSize 10
+}
+
+title <size:18><b>PLATEFORME SAAS ZALISK — DIAGRAMME DE CLASSES MÉTIER (UML 2.5)</b></size>\\n<size:12>Architecture Multi-Tenant • Gestion Omnicanale des Conversations & Tickets SAV • Abonnements SasPay</size>
+
+' ==============================================================================
+' PACKAGE 1 : MULTI-TENANT & GESTION DES UTILISATEURS
+' ==============================================================================
+package "1. Multi-Tenant & Gestion des Utilisateurs" as pkg_users #F8FAFC {
+
+  class Workspace <<tenant>> {
+    + id: String [PK]
+    + name: String
+    + slug: String [UQ]
+    + isPublic: Boolean
+    + hasExistingSav: Boolean
+    + timezone: String
+    + supportEmail: String
+    + supportPhone: String
+    + createdAt: DateTime
+    + updatedAt: DateTime
+  }
+
+  class User <<tenant>> {
+    + id: String [PK]
+    + email: String [UQ]
+    + firstName: String
+    + lastName: String
+    + emailVerified: Boolean
+    + avatarUrl: String
+    + createdAt: DateTime
+    + updatedAt: DateTime
+  }
+
+  class Membership <<tenant>> {
+    + id: String [PK]
+    + userId: String [FK]
+    + workspaceId: String [FK]
+    + role: Role
+    + status: MembershipStatus
+    + suspendedAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class WorkspaceInvitation <<tenant>> {
+    + id: String [PK]
+    + email: String
+    + workspaceId: String [FK]
+    + role: Role
+    + token: String [UQ]
+    + expiresAt: DateTime
+    + acceptedAt: DateTime
+    + createdAt: DateTime
+  }
+
+  enum Role {
+    OWNER
+    ADMIN
+    MANAGER
+    AGENT
+  }
+
+  enum MembershipStatus {
+    ACTIVE
+    SUSPENDED
+    ARCHIVED
+  }
+}
+
+' ==============================================================================
+' PACKAGE 2 : CONVERSATIONS OMNICANALES & TICKETS SAV
+' ==============================================================================
+package "2. Conversations Omnicanales & Tickets SAV" as pkg_sav #F8FAFC {
+
+  class Conversation <<sav>> {
+    + id: String [PK]
+    + workspaceId: String [FK]
+    + customerName: String
+    + customerEmail: String
+    + channel: String
+    + status: ConversationStatus
+    + priority: TicketPriority
+    + sessionToken: String [UQ]
+    + lastMessageAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class ConversationMessage <<sav>> {
+    + id: String [PK]
+    + conversationId: String [FK]
+    + senderId: String [FK]
+    + senderType: MessageType
+    + senderName: String
+    + content: String
+    + isInternalNote: Boolean
+    + createdAt: DateTime
+  }
+
+  class Ticket <<sav>> {
+    + id: String [PK]
+    + reference: String [UQ]
+    + workspaceId: String [FK]
+    + conversationId: String [FK, UQ]
+    + assignedAgentId: String [FK]
+    + title: String
+    + description: String
+    + priority: TicketPriority
+    + status: TicketStatus
+    + customerName: String
+    + slaDueAt: DateTime
+    + resolvedAt: DateTime
+    + closedAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class TicketAssignment <<sav>> {
+    + id: String [PK]
+    + ticketId: String [FK]
+    + previousAgentId: String [FK]
+    + newAgentId: String [FK]
+    + assignedById: String [FK]
+    + reason: String
+    + createdAt: DateTime
+  }
+
+  class TicketShare <<sav>> {
+    + id: String [PK]
+    + ticketId: String [FK]
+    + agentId: String [FK]
+    + sharedById: String [FK]
+    + accessLevel: ShareAccessLevel
+    + expiresAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class ConversationShare <<sav>> {
+    + id: String [PK]
+    + conversationId: String [FK]
+    + agentId: String [FK]
+    + sharedById: String [FK]
+    + accessLevel: ShareAccessLevel
+    + createdAt: DateTime
+  }
+
+  class TicketActivity <<sav>> {
+    + id: String [PK]
+    + ticketId: String [FK]
+    + authorId: String [FK]
+    + type: String
+    + content: String
+    + createdAt: DateTime
+  }
+
+  enum ConversationStatus {
+    WAITING_ASSIGNMENT
+    ACTIVE
+    WAITING_CUSTOMER
+    RESOLVED
+    CLOSED
+  }
+
+  enum MessageType {
+    CUSTOMER
+    AGENT_REPLY
+    INTERNAL_NOTE
+    SYSTEM
+  }
+
+  enum TicketStatus {
+    PENDING_ASSIGNMENT
+    OPEN
+    IN_PROGRESS
+    WAITING_CUSTOMER
+    RESOLVED
+    CLOSED
+  }
+
+  enum TicketPriority {
+    LOW
+    MEDIUM
+    HIGH
+    URGENT
+  }
+
+  enum ShareAccessLevel {
+    READ_ONLY
+    CONTRIBUTE
+  }
+}
+
+' ==============================================================================
+' PACKAGE 3 : ORGANISATION SAV & COMPÉTENCES
+' ==============================================================================
+package "3. Organisation SAV, Compétences & Agences" as pkg_org #F8FAFC {
+
+  class AgentProfile <<org>> {
+    + id: String [PK]
+    + workspaceId: String [FK]
+    + userId: String [FK, UQ]
+    + availability: AgentAvailability
+    + maxCapacity: Int
+    + currentTicketsCount: Int
+    + autoAssignmentEnabled: Boolean
+    + title: String
+    + phone: String
+    + createdAt: DateTime
+  }
+
+  class Skill <<org>> {
+    + id: String [PK]
+    + workspaceId: String [FK]
+    + name: String
+    + description: String
+    + createdAt: DateTime
+  }
+
+  class AgentSkill <<org>> {
+    + id: String [PK]
+    + agentProfileId: String [FK]
+    + skillId: String [FK]
+    + validatedById: String [FK]
+    + validatedAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class Establishment <<org>> {
+    + id: String [PK]
+    + workspaceId: String [FK]
+    + name: String
+    + type: EstablishmentType
+    + address: String
+    + city: String
+    + country: String
+    + isMain: Boolean
+    + isActive: Boolean
+    + createdAt: DateTime
+  }
+
+  enum AgentAvailability {
+    AVAILABLE
+    BUSY
+    AWAY
+    OFFLINE
+  }
+
+  enum EstablishmentType {
+    HEADQUARTERS
+    BRANCH
+    STORE
+    SERVICE_POINT
+    TECH_CENTER
+    OTHER
+  }
+}
+
+' ==============================================================================
+' PACKAGE 4 : GESTION COMMERCIALE & ABONNEMENTS (SASPAY)
+' ==============================================================================
+package "4. Gestion Commerciale & Abonnements" as pkg_billing #F8FAFC {
+
+  class Subscription <<billing>> {
+    + id: String [PK]
+    + workspaceId: String [FK, UQ]
+    + plan: PlanType
+    + status: SubscriptionStatus
+    + activePriceXaf: Int
+    + currentPeriodStart: DateTime
+    + currentPeriodEnd: DateTime
+    + gracePeriodEnd: DateTime
+    + version: Int
+    + createdAt: DateTime
+  }
+
+  class SubscriptionIntent <<billing>> {
+    + id: String [PK]
+    + workspaceId: String [FK]
+    + subscriptionId: String [FK]
+    + userId: String [FK]
+    + intentType: IntentType
+    + targetPlan: PlanType
+    + priceXaf: Int
+    + currency: String
+    + status: IntentStatus
+    + clientMutationKey: String [UQ]
+    + createdAt: DateTime
+  }
+
+  class PaymentAttempt <<billing>> {
+    + id: String [PK]
+    + intentId: String [FK]
+    + workspaceId: String [FK]
+    + attemptNumber: Int
+    + provider: String
+    + status: AttemptStatus
+    + localAttemptKey: String [UQ]
+    + expiresAt: DateTime
+    + createdAt: DateTime
+  }
+
+  class PaymentTransaction <<billing>> {
+    + id: String [PK]
+    + receiptId: String [UQ]
+    + workspaceId: String [FK]
+    + subscriptionId: String [FK]
+    + intentId: String [FK]
+    + amountXaf: Int
+    + currency: String
+    + provider: String
+    + status: TransactionApplicationStatus
+    + paidAt: DateTime
+    + createdAt: DateTime
+  }
+
+  enum PlanType {
+    DECOUVERTE
+    STARTER
+    PRO
+    ENTREPRISE
+  }
+
+  enum SubscriptionStatus {
+    ACTIVE
+    RENEWAL_DUE
+    GRACE_PERIOD
+    EXPIRED
+    CANCELLED
+  }
+
+  enum IntentType {
+    INITIAL_PURCHASE
+    RENEWAL
+    UPGRADE
+    DOWNGRADE
+  }
+
+  enum IntentStatus {
+    PENDING
+    COMPLETED
+    ABANDONED
+    EXPIRED
+  }
+
+  enum AttemptStatus {
+    INITIATED
+    CHECKOUT_CREATED
+    PAYMENT_PENDING
+    PAYMENT_CONFIRMED
+    CONFIRMED_FAILURE
+  }
+
+  enum TransactionApplicationStatus {
+    APPLIED_TO_SUBSCRIPTION
+    DUPLICATE_PAYMENT_RECORDED
+    MANUAL_ADJUSTMENT
+    REFUNDED
+  }
+}
+
+' ==============================================================================
+' RELATIONS ET ASSOCIATIONS (CARDINALITÉS VÉRIFIÉES POSTGRESQL & PRISMA)
+' ==============================================================================
+
+' --- Package 1 : Multi-Tenant ---
+Workspace "1" *-- "0..*" Membership : compose >
+User "1" -- "0..*" Membership : adhère à >
+Workspace "1" *-- "0..*" WorkspaceInvitation : émet >
+Membership .. Role
+Membership .. MembershipStatus
+
+' --- Package 2 : SAV & Conversations ---
+Workspace "1" *-- "0..*" Conversation : regroupe >
+Conversation "1" *-- "1..*" ConversationMessage : contient >
+User "0..1" -- "0..*" ConversationMessage : rédige >
+
+Workspace "1" *-- "0..*" Ticket : gère >
+Conversation "0..1" -- "0..1" Ticket : élévation >
+User "0..1" -- "0..*" Ticket : soumet >
+User "0..1" -- "0..*" Ticket : assigné à >
+
+Ticket "1" *-- "0..*" TicketAssignment : historique >
+User "1" -- "0..*" TicketAssignment : assigné >
+
+Ticket "1" *-- "0..*" TicketShare : partagé via >
+User "1" -- "0..*" TicketShare : bénéficiaire >
+
+Conversation "1" *-- "0..*" ConversationShare : partagée via >
+User "1" -- "0..*" ConversationShare : bénéficiaire >
+
+Ticket "1" *-- "0..*" TicketActivity : journalise >
+
+Conversation .. ConversationStatus
+Conversation .. TicketPriority
+ConversationMessage .. MessageType
+Ticket .. TicketStatus
+TicketShare .. ShareAccessLevel
+
+' --- Package 3 : Organisation ---
+Workspace "1" *-- "0..*" AgentProfile : emploie >
+User "1" -- "0..1" AgentProfile : étendu par >
+
+AgentProfile "1" *-- "0..*" AgentSkill : maîtrise >
+Skill "1" -- "0..*" AgentSkill : certifie >
+Workspace "1" *-- "0..*" Skill : catalogue >
+Workspace "1" *-- "0..*" Establishment : déploie >
+
+AgentProfile .. AgentAvailability
+Establishment .. EstablishmentType
+
+' --- Package 4 : Commercial ---
+Workspace "1" -- "0..1" Subscription : souscrit >
+Subscription "1" *-- "0..*" SubscriptionIntent : prépare >
+SubscriptionIntent "1" *-- "0..*" PaymentAttempt : déclenche >
+Subscription "1" -- "0..*" PaymentTransaction : comptabilise >
+PaymentTransaction "0..1" -- "1" SubscriptionIntent : valide >
+
+Subscription .. PlanType
+Subscription .. SubscriptionStatus
+SubscriptionIntent .. IntentType
+PaymentAttempt .. AttemptStatus
+PaymentTransaction .. TransactionApplicationStatus
+
+@enduml
+"""
+
+with open(puml_path, "w", encoding="utf-8") as f:
+    f.write(puml_code)
+print(f"PlantUML source written: {puml_path} ({len(puml_code)} bytes)")

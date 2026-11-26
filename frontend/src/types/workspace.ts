@@ -1,4 +1,7 @@
 export type Role = "OWNER" | "ADMIN" | "MANAGER" | "AGENT";
+export type PresenceState = "ONLINE" | "AWAY" | "OFFLINE";
+export type AvailabilityState = "AVAILABLE" | "BUSY" | "DND";
+export type AccountStatus = "ACTIVE" | "SUSPENDED" | "ARCHIVED";
 
 export interface Workspace {
   id: string;
@@ -64,9 +67,17 @@ export interface DashboardStats {
     activeConversations: number;
     waitingAgent: number;
     openTickets: number;
-    aiResolutionRate: number;
-    avgResolutionTimeMinutes: number;
-    customerSatisfactionScore: number;
+    totalTickets?: number;
+    ticketBreakdown?: {
+      OPEN: number;
+      IN_PROGRESS: number;
+      WAITING_CUSTOMER: number;
+      RESOLVED: number;
+      CLOSED: number;
+    };
+    aiResolutionRate: number | null;
+    avgResolutionTimeMinutes: number | null;
+    customerSatisfactionScore: number | null;
   };
   priorityQueue: Array<{
     id: string;
@@ -82,7 +93,7 @@ export interface DashboardStats {
   }>;
   recentActivity: Array<{
     id: string;
-    type: "AI_RESOLVED" | "AGENT_ASSIGNED" | "TICKET_CREATED" | "KNOWLEDGE_UPDATED";
+    type: "AI_RESOLVED" | "AGENT_ASSIGNED" | "TICKET_CREATED" | "KNOWLEDGE_UPDATED" | "RESOLUTION" | "ASSIGNMENT" | "STATUS_CHANGE" | "NOTE" | "TICKET_EVENT" | string;
     title: string;
     description: string;
     timestamp: string;
@@ -156,7 +167,10 @@ export interface Agent {
   name: string;
   email: string;
   role: Role;
-  status: "AVAILABLE" | "BUSY" | "AWAY" | "OFFLINE";
+  presence?: PresenceState;
+  availability?: AvailabilityState;
+  accountStatus?: AccountStatus;
+  status: "AVAILABLE" | "BUSY" | "DND" | "AWAY" | "OFFLINE";
   skills: string[];
   activeConversations: number;
   resolvedToday: number;
@@ -356,8 +370,19 @@ export interface AgentConversationItem {
 
 export interface AgentProfileData {
   id: string;
-  availability: 'AVAILABLE' | 'BUSY' | 'AWAY' | 'OFFLINE';
+  availability: AvailabilityState;
+  presence?: PresenceState;
+  presenceInfo?: {
+    state: PresenceState;
+    activeSessions: number;
+    lastHeartbeatAt: string | null;
+    lastActivityAt: string | null;
+  };
+  accountStatus?: AccountStatus;
+  role?: Role;
   maxCapacity: number;
+  notificationEmail?: boolean;
+  notificationApp?: boolean;
   notificationPreferences?: Record<string, boolean>;
   user: {
     id: string;
@@ -367,12 +392,15 @@ export interface AgentProfileData {
   };
   skills: Array<{
     id: string;
-    isPrimary: boolean;
+    isPrimary?: boolean;
     verifiedAt?: string;
+    validatedAt?: string;
     skill: {
       id: string;
       name: string;
-      code: string;
+      description?: string | null;
+      isActive?: boolean;
+      code?: string;
       category?: string;
     };
   }>;
@@ -417,5 +445,56 @@ export interface Establishment {
   longitude?: number | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export type QuotaStatus = 'OK' | 'WARNING' | 'REACHED';
+
+export interface QuotaMetric {
+  key: 'agents' | 'establishments' | 'storage' | string;
+  label: string;
+  used: number;
+  limit: number | null;
+  unit: string;
+  unlimited: boolean;
+  percentage: number;
+  remaining: number | null;
+  status: QuotaStatus;
+  breakdown?: Record<string, any>;
+}
+
+export interface QuotaAlertItem {
+  key: string;
+  severity: 'WARNING' | 'REACHED';
+  title: string;
+  message: string;
+}
+
+export interface WorkspaceUsageSummary {
+  workspaceId: string;
+  plan: {
+    id: 'DECOUVERTE' | 'STARTER' | 'PRO' | 'ENTREPRISE' | string;
+    name: string;
+    priceXaf: number;
+    periodLabel: string;
+    isPaid: boolean;
+    currentPeriodStart?: string | null;
+    currentPeriodEnd?: string | null;
+    nextRecommendedPlanId?: string | null;
+  };
+  metrics: {
+    agents: QuotaMetric;
+    establishments: QuotaMetric;
+    storage: QuotaMetric;
+  };
+  peakPercentage: number;
+  globalSeverity: QuotaStatus;
+  alerts: QuotaAlertItem[];
+  monthlyActivity: {
+    periodStart: string;
+    ticketsCount: number;
+    conversationsCount: number;
+    messagesCount: number;
+  };
+  computedAt: string;
 }
 

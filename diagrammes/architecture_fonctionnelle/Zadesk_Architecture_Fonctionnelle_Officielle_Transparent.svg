@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1460 700" width="1460" height="700">
+<defs>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap');
+    text {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    .sec-header { font-size: 14px; font-weight: 800; fill: #0F172A; letter-spacing: 0.5px; }
+    .sec-sub { font-size: 10.5px; font-weight: 600; fill: #64748B; }
+
+    .card-title { font-size: 12.5px; font-weight: 700; fill: #1E293B; }
+    .card-title-blue { font-size: 12.5px; font-weight: 800; fill: #1E3A8A; }
+    .card-title-green { font-size: 12.5px; font-weight: 800; fill: #065F46; }
+    .card-sub { font-size: 10.5px; font-weight: 400; fill: #64748B; }
+
+    .banner-text { font-size: 14.5px; font-weight: 800; fill: #FFFFFF; letter-spacing: 0.8px; text-anchor: middle; }
+    .banner-sub { font-size: 11px; font-weight: 500; fill: #64748B; font-style: italic; }
+
+    .pill-label { font-size: 10.5px; font-weight: 600; fill: #475569; text-anchor: middle; }
+
+    .rag-title { font-size: 13.5px; font-weight: 800; fill: #B45309; letter-spacing: 0.5px; }
+    .rag-badge { font-size: 9.5px; font-weight: 800; fill: #D97706; letter-spacing: 1px; }
+    .rag-bullet { font-size: 11px; font-weight: 500; fill: #78350F; }
+  </style>
+
+  <!-- Marqueurs de flèches -->
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563EB" />
+  </marker>
+  <marker id="arrow-teal" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1E7864" />
+  </marker>
+  <marker id="arrow-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#D97706" />
+  </marker>
+</defs>
+
+
+
+<!-- ======================================================================= -->
+<!-- FLÈCHES D'ACCÈS TRANSVERSALES (Dessinées sous les boîtes)                -->
+<!-- ======================================================================= -->
+
+<!-- Flèche 1 : CLIENT -> PORTAIL PUBLIC (Bleu) -->
+<path d="M 270 186 L 370 186" fill="none" stroke="#2563EB" stroke-width="2.2" marker-end="url(#arrow-blue)" />
+
+<!-- Flèche 2 : ACTEURS INTERNES -> WORKSPACE ENTREPRISE (Vert Teal) -->
+<path d="M 270 388 L 320 388 L 320 48 L 1110 48 L 1110 78" fill="none" stroke="#1E7864" stroke-width="2.2" marker-end="url(#arrow-teal)" />
+
+<!-- Cartouche étiquette sur la flèche supérieure -->
+<rect x="540" y="34" width="340" height="28" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2" />
+<text x="710" y="52" class="pill-label">Accès au Workspace selon le rôle et les permissions</text>
+
+<!-- Flèche 3 : PORTAIL PUBLIC -> IA RAG (Orange pointillés) -->
+<path d="M 550 480 L 550 525" fill="none" stroke="#D97706" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow-orange)" />
+
+<!-- Flèche 4 : WORKSPACE ENTREPRISE -> IA RAG (Orange pointillés) -->
+<path d="M 850 480 L 850 595 L 785 595" fill="none" stroke="#D97706" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow-orange)" />
+
+
+<!-- ======================================================================= -->
+<!-- ZONE 1 : ACTEURS (Colonne Gauche)                                       -->
+<!-- ======================================================================= -->
+<g transform="translate(40, 80)">
+  <!-- Cadre englobant blanc -->
+  <rect x="0" y="0" width="230" height="400" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2" />
+  
+  <text x="20" y="32" class="sec-header">ACTEURS</text>
+  
+  <!-- Accès externe -->
+  <text x="20" y="60" class="sec-sub">Accès externe</text>
+  
+  <g transform="translate(15, 72)">
+    <rect x="0" y="0" width="200" height="56" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1" />
+    <text x="16" y="25" class="card-title-blue">CLIENT</text>
+    <text x="16" y="43" class="card-sub">Utilisateur du portail public</text>
+  </g>
+  
+  <!-- Accès interne -->
+  <text x="20" y="156" class="sec-sub">Accès interne</text>
+  
+  <!-- AGENT -->
+  <g transform="translate(15, 168)">
+    <rect x="0" y="0" width="200" height="50" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="16" y="23" class="card-title-green">AGENT</text>
+    <text x="16" y="39" class="card-sub">Conseiller SAV</text>
+  </g>
+  
+  <!-- MANAGER -->
+  <g transform="translate(15, 224)">
+    <rect x="0" y="0" width="200" height="50" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="16" y="23" class="card-title-green">MANAGER</text>
+    <text x="16" y="39" class="card-sub">Superviseur SAV</text>
+  </g>
+  
+  <!-- ADMIN -->
+  <g transform="translate(15, 280)">
+    <rect x="0" y="0" width="200" height="50" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="16" y="23" class="card-title-green">ADMIN</text>
+    <text x="16" y="39" class="card-sub">Administrateur de l'entreprise</text>
+  </g>
+  
+  <!-- OWNER -->
+  <g transform="translate(15, 336)">
+    <rect x="0" y="0" width="200" height="50" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="16" y="23" class="card-title-green">OWNER</text>
+    <text x="16" y="39" class="card-sub">Propriétaire de l'espace</text>
+  </g>
+</g>
+
+
+<!-- ======================================================================= -->
+<!-- ZONE 2 : PORTAIL PUBLIC (Colonne Centrale)                              -->
+<!-- ======================================================================= -->
+<g transform="translate(370, 80)">
+  <!-- Bannière Pilule Bleue -->
+  <rect x="0" y="0" width="360" height="44" rx="8" fill="#36648F" />
+  <text x="180" y="28" class="banner-text">PORTAIL PUBLIC</text>
+  
+  <text x="5" y="62" class="banner-sub">Espace destiné aux clients</text>
+  
+  <!-- Conteneur Blanc -->
+  <rect x="0" y="74" width="360" height="326" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2" />
+  
+  <!-- Module 1 : Annuaire des entreprises -->
+  <g transform="translate(15, 88)">
+    <rect x="0" y="0" width="330" height="54" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="0.8" />
+    <text x="16" y="23" class="card-title">Annuaire des entreprises</text>
+    <text x="16" y="41" class="card-sub">Recherche et accès aux fiches entreprise</text>
+  </g>
+  
+  <!-- Module 2 : Informations de l'entreprise -->
+  <g transform="translate(15, 150)">
+    <rect x="0" y="0" width="330" height="54" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="0.8" />
+    <text x="16" y="23" class="card-title">Informations de l'entreprise</text>
+    <text x="16" y="41" class="card-sub">Consultation des informations utiles</text>
+  </g>
+  
+  <!-- Module 3 : Établissements -->
+  <g transform="translate(15, 212)">
+    <rect x="0" y="0" width="330" height="54" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="0.8" />
+    <text x="16" y="23" class="card-title">Établissements</text>
+    <text x="16" y="41" class="card-sub">Consultation des établissements, le cas échéant</text>
+  </g>
+  
+  <!-- Module 4 : Demande SAV -->
+  <g transform="translate(15, 274)">
+    <rect x="0" y="0" width="330" height="54" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="0.8" />
+    <text x="16" y="23" class="card-title">Demande SAV</text>
+    <text x="16" y="41" class="card-sub">Soumission d'une demande sans compte client</text>
+  </g>
+  
+  <!-- Module 5 : Échanges et suivi -->
+  <g transform="translate(15, 336)">
+    <rect x="0" y="0" width="330" height="54" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="0.8" />
+    <text x="16" y="23" class="card-title">Échanges et suivi</text>
+    <text x="16" y="41" class="card-sub">Communication et suivi de la demande*</text>
+  </g>
+</g>
+
+
+<!-- ======================================================================= -->
+<!-- ZONE 3 : WORKSPACE ENTREPRISE (Colonne Droite)                          -->
+<!-- ======================================================================= -->
+<g transform="translate(800, 80)">
+  <!-- Bannière Pilule Verte -->
+  <rect x="0" y="0" width="620" height="44" rx="8" fill="#247A5B" />
+  <text x="310" y="28" class="banner-text">WORKSPACE ENTREPRISE</text>
+  
+  <text x="5" y="62" class="banner-sub">Espace réservé aux équipes de l'entreprise</text>
+  
+  <!-- Conteneur Blanc -->
+  <rect x="0" y="74" width="620" height="326" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2" />
+  
+  <!-- Ligne 1 : Tickets SAV + Conversations -->
+  <g transform="translate(18, 88)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Tickets SAV</text>
+    <text x="18" y="47" class="card-sub">Réception et traitement</text>
+  </g>
+  <g transform="translate(320, 88)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Conversations</text>
+    <text x="18" y="47" class="card-sub">Échanges avec les clients</text>
+  </g>
+  
+  <!-- Ligne 2 : Agents et compétences + Établissements -->
+  <g transform="translate(18, 162)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Agents et compétences</text>
+    <text x="18" y="47" class="card-sub">Organisation des équipes</text>
+  </g>
+  <g transform="translate(320, 162)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Établissements</text>
+    <text x="18" y="47" class="card-sub">Informations des sites</text>
+  </g>
+  
+  <!-- Ligne 3 : Membres et rôles + Paramètres entreprise -->
+  <g transform="translate(18, 236)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Membres et rôles</text>
+    <text x="18" y="47" class="card-sub">Gestion des accès</text>
+  </g>
+  <g transform="translate(320, 236)">
+    <rect x="0" y="0" width="282" height="66" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="18" y="27" class="card-title-green">Paramètres entreprise</text>
+    <text x="18" y="47" class="card-sub">Configuration de l'espace</text>
+  </g>
+  
+  <!-- Ligne 4 : Abonnements (Pleine Largeur) -->
+  <g transform="translate(18, 310)">
+    <rect x="0" y="0" width="584" height="74" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="292" y="32" class="card-title-green" text-anchor="middle">Abonnements</text>
+    <text x="292" y="52" class="card-sub" text-anchor="middle">Gestion de l'offre</text>
+  </g>
+</g>
+
+
+<!-- ======================================================================= -->
+<!-- ZONE 4 : COMPOSANTE CIBLE (Assistance IA - RAG)                          -->
+<!-- ======================================================================= -->
+<g transform="translate(370, 530)">
+  <!-- Boîte Pointillés Pêche -->
+  <rect x="0" y="0" width="410" height="130" rx="10" fill="#FEF7EE" stroke="#D97706" stroke-width="1.8" stroke-dasharray="6,4" />
+  
+  <text x="24" y="30" class="rag-title">ASSISTANCE PAR IA — RAG</text>
+  <text x="24" y="48" class="rag-badge">COMPOSANTE CIBLE</text>
+  
+  <text x="24" y="74" class="rag-bullet">• Documents de référence de l'entreprise</text>
+  <text x="24" y="94" class="rag-bullet">• Recherche documentaire et propositions de réponses</text>
+  <text x="24" y="114" class="rag-bullet">• Transfert vers un conseiller si nécessaire</text>
+</g>
+
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 850" width="1450" height="850">
+<defs>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap');
+    </style>
+    <marker id="comp-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#0F172A" stroke="#0F172A" stroke-width="1"/>
+    </marker>
+    <marker id="aggr-diamond" viewBox="0 0 14 14" refX="1" refY="7" markerWidth="13" markerHeight="13" orient="auto">
+        <polygon points="1,7 7,2 13,7 7,12" fill="#FFFFFF" stroke="#0F172A" stroke-width="2"/>
+    </marker>
+    <marker id="nav-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polygon points="1,2 10,6 1,10" fill="#2563EB"/>
+    </marker>
+    <marker id="dep-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+        <polyline points="2,2 10,6 2,10" fill="none" stroke="#475569" stroke-width="2"/>
+    </marker>
+</defs>
+<rect width="1450" height="850" fill="#FAFAFA"/>
+<polyline points="440,230.0 540,252.5" fill="none" stroke="#2563EB" stroke-width="2"   />
+<rect x="400.2" y="219.25" width="179.6" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="490.0" y="233.25" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">échange via (1 .. 0..*)</text>
+<polyline points="920,252.5 1020,220.0" fill="none" stroke="#0F172A" stroke-width="2"  marker-start="url(#comp-diamond)" />
+<rect x="894.6" y="214.25" width="150.8" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="970.0" y="228.25" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">compose (1 .. 1..*)</text>
+<polyline points="730.0,425 730.0,520" fill="none" stroke="#0F172A" stroke-width="2"  marker-start="url(#comp-diamond)" />
+<rect x="654.6" y="450.5" width="150.8" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="730.0" y="464.5" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">partage (1 .. 0..*)</text>
+<polyline points="1210.0,360 1210.0,520" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6,4"  marker-end="url(#dep-arrow)"/>
+<rect x="1156.2" y="418.0" width="107.60000000000001" height="20" rx="4" ry="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+<text x="1210.0" y="432.0" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">déclenche SSE</text>
+<g id="card-customer">
+  <rect x="60" y="80" width="380" height="300" rx="8" ry="8" fill="#FAF5FF" stroke="#7C3AED" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="250.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#8B5CF6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="250.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#6D28D9" text-anchor="middle">Customer</text>
+  <line x1="60" y1="140" x2="440" y2="140" stroke="#C4B5FD" stroke-width="1.8"/>
+  <text x="76" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="76" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ workspaceId : text [FK]</text>
+  <text x="76" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ name : text</text>
+  <text x="76" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ email : text?</text>
+  <text x="76" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ phone : text?</text>
+  <text x="76" y="284" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ createdAt : timestamp</text>
+  <line x1="60" y1="308" x2="440" y2="308" stroke="#C4B5FD" stroke-width="1.8"/>
+  <text x="76" y="332" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ getTicketHistory() : List&lt;Ticket&gt;</text>
+</g>
+<g id="card-conversation">
+  <rect x="540" y="80" width="380" height="345" rx="8" ry="8" fill="#F0FDFA" stroke="#0D9488" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="730.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#14B8A6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="730.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#0F766E" text-anchor="middle">Conversation</text>
+  <line x1="540" y1="140" x2="920" y2="140" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="556" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="556" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ workspaceId : text [FK]</text>
+  <text x="556" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ customerId : text? [FK]</text>
+  <text x="556" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ assignedAgentId : text? [FK]</text>
+  <text x="556" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ status : ConversationStatus</text>
+  <text x="556" y="284" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ channel : ChannelType</text>
+  <text x="556" y="308" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ lastMessageAt : timestamp</text>
+  <line x1="540" y1="332" x2="920" y2="332" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="556" y="356" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ postMessage(text, type) : Message</text>
+  <text x="556" y="380" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ elevateToTicket(priority) : Ticket</text>
+</g>
+<g id="card-conversationmessage">
+  <rect x="1020" y="80" width="380" height="280" rx="8" ry="8" fill="#F0FDFA" stroke="#0D9488" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="1210.0" y="106" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#14B8A6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="1210.0" y="130" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#0F766E" text-anchor="middle">ConversationMessage</text>
+  <line x1="1020" y1="140" x2="1400" y2="140" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="1036" y="164" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="1036" y="188" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ conversationId : text [FK]</text>
+  <text x="1036" y="212" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ senderUserId : text?</text>
+  <text x="1036" y="236" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ senderCustomerId : text?</text>
+  <text x="1036" y="260" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ type : MessageType</text>
+  <text x="1036" y="284" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ body : text</text>
+  <line x1="1020" y1="308" x2="1400" y2="308" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="1036" y="332" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ markAsDelivered() : void</text>
+</g>
+<g id="card-conversationshare">
+  <rect x="540" y="520" width="380" height="230" rx="8" ry="8" fill="#F0FDFA" stroke="#0D9488" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="730.0" y="546" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#14B8A6" text-anchor="middle">&#171;entity&#187;</text>
+  <text x="730.0" y="570" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#0F766E" text-anchor="middle">ConversationShare</text>
+  <line x1="540" y1="580" x2="920" y2="580" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="556" y="604" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="556" y="628" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ conversationId : text [FK]</text>
+  <text x="556" y="652" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ sharedWithUserId : text [FK]</text>
+  <text x="556" y="676" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ accessLevel : ShareAccessLevel</text>
+  <line x1="540" y1="700" x2="920" y2="700" stroke="#5EEAD4" stroke-width="1.8"/>
+  <text x="556" y="724" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ revokeAccess() : void</text>
+</g>
+<g id="card-pulseevent">
+  <rect x="1020" y="520" width="380" height="230" rx="8" ry="8" fill="#F8FAFC" stroke="#475569" stroke-width="2"  filter="drop-shadow(0 2px 5px rgba(0,0,0,0.06))"/>
+  <text x="1210.0" y="546" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" font-style="italic" fill="#64748B" text-anchor="middle">&#171;event&#187;</text>
+  <text x="1210.0" y="570" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#1E293B" text-anchor="middle">PulseEvent</text>
+  <line x1="1020" y1="580" x2="1400" y2="580" stroke="#CBD5E1" stroke-width="1.8"/>
+  <text x="1036" y="604" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ id : text [PK]</text>
+  <text x="1036" y="628" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ channel : text</text>
+  <text x="1036" y="652" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ eventName : text</text>
+  <text x="1036" y="676" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#0F172A">+ emittedAt : timestamp</text>
+  <line x1="1020" y1="700" x2="1400" y2="700" stroke="#CBD5E1" stroke-width="1.8"/>
+  <text x="1036" y="724" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" fill="#334155">+ broadcastSSE() : void</text>
+</g>
+</svg>

@@ -6,6 +6,7 @@ interface LogoProps {
   isDark?: boolean;
   size?: "sm" | "md" | "lg";
   showText?: boolean;
+  brandName?: string;
 }
 
 export const Logo: React.FC<LogoProps> = ({
@@ -13,6 +14,7 @@ export const Logo: React.FC<LogoProps> = ({
   isDark = false,
   size = "md",
   showText = true,
+  brandName = "Zadesk",
 }) => {
   const iconSizes = {
     sm: "w-7 h-7",
@@ -73,14 +75,14 @@ export const Logo: React.FC<LogoProps> = ({
         />
       </svg>
 
-      {/* Clean Zadesk Wordmark (NO TAGLINE) */}
+      {/* Clean Wordmark (NO TAGLINE) */}
       {showText && (
         <span
           className={`font-black tracking-tight ${textSizes[size]} ${
             isDark ? "text-white" : "text-navy-900"
           }`}
         >
-          Zadesk
+          {brandName}
         </span>
       )}
     </div>

@@ -1,0 +1,157 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultTextAlignment left
+skinparam roundCorner 4
+skinparam packageTitleAlignment left
+skinparam wrapWidth 240
+skinparam linetype ortho
+
+<style>
+root {
+  FontName "Helvetica"
+  FontSize 11
+  FontColor #2D3142
+  LineColor #CBD5E1
+}
+header {
+  FontName "Georgia"
+  FontSize 12
+  FontStyle bold
+  FontColor #2D3142
+}
+package {
+  FontName "Georgia"
+  FontSize 12
+  FontStyle bold
+  FontColor #2D3142
+  LineColor #4F5D75
+  LineThickness 1.2
+  BackgroundColor transparent
+}
+rectangle {
+  RoundCorner 4
+  LineColor #2D3142
+  LineThickness 0.9
+  BackgroundColor #FFFFFF
+  FontColor #334155
+  FontSize 11
+}
+actor {
+  FontName "Helvetica"
+  FontSize 10.5
+  FontStyle bold
+  FontColor #2D3142
+  LineColor #2D3142
+  BackgroundColor #FFFFFF
+}
+arrow {
+  LineColor #4F5D75
+  FontColor #2D3142
+  FontSize 10
+  LineThickness 1.1
+}
+.target {
+  LineColor #EB6C36
+  LineStyle 4-3
+  LineThickness 1.2
+  BackgroundColor #FFFAF8
+}
+.extActor {
+  LineColor #4F5D75
+  BackgroundColor #FFFFFF
+}
+</style>
+
+' ==============================================================================
+' ZONE 1 : ACTEURS ET ESPACE PUBLIC (GAUCHE)
+' ==============================================================================
+
+package "Acteur Externe" as p_ext {
+  actor "Client\n<size:9><color:#64748B>Demandeur SAV</color></size>" as client <<extActor>>
+}
+
+package "PORTAIL PUBLIC\n<size:10><color:#64748B>Accès libre sur le Web (sans création de compte)</color></size>" as p_portal {
+  rectangle "<b>Annuaire des entreprises</b>\n---\n• Recherche des commerces certifiés\n• Filtrage par secteur d'activité" as pub_annuaire
+  
+  rectangle "<b>Informations & Vitrine entreprise</b>\n---\n• Présentation, coordonnées et politique SAV\n• Consultation des engagements de service" as pub_vitrine
+  
+  rectangle "<b>Consultation des établissements</b>\n<i><size:9><color:#64748B>(affiché si renseigné par l'entreprise)</color></size></i>\n---\n• Adresses physiques des succursales\n• Horaires d'ouverture des ateliers SAV" as pub_etab
+  
+  rectangle "<b>Soumission d'assistance SAV</b>\n---\n• Formulaire de demande sans compte\n• Description de panne et justificatifs" as pub_soumission
+  
+  rectangle "<b>Tchat en direct & Suivi de demande</b>\n---\n• Dialogue instantané avec le service client\n• Session sécurisée par jeton d'accès public\n• Consultation de l'état d'avancement" as pub_tchat
+
+  pub_annuaire -down-> pub_vitrine
+  pub_vitrine -down-> pub_etab
+  pub_etab -down-> pub_soumission
+  pub_soumission -down-> pub_tchat
+}
+
+' ==============================================================================
+' ZONE 2 : ACTEURS ET WORKSPACE ENTREPRISE (DROITE)
+' ==============================================================================
+
+package "Acteurs Internes (Entreprise)" as p_int {
+  actor "Conseiller SAV\n<size:9><color:#64748B>(Rôle AGENT)</color></size>" as agent
+  actor "Superviseur SAV\n<size:9><color:#64748B>(Rôle MANAGER)</color></size>" as manager
+  actor "Administrateur\n<size:9><color:#64748B>(Rôle ADMIN)</color></size>" as admin
+  actor "Propriétaire\n<size:9><color:#64748B>(Rôle OWNER)</color></size>" as owner
+
+  agent -[hidden]right- manager
+  agent -[hidden]down- admin
+  manager -[hidden]down- owner
+}
+
+package "WORKSPACE ENTREPRISE\n<size:10><color:#64748B>Espace collaboratif multi-tenant réservé aux membres authentifiés</color></size>" as p_ws {
+
+  rectangle "<b>Gestion des tickets SAV</b>\n---\n• Numérotation unique de dossier\n• Cycle : Nouveau → En cours → Résolu\n• Suivi des délais d'engagement (SLA)\n• Journal d'activité inaltérable\n• Partage inter-établissements" as mod_tickets
+  
+  rectangle "<b>Conversations & Échanges clients</b>\n---\n• Messagerie instantanée omnicanale\n• Prise en charge des tchats en direct\n• Notes internes d'équipe confidentielles\n• Élévation directe en ticket SAV" as mod_conv
+  
+  rectangle "<b>Gestion des agents & Compétences</b>\n---\n• Disponibilités (Disponible, Occupé, Absent)\n• Plafonds de capacité de traitement\n• Matrice des compétences techniques\n• Affectation automatique et réattribution" as mod_team
+  
+  rectangle "<b>Gestion des établissements</b>\n<i><size:9><color:#64748B>(Module optionnel selon l'entreprise)</color></size></i>\n---\n• Gestion des succursales et ateliers SAV\n• Horaires, adresses et localisation\n• Rattachement des agents aux agences" as mod_agencies
+  
+  rectangle "<b>Gestion des membres & Rôles</b>\n---\n• Invitations par courriel et attribution RBAC\n• Rôles : AGENT, MANAGER, ADMIN, OWNER\n• Traçabilité et journal d'audit de sécurité\n• Suspension et révocation des accès" as mod_members
+  
+  rectangle "<b>Paramètres & Configuration</b>\n---\n• Profil d'entreprise, raison sociale et logo\n• Définition des règles et délais SLA" as mod_settings
+  
+  rectangle "<b>Gestion des abonnements</b>\n---\n• Formules SaaS (Découverte, Starter, Pro)\n• Paiements dématérialisés via SasPay\n• Régulation dynamique des quotas autorisés\n• Factures comptables et historique" as mod_billing
+
+  rectangle "<b>Assistance IA (Approche RAG)</b>\n<size:9.5><color:#EB6C36><b>[ Composante cible • En préparation ]</b></color></size>\n---\n• Documents de référence de l'entreprise\n• Recherche d'informations pertinentes\n• Génération de propositions de réponses\n• Transfert et escalade vers un conseiller SAV\n• Validation humaine et garde-fous stricts" as mod_ai <<target>>
+
+  mod_tickets -[hidden]right- mod_conv
+  mod_tickets -[hidden]down- mod_team
+  mod_conv -[hidden]down- mod_agencies
+  mod_team -[hidden]down- mod_members
+  mod_agencies -[hidden]down- mod_settings
+  mod_members -[hidden]down- mod_billing
+  mod_settings -[hidden]down- mod_ai
+}
+
+' ==============================================================================
+' LIAISONS ET RELATIONS D'ACCÈS
+' ==============================================================================
+
+p_ext -[hidden]right- p_int
+p_portal -[hidden]right- p_ws
+
+' Relations acteurs -> espaces
+client -down-> p_portal : <b>Accède librement</b>\n(sans compte)
+
+p_int -down-> p_ws : <b>S'authentifient par rôle</b>\n(accès RBAC sécurisé)
+
+' Relations fonctionnelles entre espaces
+pub_soumission -right-> mod_tickets : <b>Transmet la demande</b>\n(création ticket sans compte)
+pub_tchat <-right-> mod_conv : <b>Échanges en direct</b>\n(session sécurisée par jeton)
+
+' Relations internes au Workspace
+mod_conv -down-> mod_tickets : <b>Élève en ticket</b>
+mod_team -up-> mod_tickets : <b>Affecte aux agents</b>
+
+' Interactions Assistance IA cible
+mod_ai .up.> mod_conv : <color:#EB6C36><b>Propose des réponses</b></color>
+mod_ai .left.> mod_tickets : <color:#EB6C36><b>Transfère au conseiller</b></color>
+
+@enduml

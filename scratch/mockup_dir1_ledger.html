@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Zadesk — Direction 1 : Le Registre Asymétrique (Desktop 1440x900)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #FAFAF8;
+      color: #0D1B3D;
+      display: flex;
+      height: 900px;
+      width: 1440px;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SIDEBAR OFFICIELLE PHASE 1 (256px) */
+    .sidebar {
+      width: 256px;
+      height: 100%;
+      background: #FFFFFF;
+      border-right: 1px solid #E2E8F0;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: #0D1B3D;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22C55E;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #0D1B3D;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: #64748B;
+      font-weight: 500;
+    }
+
+    .nav-body {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+    .nav-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94A3B8;
+      letter-spacing: 0.08em;
+      padding: 8px 10px 4px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #475569;
+      border-radius: 8px;
+      margin-bottom: 2px;
+      text-decoration: none;
+    }
+    .nav-item.active {
+      background: rgba(13, 27, 61, 0.06);
+      color: #0D1B3D;
+      font-weight: 600;
+      border-left: 2px solid #22C55E;
+      border-radius: 2px 8px 8px 2px;
+    }
+    .nav-icon {
+      width: 15px;
+      height: 15px;
+      opacity: 0.7;
+    }
+
+    .sidebar-footer {
+      padding: 14px;
+      border-top: 1px solid #E2E8F0;
+      background: #F8FAFC;
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+    }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #DCFCE7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* MAIN VIEWPORT */
+    .viewport {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #FAFAF8;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      height: 52px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748B;
+    }
+    .breadcrumbs strong {
+      color: #0D1B3D;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .demo-tag {
+      background: #FEF3C7;
+      color: #92400E;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    .btn-create {
+      background: #0D1B3D;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* DIRECTION 1: LE REGISTRE ASYMÉTRIQUE */
+    .ledger-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 320px;
+      height: calc(100% - 52px);
+      overflow: hidden;
+    }
+
+    /* COLONNE 1: COMMANDE SOMBRE (310px) */
+    .col-command {
+      background: #0D1B3D;
+      color: #FFFFFF;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-y: auto;
+    }
+    .col-command .eyebrow {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #94A3B8;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .col-command .headline {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: #FFFFFF;
+      margin-bottom: 24px;
+    }
+    .command-stat-box {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 18px 0;
+    }
+    .command-big-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1;
+      color: #FFFFFF;
+      letter-spacing: -0.03em;
+    }
+    .command-label {
+      font-size: 12px;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+    .status-breakdown {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .status-row .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .status-row .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .agencies-box {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .agency-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: #CBD5E1;
+    }
+    .agency-item span:last-child {
+      color: #22C55E;
+      font-weight: 600;
+    }
+    .ai-notice {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      color: #94A3B8;
+      line-height: 1.4;
+      margin-top: 16px;
+    }
+
+    /* COLONNE 2: LE REGISTRE D'ACTION (Centre) */
+    .col-ledger {
+      background: #FAFAF8;
+      padding: 28px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .ledger-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(13, 27, 61, 0.08);
+    }
+    .ledger-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0D1B3D;
+    }
+    .ledger-subtitle {
+      font-size: 12px;
+      color: #64748B;
+      margin-top: 2px;
+    }
+    .ledger-table {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(13, 27, 61, 0.02);
+    }
+    .ledger-row {
+      display: grid;
+      grid-template-columns: 80px 140px 1fr 100px 110px;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 12px;
+      transition: background 0.15s;
+    }
+    .ledger-row:last-child { border-bottom: none; }
+    .ledger-row:hover { background: #F8FAFC; }
+    .ledger-row.header {
+      background: #F8FAFC;
+      font-weight: 600;
+      color: #64748B;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .ref-code {
+      font-family: 'JetBrains Mono', monospace;
+      color: #64748B;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .cust-name {
+      font-weight: 600;
+      color: #0D1B3D;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ticket-title {
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 12px;
+    }
+    .badge-urgent {
+      background: #FEE2E2;
+      color: #991B1B;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      display: inline-block;
+      text-align: center;
+    }
+    .badge-medium {
+      background: #FEF3C7;
+      color: #92400E;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      display: inline-block;
+      text-align: center;
+    }
+    .badge-normal {
+      background: #E2E8F0;
+      color: #475569;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-action-row {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      color: #0D1B3D;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-action-row:hover {
+      background: #0D1B3D;
+      color: #FFFFFF;
+      border-color: #0D1B3D;
+    }
+
+    /* COLONNE 3: FIL D'ACTIVITÉ (320px) */
+    .col-activity {
+      background: #FFFFFF;
+      border-left: 1px solid #E2E8F0;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .activity-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0D1B3D;
+      margin-bottom: 4px;
+    }
+    .activity-subtitle {
+      font-size: 11px;
+      color: #64748B;
+      margin-bottom: 20px;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 16px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 6px;
+      bottom: 12px;
+      width: 1px;
+      background: #E2E8F0;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -16px;
+      top: 4px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid #0D1B3D;
+    }
+    .timeline-dot.green { border-color: #22C55E; }
+    .timeline-dot.amber { border-color: #F59E0B; }
+    .timeline-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #94A3B8;
+      margin-bottom: 2px;
+    }
+    .timeline-desc {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0D1B3D;
+      line-height: 1.3;
+    }
+    .timeline-detail {
+      font-size: 11px;
+      color: #64748B;
+      margin-top: 2px;
+    }
+
+    .team-duty-card {
+      margin-top: auto;
+      padding: 14px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+    }
+    .duty-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .agent-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-bottom: 8px;
+    }
+    .agent-row:last-child { margin-bottom: 0; }
+    .agent-name { font-weight: 600; color: #0D1B3D; }
+    .agent-load { font-size: 10.5px; color: #64748B; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. SIDEBAR CANONIQUE PHASE 1 -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-mark">Z</div>
+      <div>
+        <div class="brand-title">ZADESK</div>
+        <div class="brand-subtitle">Sodico SARL</div>
+      </div>
+    </div>
+
+    <div class="nav-body">
+      <div class="nav-section-title">SERVICE CLIENT</div>
+      <a href="#" class="nav-item active">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        Vue d'ensemble
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        Conversations
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+        Demandes clients
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        Clients
+      </a>
+
+      <div class="nav-section-title" style="margin-top: 14px;">MON ÉQUIPE</div>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        Équipe et accès
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        Nos agences
+      </a>
+
+      <div class="nav-section-title" style="margin-top: 14px;">INTELLIGENCE ARTIFICIELLE</div>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Configuration IA
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        Connaissances
+      </a>
+
+      <div class="nav-section-title" style="margin-top: 14px;">PERFORMANCES</div>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        Statistiques
+      </a>
+
+      <div class="nav-section-title" style="margin-top: 14px;">ADMINISTRATION</div>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        Paramètres
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #0D1B3D;">Aimé Ndongo</div>
+            <div style="font-size: 9.5px; color: #64748B;">Responsable SAV</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. CONTENU PRINCIPAL -->
+  <main class="viewport">
+    <header class="topbar">
+      <div class="breadcrumbs">
+        <span>Workspace</span>
+        <span>/</span>
+        <strong>Cockpit SAV — Le Registre Asymétrique</strong>
+      </div>
+      <div class="topbar-actions">
+        <span class="demo-tag">[DÉMO DIRECTION 1]</span>
+        <button class="btn-create">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Nouveau dossier
+        </button>
+      </div>
+    </header>
+
+    <div class="ledger-container">
+      
+      <!-- COLONNE 1: COMMANDE & ÉTAT D'AUTORITÉ (310px) -->
+      <section class="col-command">
+        <div class="eyebrow">COMMANDEMENT SAV</div>
+        <h1 class="headline">Triage & Traitement des dossiers</h1>
+
+        <div class="command-stat-box">
+          <div class="command-big-num">14</div>
+          <div class="command-label">Demandes ouvertes au total</div>
+          
+          <div class="status-breakdown">
+            <div class="status-row">
+              <span><span class="dot" style="background: #EF4444;"></span>Nouveaux / Non assignés</span>
+              <span class="num">3</span>
+            </div>
+            <div class="status-row">
+              <span><span class="dot" style="background: #3B82F6;"></span>En cours de traitement</span>
+              <span class="num">7</span>
+            </div>
+            <div class="status-row">
+              <span><span class="dot" style="background: #F59E0B;"></span>En attente client</span>
+              <span class="num">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="command-stat-box">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <div style="font-family: 'Outfit'; font-size: 28px; font-weight: 700; color: #FFFFFF;">5</div>
+            <span style="font-size: 11px; color: #22C55E; font-weight: 600;">Tous en poste</span>
+          </div>
+          <div class="command-label">Conseillers SAV disponibles</div>
+        </div>
+
+        <div class="ai-notice">
+          <strong>Module IA :</strong> En phase de paramétrage. Aucune réponse automatique active actuellement sur les conversations.
+        </div>
+
+        <div class="agencies-box">
+          <div class="eyebrow" style="margin-bottom: 8px;">AGENCES EN LIGNE</div>
+          <div class="agency-item">
+            <span>Agence Douala Akwa</span>
+            <span>3 conseillers</span>
+          </div>
+          <div class="agency-item">
+            <span>Agence Yaoundé Bastos</span>
+            <span>2 conseillers</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLONNE 2: LE REGISTRE PRINCIPAL (Centre) -->
+      <section class="col-ledger">
+        <div class="ledger-header">
+          <div>
+            <h2 class="ledger-title">File Opérationnelle Prioritaire</h2>
+            <p class="ledger-subtitle">Demandes actives du portail nécessitant un traitement ou un suivi d'agent</p>
+          </div>
+          <div style="font-size: 11px; color: #64748B; font-family: 'JetBrains Mono';">
+            Filtre : Non résolus (14)
+          </div>
+        </div>
+
+        <div class="ledger-table">
+          <div class="ledger-row header">
+            <div>RÉF.</div>
+            <div>CLIENT</div>
+            <div>OBJET DE LA DEMANDE</div>
+            <div>URGENCE</div>
+            <div style="text-align: right;">ACTION</div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8021</div>
+            <div class="cust-name">Alain Tchakounte</div>
+            <div class="ticket-title">Colis non livré — Agence Akwa (Attente 28 min)</div>
+            <div><span class="badge-urgent">URGENT</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Assigner</button></div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8019</div>
+            <div class="cust-name">Béatrice Ngo</div>
+            <div class="ticket-title">Demande de duplicata de facture proforma #491</div>
+            <div><span class="badge-medium">MOYEN</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Traiter</button></div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8018</div>
+            <div class="cust-name">Mamadou Traoré</div>
+            <div class="ticket-title">Question sur le délai de garantie groupe électrogène</div>
+            <div><span class="badge-normal">NORMAL</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Voir</button></div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8015</div>
+            <div class="cust-name">Pauline Mbida</div>
+            <div class="ticket-title">Changement d'adresse de livraison avant expédition</div>
+            <div><span class="badge-medium">MOYEN</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Assigner</button></div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8012</div>
+            <div class="cust-name">Cabinet Ekwalla</div>
+            <div class="ticket-title">Demande d'intervention technicien sur site Bastos</div>
+            <div><span class="badge-urgent">URGENT</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Assigner</button></div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="ref-code">#TK-8009</div>
+            <div class="cust-name">Société BTP Sahel</div>
+            <div class="ticket-title">Réclamation bon de commande non conforme</div>
+            <div><span class="badge-normal">NORMAL</span></div>
+            <div style="text-align: right;"><button class="btn-action-row">Voir</button></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 14px 18px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 12px; color: #475569;">
+            <strong>Portail Client Zadesk :</strong> 6 nouvelles demandes enregistrées aujourd'hui via le portail public.
+          </div>
+          <span style="font-size: 11px; font-weight: 600; color: #0D1B3D; text-decoration: underline; cursor: pointer;">Accéder aux 14 demandes &rarr;</span>
+        </div>
+      </section>
+
+      <!-- COLONNE 3: FIL D'ACTIVITÉ RÉCENTE (320px) -->
+      <section class="col-activity">
+        <h3 class="activity-title">Journal d'Activité</h3>
+        <p class="activity-subtitle">Événements récents du service client</p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot green"></div>
+            <div class="timeline-time">12:44</div>
+            <div class="timeline-desc">Dossier #TK-8016 résolu</div>
+            <div class="timeline-detail">Par Marc Eyango (Agence Akwa)</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot amber"></div>
+            <div class="timeline-time">12:31</div>
+            <div class="timeline-desc">Dossier #TK-8021 créé</div>
+            <div class="timeline-detail">Par Alain Tchakounte via Portail</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">12:15</div>
+            <div class="timeline-desc">Affectation #TK-8019</div>
+            <div class="timeline-detail">Assigné à Sophie Mendomo</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot green"></div>
+            <div class="timeline-time">11:50</div>
+            <div class="timeline-desc">Dossier #TK-8010 clôturé</div>
+            <div class="timeline-detail">Client notifié par email</div>
+          </div>
+        </div>
+
+        <div class="team-duty-card">
+          <div class="duty-header">Conseillers en poste</div>
+          <div class="agent-row">
+            <span class="agent-name">Marc Eyango</span>
+            <span class="agent-load">3 dossiers actifs</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-name">Sophie Mendomo</span>
+            <span class="agent-load">2 dossiers actifs</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-name">Cédric Bella</span>
+            <span class="agent-load">2 dossiers actifs</span>
+          </div>
+          <div class="agent-row">
+            <span class="agent-name">Esther Nguema</span>
+            <span class="agent-load">0 dossier (Dispo)</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+</body>
+</html>

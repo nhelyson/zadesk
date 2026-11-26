@@ -13,6 +13,16 @@ import {
   confirmPaymentAndApplyUpgrade,
   buildSimulatedVerifiedFinancialProof,
 } from "../src/services/commercialService.js";
+import {
+  issueGatewayProofToken,
+  mintSimulationProofForTesting,
+  verifyFinancialProofToken,
+  getInternalGatewayCapabilityKey,
+  initializeGatewaySigner,
+} from "../src/security/financialTrustAuthority.js";
+import {
+  mintVerifiedPaymentProof,
+} from "../src/security/financialVerificationGateway.js";
 
 console.log("==========================================================================");
 console.log("=== EXÉCUTION DU HARNAIS PHASE D.1 : FACTURATION, ABONNEMENTS & DOWNGRADES ===");
@@ -1505,7 +1515,444 @@ try {
 }
 console.log("✓ 52. [Sécurité / Environnement] Étanchéité absolue de la production contre toute preuve simulée validée.");
 
+// ---------------------------------------------------------------------------
+// TEST 53 [Sécurité D.1.4 / Cryptographie] : Rejet strict de tout objet forgé sans signature cryptographique valide
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    // Un attaquant ou un composant interne non fiable passe un POJO imitant la source SASPAY_SECURE_WEBHOOK
+    const forgedPlainObject = {
+      source: "SASPAY_SECURE_WEBHOOK",
+      provider: "SASPAY",
+      providerTransactionId: "FORGED_TX_123",
+      amountXaf: 10000,
+      currency: "XAF",
+    };
+    await confirmPaymentAndApplyUpgrade("user-attacker", {
+      workspaceId: "ws-test",
+      intentId: "intent-test",
+      financialProof: forgedPlainObject,
+    });
+  },
+  /SECURITY_INVALID_PROOF_STRUCTURE/,
+  "Un objet non signé ou dépourvu de preuve cryptographique doit être immédiatement rejeté."
+);
+console.log("✓ 53. [Sécurité D.1.4 / Cryptographie] Rejet strict de tout objet forgé sans signature cryptographique valide.");
+
+// ---------------------------------------------------------------------------
+// TEST 54 [Sécurité D.1.4 / Cryptographie] : Détection immédiate de toute altération de charge utile (Tampering)
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    const legitimateToken = mintVerifiedPaymentProof({
+      intentId: "intent-starter",
+      workspaceId: "ws-alpha",
+      providerTransactionId: "TX_LEGIT_1",
+      amountXaf: 10000,
+      source: "SERVER_VERIFIED_GATEWAY",
+    });
+
+    // Attaquant tente d'altérer le montant ou la signature
+    const tamperedToken = {
+      ...legitimateToken,
+      amountXaf: 45000, // Altération du montant
+    };
+
+    await confirmPaymentAndApplyUpgrade("user-attacker", {
+      workspaceId: "ws-alpha",
+      intentId: "intent-starter",
+      financialProof: tamperedToken,
+    });
+  },
+  /SECURITY_FORGED_PROOF_TOKEN/,
+  "Toute modification même minime de la charge utile scellée doit invalider la signature HMAC."
+);
+console.log("✓ 54. [Sécurité D.1.4 / Cryptographie] Détection et rejet immédiat de toute altération de charge utile (Tampering) validés.");
+
+// ---------------------------------------------------------------------------
+// TEST 55 [Sécurité D.1.4 / Expiration] : Rejet strict d'un jeton de preuve financière ayant expiré (TTL dépassé)
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    // Jeton émis avec TTL négatif (déjà expiré)
+    const expiredToken = mintVerifiedPaymentProof({
+      intentId: "intent-exp",
+      workspaceId: "ws-alpha",
+      providerTransactionId: "TX_EXPIRED_PROOF",
+      amountXaf: 10000,
+      source: "SERVER_VERIFIED_GATEWAY",
+      ttlMs: -1000,
+    });
+
+    await confirmPaymentAndApplyUpgrade("user-1", {
+      workspaceId: "ws-alpha",
+      intentId: "intent-exp",
+      financialProof: expiredToken,
+    });
+  },
+  /SECURITY_EXPIRED_PROOF_TOKEN/,
+  "Un jeton expiré ne doit jamais pouvoir être validé."
+);
+console.log("✓ 55. [Sécurité D.1.4 / Expiration] Rejet strict d'un jeton financier ayant dépassé son TTL validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 56 [Sécurité D.1.4 / Anti-Rejeu] : Rejet strict de la réutilisation d'un même jeton de capacité consommé
+// ---------------------------------------------------------------------------
+class MockSuccessPrisma {
+  constructor() {
+    this.intent = { id: "intent-ok", workspaceId: "ws-ok", targetPlan: "STARTER", priceXaf: 10000, status: "PENDING", subscriptionId: "sub-ok", attempts: [] };
+    this.sub = { id: "sub-ok", workspaceId: "ws-ok", plan: "DECOUVERTE", version: 1 };
+  }
+  get subscriptionIntent() {
+    return {
+      findUnique: async () => this.intent,
+      update: async ({ data }) => { Object.assign(this.intent, data); return this.intent; },
+    };
+  }
+  get providerPaymentReceipt() {
+    return {
+      findUnique: async () => null,
+      create: async ({ data }) => ({ id: "rec-ok", ...data }),
+    };
+  }
+  get paymentTransaction() {
+    return {
+      create: async ({ data }) => ({ id: "ptx-ok", ...data }),
+    };
+  }
+  get paymentAttempt() {
+    return {
+      updateMany: async () => ({ count: 1 }),
+    };
+  }
+  get subscription() {
+    return {
+      findUnique: async () => this.sub,
+      update: async ({ data }) => { Object.assign(this.sub, data); return this.sub; },
+    };
+  }
+  get subscriptionHistoryLog() {
+    return {
+      create: async () => ({ id: "shl-1" }),
+    };
+  }
+  get auditLog() {
+    return {
+      create: async () => ({ id: "aud-1" }),
+    };
+  }
+  get membership() {
+    return {
+      findUnique: async () => ({ id: "mem-owner", role: "OWNER", status: "ACTIVE" }),
+      findMany: async () => [],
+      count: async () => 1,
+    };
+  }
+  get workspaceInvitation() {
+    return {
+      count: async () => 0,
+    };
+  }
+  async $queryRaw() {}
+}
+
+const mockSuccessTx = new MockSuccessPrisma();
+const singleUseProof = mintVerifiedPaymentProof({
+  intentId: "intent-ok",
+  workspaceId: "ws-ok",
+  providerTransactionId: "TX_SINGLE_USE_PROOF",
+  amountXaf: 10000,
+  source: "SERVER_VERIFIED_GATEWAY",
+});
+
+// Première application : Succès
+const resFirst = await confirmPaymentAndApplyUpgrade("user-owner", {
+  workspaceId: "ws-ok",
+  intentId: "intent-ok",
+  financialProof: singleUseProof,
+}, { tx: mockSuccessTx });
+assert.strictEqual(resFirst.success, true);
+
+// Seconde tentative immédiate avec le MÊME jeton cryptographique : Doit être rejetée comme déjà consommé
+await assert.rejects(
+  async () => {
+    await confirmPaymentAndApplyUpgrade("user-owner", {
+      workspaceId: "ws-ok",
+      intentId: "intent-ok",
+      financialProof: singleUseProof,
+    }, { tx: mockSuccessTx });
+  },
+  /SECURITY_PROOF_ALREADY_CONSUMED/,
+  "Le jeton financier ne doit jamais pouvoir être réutilisé après consommation."
+);
+console.log("✓ 56. [Sécurité D.1.4 / Anti-Rejeu] Rejet strict de la réutilisation d'un même jeton de capacité consommé validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 57 [Sécurité D.1.4 / Binding] : Rejet strict en cas d'incohérence entre jeton et workspace/intent
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    const boundToken = mintVerifiedPaymentProof({
+      intentId: "intent-alpha",
+      workspaceId: "ws-alpha",
+      providerTransactionId: "TX_BOUND_CHECK",
+      amountXaf: 10000,
+      source: "SERVER_VERIFIED_GATEWAY",
+    });
+
+    // Présentation du jeton scellé pour ws-alpha à un autre workspace ws-beta
+    await confirmPaymentAndApplyUpgrade("user-attacker", {
+      workspaceId: "ws-beta",
+      intentId: "intent-alpha",
+      financialProof: boundToken,
+    });
+  },
+  /SECURITY_BOUND_CONTEXT_MISMATCH/,
+  "Le jeton scellé pour un workspace ne peut pas être présenté pour un autre workspace."
+);
+console.log("✓ 57. [Sécurité D.1.4 / Binding] Scellement contextuel strict (workspaceId/intentId) du jeton validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 58 [Sécurité D.1.4 / Production] : Interdiction physique absolue d'émettre TEST_SIMULATION en production
+// ---------------------------------------------------------------------------
+const prevEnvD14 = process.env.NODE_ENV;
+try {
+  process.env.NODE_ENV = "production";
+  assert.throws(
+    () => {
+      mintSimulationProofForTesting({
+        intentId: "intent-prod",
+        workspaceId: "ws-prod",
+        providerTransactionId: "TX_PROD_SIM",
+        amountXaf: 10000,
+      });
+    },
+    /SECURITY_VIOLATION/,
+    "mintSimulationProofForTesting doit physiquement jeter une exception fatale en environnement de production."
+  );
+} finally {
+  process.env.NODE_ENV = prevEnvD14;
+}
+console.log("✓ 58. [Sécurité D.1.4 / Production] Interdiction physique absolue d'émission de simulation en production validée.");
+
+// ---------------------------------------------------------------------------
+// TEST 59 [Sécurité D.1.5 / Autorité Restreinte] : Rejet strict d'un appel direct d'émission sans clé de passerelle
+// ---------------------------------------------------------------------------
+assert.throws(
+  () => {
+    // Un module non autorisé tente d'appeler directement issueGatewayProofToken sans la clé interne
+    issueGatewayProofToken({
+      gatewayCapabilityKey: "fake_or_missing_key",
+      intentId: "intent-hack",
+      workspaceId: "ws-hack",
+      providerTransactionId: "TX_HACK_DIRECT",
+      amountXaf: 10000,
+      source: "SERVER_VERIFIED_GATEWAY",
+    });
+  },
+  /SECURITY_UNAUTHORIZED_EMISSION_ATTEMPT/,
+  "L'émission directe sans clé de passerelle authentique doit être immédiatement rejetée."
+);
+console.log("✓ 59. [Sécurité D.1.5 / Autorité Restreinte] Rejet strict de toute tentative d'émission directe non autorisée validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 60 [Sécurité D.1.5 / Secret] : Échec sécurisé en production si INTERNAL_FINANCIAL_SECRET est absent ou trop court
+// ---------------------------------------------------------------------------
+const prevEnvSecret = process.env.NODE_ENV;
+const prevRawSecret = process.env.INTERNAL_FINANCIAL_SECRET;
+try {
+  process.env.NODE_ENV = "production";
+  delete process.env.INTERNAL_FINANCIAL_SECRET;
+
+  assert.throws(
+    () => {
+      mintVerifiedPaymentProof({
+        intentId: "intent-sec",
+        workspaceId: "ws-sec",
+        providerTransactionId: "TX_SEC_NO_KEY",
+        amountXaf: 10000,
+      });
+    },
+    /SECURITY_FATAL: INTERNAL_FINANCIAL_SECRET is mandatory in production/,
+    "L'absence de secret en production doit immédiatement lever une exception fatale de sécurité."
+  );
+
+  // Test avec secret insuffisant (< 32 caractères)
+  process.env.INTERNAL_FINANCIAL_SECRET = "too_short_secret";
+  assert.throws(
+    () => {
+      mintVerifiedPaymentProof({
+        intentId: "intent-sec",
+        workspaceId: "ws-sec",
+        providerTransactionId: "TX_SEC_SHORT",
+        amountXaf: 10000,
+      });
+    },
+    /SECURITY_FATAL: INTERNAL_FINANCIAL_SECRET must be at least 32 characters/,
+    "Un secret de longueur insuffisante en production doit être rejeté."
+  );
+} finally {
+  process.env.NODE_ENV = prevEnvSecret;
+  if (prevRawSecret) process.env.INTERNAL_FINANCIAL_SECRET = prevRawSecret;
+  else delete process.env.INTERNAL_FINANCIAL_SECRET;
+}
+console.log("✓ 60. [Sécurité D.1.5 / Secret] Échec sécurisé et rejet formel de tout secret absent ou de faible entropie en production validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 61 [Sécurité D.1.5 / Binding Intent] : Rejet strict si le jeton est présenté pour un intentId différent
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    const boundToken = mintVerifiedPaymentProof({
+      intentId: "intent-legit-A",
+      workspaceId: "ws-same",
+      providerTransactionId: "TX_DIFF_INTENT",
+      amountXaf: 10000,
+    });
+
+    // Même workspace mais mauvaise intention
+    await confirmPaymentAndApplyUpgrade("user-attacker", {
+      workspaceId: "ws-same",
+      intentId: "intent-malicious-B",
+      financialProof: boundToken,
+    });
+  },
+  /SECURITY_BOUND_CONTEXT_MISMATCH/,
+  "Le jeton scellé pour une intention spécifique ne peut pas être consommé pour une autre intention."
+);
+console.log("✓ 61. [Sécurité D.1.5 / Binding Intent] Scellement strict de l'intention (intentId) du jeton validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 62 [Sécurité D.1.5 / Tampering TxId] : Détection immédiate de falsification du providerTransactionId
+// ---------------------------------------------------------------------------
+await assert.rejects(
+  async () => {
+    const legitimateToken = mintVerifiedPaymentProof({
+      intentId: "intent-txid",
+      workspaceId: "ws-txid",
+      providerTransactionId: "TX_ORIGINAL_ID",
+      amountXaf: 10000,
+    });
+
+    const tamperedTxIdToken = {
+      ...legitimateToken,
+      providerTransactionId: "TX_FORGED_DIFFERENT_ID",
+    };
+
+    await confirmPaymentAndApplyUpgrade("user-attacker", {
+      workspaceId: "ws-txid",
+      intentId: "intent-txid",
+      financialProof: tamperedTxIdToken,
+    });
+  },
+  /SECURITY_FORGED_PROOF_TOKEN/,
+  "La modification du providerTransactionId doit impérativement invalider la signature HMAC."
+);
+console.log("✓ 62. [Sécurité D.1.5 / Tampering TxId] Détection et rejet immédiat de toute altération du providerTransactionId validés.");
+
+// ---------------------------------------------------------------------------
+// TEST 63 [Sécurité D.1.6 / D.1.7 : Capacité Inviolable] : Rejet strict de tout appel direct à getInternalGatewayCapabilityKey ou réinitialisation
+// ---------------------------------------------------------------------------
+assert.throws(
+  () => {
+    getInternalGatewayCapabilityKey();
+  },
+  /SECURITY_GATEWAY_CAPABILITY_EXHAUSTED/,
+  "La clé de capacité gateway ne peut être réclamée qu'une seule fois lors du bootstrap et doit être épuisée."
+);
+
+assert.throws(
+  () => {
+    initializeGatewaySigner();
+  },
+  /SECURITY_GATEWAY_ALREADY_INITIALIZED/,
+  "Le signataire de passerelle ne peut être initialisé qu'une seule fois."
+);
+console.log("✓ 63. [Sécurité D.1.6 / D.1.7 : Capacité Inviolable] Invalidation immédiate et protection anti-fuite de la clé de capacité validées.");
+
+// ---------------------------------------------------------------------------
+// TEST 64 [Sécurité D.1.6 / Gateway Validation] : Rejet formel des paiements avec statut non final
+// ---------------------------------------------------------------------------
+assert.throws(
+  () => {
+    mintVerifiedPaymentProof({
+      intentId: "intent-gw-status",
+      workspaceId: "ws-gw-status",
+      providerTransactionId: "TX_GW_PENDING",
+      amountXaf: 10000,
+      paymentStatus: "PENDING",
+    });
+  },
+  /SECURITY_PAYMENT_STATUS_NOT_FINAL/,
+  "La passerelle de vérification doit refuser d'émettre une preuve pour un paiement non final."
+);
+
+assert.throws(
+  () => {
+    mintVerifiedPaymentProof({
+      intentId: "intent-gw-status",
+      workspaceId: "ws-gw-status",
+      providerTransactionId: "TX_GW_FAILED",
+      amountXaf: 10000,
+      paymentStatus: "FAILED",
+    });
+  },
+  /SECURITY_PAYMENT_STATUS_NOT_FINAL/,
+  "La passerelle de vérification doit refuser d'émettre une preuve pour un paiement échoué."
+);
+console.log("✓ 64. [Sécurité D.1.6 / Gateway Validation] Rejet formel de tout statut de paiement non final (PENDING, FAILED) validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 65 [Sécurité D.1.6 / Gateway Validation] : Rejet formel des montants non entiers ou négatifs
+// ---------------------------------------------------------------------------
+assert.throws(
+  () => {
+    mintVerifiedPaymentProof({
+      intentId: "intent-gw-amount",
+      workspaceId: "ws-gw-amount",
+      providerTransactionId: "TX_GW_FLOAT",
+      amountXaf: 10000.5,
+    });
+  },
+  /SECURITY_INVALID_AMOUNT/,
+  "La passerelle doit refuser tout montant non entier."
+);
+
+assert.throws(
+  () => {
+    mintVerifiedPaymentProof({
+      intentId: "intent-gw-amount",
+      workspaceId: "ws-gw-amount",
+      providerTransactionId: "TX_GW_NEG",
+      amountXaf: -5000,
+    });
+  },
+  /SECURITY_INVALID_AMOUNT/,
+  "La passerelle doit refuser tout montant négatif."
+);
+console.log("✓ 65. [Sécurité D.1.6 / Gateway Validation] Rejet formel des montants décimaux ou négatifs validé.");
+
+// ---------------------------------------------------------------------------
+// TEST 66 [Sécurité D.1.6 / Gateway Validation] : Rejet formel des devises non autorisées
+// ---------------------------------------------------------------------------
+assert.throws(
+  () => {
+    mintVerifiedPaymentProof({
+      intentId: "intent-gw-curr",
+      workspaceId: "ws-gw-curr",
+      providerTransactionId: "TX_GW_USD",
+      amountXaf: 10000,
+      currency: "USD",
+    });
+  },
+  /SECURITY_INVALID_CURRENCY/,
+  "La passerelle doit rejeter toute devise autre que XAF."
+);
+console.log("✓ 66. [Sécurité D.1.6 / Gateway Validation] Rejet formel des devises non autorisées validé.");
+
 console.log("\n==========================================================================");
-console.log("=== TOUS LES 52 TESTS DU HARNAIS PHASE D.1 / D.1.1 / D.1.2 / D.1.3 SONT VALIDÉS AVEC SUCCÈS ===");
+console.log("=== TOUS LES 66 TESTS DU HARNAIS PHASE D.1 / D.1.6 SONT VALIDÉS AVEC SUCCÈS ===");
 console.log("==========================================================================\n");
+
+process.exit(0);
 

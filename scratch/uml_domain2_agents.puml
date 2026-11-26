@@ -1,0 +1,106 @@
+@startuml zadesk_domain2_agents
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+package "Domaine 2 : Gestion des Agents & Compétences" {
+
+    enum AgentAvailability <<enumeration>> {
+        AVAILABLE
+        BUSY
+        AWAY
+        OFFLINE
+    }
+
+    class Workspace <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class User <<external>> {
+        - id: CUID
+        - firstName: String
+        - lastName: String
+    }
+
+    class Ticket <<external>> {
+        - id: CUID
+        - priority: TicketPriority
+    }
+
+    class AgentProfile <<entity>> {
+        - id: CUID {readOnly, unique}
+        - userId: String
+        - workspaceId: String
+        - title: String = "Conseiller SAV"
+        - bio: String?
+        - avatarUrl: String?
+        - availability: AgentAvailability = AVAILABLE
+        - maxCapacity: Integer = 10
+        - autoAssignmentEnabled: Boolean = true
+        - phone: String?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + setAvailability(status: AgentAvailability): void
+        + updateCapacity(limit: Integer): void
+        + toggleAutoAssignment(enabled: Boolean): void
+        + getActiveTicketsCount(): Integer
+        + isAvailableForAssignment(): Boolean
+    }
+
+    class Skill <<entity>> {
+        - id: CUID {readOnly, unique}
+        - workspaceId: String
+        - name: String
+        - description: String?
+        - createdAt: DateTime {readOnly}
+        --
+        + updateSkill(name: String, description: String): void
+    }
+
+    class AgentSkill <<entity>> {
+        - id: CUID {readOnly, unique}
+        - agentProfileId: String
+        - skillId: String
+        - validatedAt: DateTime?
+        - validatedById: String?
+        --
+        + validate(validatorUserId: String): void
+        + revoke(): void
+    }
+
+    class AssignmentEngine <<service>> {
+        --
+        + autoAssignTicket(ticket: Ticket, workspace: Workspace): AssignmentResult
+        - filterEligibleAgents(category: String, workspaceId: String): List<AgentProfile>
+        - computeWeightedLoad(agent: AgentProfile): Integer
+        - selectBestCandidate(candidates: List<AgentScoreDTO>): AgentProfile
+    }
+
+    ' Relations du Domaine 2
+    User "1" -- "0..*" AgentProfile : incarne >
+    Workspace "1" *-- "0..*" AgentProfile : emploie >
+    AgentProfile "1" *-- "0..*" AgentSkill : détient >
+    Skill "1" -- "0..*" AgentSkill : catégorise >
+    Workspace "1" *-- "0..*" Skill : définit >
+    AssignmentEngine ..> AgentProfile : évalue >
+    AssignmentEngine ..> Ticket : affecte >
+}
+@enduml

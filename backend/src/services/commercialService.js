@@ -1,5 +1,17 @@
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 import { prisma } from "../lib/prisma.js";
 import { logger } from "../utils/logger.js";
+import {
+  verifyFinancialProofToken,
+  recordConsumedFinancialProof,
+  mintSimulationProofForTesting,
+} from "../security/financialTrustAuthority.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CHAT_ATTACHMENTS_ROOT = path.resolve(__dirname, "../../uploads/chat-attachments");
 
 /**
  * ZADESK COMMERCIAL & PRICING SERVICE
@@ -16,6 +28,8 @@ export const OFFICIAL_PLANS = {
     isPaid: false,
     maxAgents: 1,
     maxEstablishments: 1,
+    maxStorageMb: 500,
+    storageLabel: "500 Mo",
     tagline: "Offre gratuite permanente pour lancer sa relation client.",
     description: "Pour tester et lancer la relation client de son entreprise sans engagement financier.",
     features: [
@@ -37,6 +51,8 @@ export const OFFICIAL_PLANS = {
     isPaid: true,
     maxAgents: 2,
     maxEstablishments: 1,
+    maxStorageMb: 2048,
+    storageLabel: "2 Go",
     tagline: "Pour structurer la relation client en ligne d'une PME ou boutique active.",
     description: "1 à 2 agents connectés, routage par compétences et assistance e-mail réactive.",
     features: [
@@ -61,6 +77,8 @@ export const OFFICIAL_PLANS = {
     isPaid: true,
     maxAgents: 5,
     maxEstablishments: 3,
+    maxStorageMb: 10240,
+    storageLabel: "10 Go",
     tagline: "Pour les entreprises avec une équipe relation client active et points de vente physiques.",
     description: "Jusqu'à 5 agents spécialisés, multi-établissements (jusqu'à 3 agences) et assistance prioritaire.",
     features: [
@@ -83,6 +101,8 @@ export const OFFICIAL_PLANS = {
     isPaid: true,
     maxAgents: 999,
     maxEstablishments: 999,
+    maxStorageMb: 51200,
+    storageLabel: "50 Go",
     tagline: "Pour les réseaux de distribution, cliniques et multi-agences régionales.",
     description: "Agents et agences sans limite logicielle, gestion multi-établissements et accompagnement dédié.",
     features: [
@@ -165,11 +185,11 @@ export function computeNextRenewalDate(fromDate, anchorDay) {
  * Prior to Phase A migration and SasPay live confirmation, all workspaces
  * operate under the DECOUVERTE tier.
  */
-export async function getWorkspaceActivePlan(workspaceId) {
+export async function getWorkspaceActivePlan(workspaceId, { tx = prisma } = {}) {
   if (!workspaceId) return OFFICIAL_PLANS.DECOUVERTE;
   try {
-    if (prisma.subscription) {
-      const sub = await prisma.subscription.findUnique({
+    if (tx.subscription) {
+      const sub = await tx.subscription.findUnique({
         where: { workspaceId },
       });
       if (sub && sub.status === "ACTIVE" && OFFICIAL_PLANS[sub.plan]) {
@@ -840,7 +860,7 @@ export async function applyScheduledDowngrade(workspaceId) {
     }
 
     // 4. Scenario D: Verify active plan & subscription version have not drifted
-    const currentPlan = await getWorkspaceActivePlan(workspaceId);
+    const currentPlan = await getWorkspaceActivePlan(workspaceId, { tx });
     let hasSubscriptionVersionDrift = false;
     let currentSubVersion = null;
     if (tx.subscription && request.subscriptionId) {
@@ -1145,18 +1165,54 @@ export async function createUpgradeIntent(userId, { workspaceId, targetPlanId, c
   // Idempotence : si un clientMutationKey est fourni et existe déjà
   const mutationKey = clientMutationKey || `upg_${workspaceId}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   if (tx.subscriptionIntent) {
-    const existingIntent = await tx.subscriptionIntent.findUnique({
-      where: { clientMutationKey: mutationKey },
+    if (clientMutationKey) {
+      const existingIntent = await tx.subscriptionIntent.findUnique({
+        where: { clientMutationKey: mutationKey },
+        include: { attempts: true },
+      });
+      if (existingIntent) {
+        return {
+          success: true,
+          isIdempotent: true,
+          intent: existingIntent,
+          targetPlan,
+        };
+      }
+    }
+
+    // Réutilisation idempotente : si une intention PENDING identique existe déjà pour cet espace et ce plan
+    const existingPending = await tx.subscriptionIntent.findFirst({
+      where: {
+        workspaceId,
+        targetPlan: targetPlan.id,
+        status: "PENDING",
+      },
       include: { attempts: true },
+      orderBy: { createdAt: "desc" },
     });
-    if (existingIntent) {
+
+    if (existingPending) {
       return {
         success: true,
         isIdempotent: true,
-        intent: existingIntent,
+        intent: existingPending,
+        attempt: existingPending.attempts?.[0] || null,
         targetPlan,
+        subscriptionVersion: sub.version,
       };
     }
+
+    // Si une intention PENDING antérieure pour un AUTRE plan existait, la marquer ABANDONED pour éviter tout doublon
+    await tx.subscriptionIntent.updateMany({
+      where: {
+        workspaceId,
+        status: "PENDING",
+        targetPlan: { not: targetPlan.id },
+      },
+      data: {
+        status: "ABANDONED",
+      },
+    });
 
     const intent = await tx.subscriptionIntent.create({
       data: {
@@ -1294,9 +1350,12 @@ export async function abandonUpgradeIntent(userId, { workspaceId, intentId, reas
 
 /**
  * Générateur de preuve financière simulée exclusivement réservé aux tests unitaires/simulés.
- * Interdit formellement en production.
+ * Interdit formellement en production (SÉCURITÉ D.1.4 / D.1.5).
+ * Produit un jeton cryptographiquement scellé et signé.
  */
 export function buildSimulatedVerifiedFinancialProof({
+  intentId = "*",
+  workspaceId = "*",
   providerTransactionId,
   amountXaf,
   providerReference = null,
@@ -1304,21 +1363,17 @@ export function buildSimulatedVerifiedFinancialProof({
   operatorReference = null,
   rawPayload = {},
 }) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("SECURITY_VIOLATION: Les preuves simulées sont formellement interdites en environnement de production.");
-  }
-  return {
-    source: "TEST_SIMULATION",
-    provider: "SASPAY",
+  return mintSimulationProofForTesting({
+    intentId,
+    workspaceId,
     providerTransactionId,
-    providerReference: providerReference || `REF_${Date.now()}`,
     amountXaf,
     currency: "XAF",
+    providerReference,
     paymentMethod,
     operatorReference,
-    verifiedAt: new Date().toISOString(),
     rawPayload,
-  };
+  });
 }
 
 /**
@@ -1391,8 +1446,15 @@ export async function confirmPaymentAndApplyUpgrade(actingUserId, {
   if (!amountXaf || typeof amountXaf !== "number" || amountXaf <= 0) {
     const secErr = new Error("SECURITY_INVALID_AMOUNT: Le montant de la preuve financière est invalide.");
     secErr.statusCode = 400;
+    secErr.code = "SECURITY_INVALID_AMOUNT";
     throw secErr;
   }
+
+  // 0.1 VÉRIFICATION CRYPTOGRAPHIQUE ET ANTI-REJEU DE LA PREUVE (SÉCURITÉ D.1.4)
+  const verifiedProof = verifyFinancialProofToken(financialProof, {
+    expectedIntentId: intentId,
+    expectedWorkspaceId: workspaceId,
+  });
 
   const executeUpgrade = async (tx) => {
     // 1. Verrou pessimiste sur le workspace
@@ -1511,6 +1573,9 @@ export async function confirmPaymentAndApplyUpgrade(actingUserId, {
       },
     });
 
+    // 7.1 Consommation effective, atomique et persistante de la preuve financière (Anti-rejeu D.1.4 / D.1.5)
+    await recordConsumedFinancialProof(tx, verifiedProof, actingUserId);
+
     // 8. Mise à jour de la tentative et de l'intention
     await tx.paymentAttempt.updateMany({
       where: { intentId: intent.id },
@@ -1592,4 +1657,323 @@ export async function confirmPaymentAndApplyUpgrade(actingUserId, {
   }
   return await prisma.$transaction(executeUpgrade);
 }
+
+const PLAN_UPGRADE_ORDER = ["DECOUVERTE", "STARTER", "PRO", "ENTREPRISE"];
+
+function estimateInlineMediaBytes(rawValue) {
+  if (!rawValue || typeof rawValue !== "string") return 0;
+  if (!rawValue.startsWith("data:")) return 0;
+  const commaIdx = rawValue.indexOf(",");
+  if (commaIdx === -1) return Buffer.byteLength(rawValue, "utf8");
+  const base64Length = rawValue.length - commaIdx - 1;
+  return Math.max(0, Math.floor((base64Length * 3) / 4));
+}
+
+async function computeDirectoryBytes(dirPath) {
+  try {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    let total = 0;
+    let fileCount = 0;
+    for (const entry of entries) {
+      if (entry.isFile()) {
+        const stat = await fs.stat(path.join(dirPath, entry.name)).catch(() => null);
+        if (stat) {
+          total += stat.size;
+          fileCount += 1;
+        }
+      }
+    }
+    return { totalBytes: total, fileCount };
+  } catch {
+    return { totalBytes: 0, fileCount: 0 };
+  }
+}
+
+function buildQuotaStatus(ratio, unlimited = false) {
+  if (unlimited) return "OK";
+  if (ratio >= 1) return "REACHED";
+  if (ratio >= 0.8) return "WARNING";
+  return "OK";
+}
+
+function buildQuotaMetric({
+  key,
+  label,
+  used,
+  limit,
+  unit,
+  unlimited = false,
+  breakdown = {},
+}) {
+  const safeUsed = Math.max(0, Number(used) || 0);
+  const safeLimit = Math.max(1, Number(limit) || 1);
+  const rawRatio = unlimited ? 0 : safeUsed / safeLimit;
+  const percentage = unlimited ? 0 : Math.min(100, Math.round(rawRatio * 1000) / 10);
+  const remaining = unlimited ? null : Math.max(0, safeLimit - safeUsed);
+  const status = buildQuotaStatus(rawRatio, unlimited);
+
+  return {
+    key,
+    label,
+    used: safeUsed,
+    limit: unlimited ? null : safeLimit,
+    unit,
+    unlimited,
+    percentage,
+    remaining,
+    status,
+    breakdown,
+  };
+}
+
+/**
+ * Compute live, real-time consumption & quota status for a workspace.
+ * Never fabricates stats: counts live DB seats, establishments, and real attachment/media bytes.
+ */
+export async function getWorkspaceUsageSummary(workspaceId, { attachmentRoot = CHAT_ATTACHMENTS_ROOT } = {}) {
+  if (!workspaceId) {
+    const err = new Error("workspaceId est requis.");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+
+  const [
+    activePlan,
+    subscription,
+    workspaceMedia,
+    activeMembersCount,
+    pendingInvitesCount,
+    establishments,
+    conversations,
+    ticketsThisMonth,
+    conversationsThisMonth,
+    messagesThisMonth,
+  ] = await Promise.all([
+    getWorkspaceActivePlan(workspaceId),
+    prisma.subscription.findUnique({ where: { workspaceId } }),
+    prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { id: true, name: true, logoUrl: true, coverUrl: true },
+    }),
+    prisma.membership.count({
+      where: { workspaceId, status: "ACTIVE" },
+    }),
+    prisma.workspaceInvitation.count({
+      where: {
+        workspaceId,
+        acceptedAt: null,
+        revokedAt: null,
+        expiresAt: { gt: now },
+      },
+    }),
+    prisma.establishment.findMany({
+      where: { workspaceId },
+      select: { id: true, isActive: true, isPublic: true, imageUrl: true, galleryImages: true },
+    }),
+    prisma.conversation.findMany({
+      where: { workspaceId },
+      select: { id: true },
+    }),
+    prisma.ticket.count({
+      where: { workspaceId, createdAt: { gte: monthStart } },
+    }),
+    prisma.conversation.count({
+      where: { workspaceId, createdAt: { gte: monthStart } },
+    }),
+    prisma.conversationMessage.count({
+      where: {
+        conversation: { workspaceId },
+        createdAt: { gte: monthStart },
+      },
+    }),
+  ]);
+
+  if (!workspaceMedia) {
+    const err = new Error("Espace de travail introuvable.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  // Sum real chat attachment bytes on disk across workspace conversations
+  let attachmentBytes = 0;
+  let attachmentFilesCount = 0;
+  if (conversations.length > 0) {
+    const dirStats = await Promise.all(
+      conversations.map((conv) =>
+        computeDirectoryBytes(path.resolve(attachmentRoot, String(conv.id).replace(/[^a-zA-Z0-9_-]/g, "")))
+      )
+    );
+    for (const stat of dirStats) {
+      attachmentBytes += stat.totalBytes;
+      attachmentFilesCount += stat.fileCount;
+    }
+  }
+
+  // Sum inline base64 media stored for brand & establishment storefronts
+  let mediaBytes =
+    estimateInlineMediaBytes(workspaceMedia.logoUrl) +
+    estimateInlineMediaBytes(workspaceMedia.coverUrl);
+
+  for (const est of establishments) {
+    mediaBytes += estimateInlineMediaBytes(est.imageUrl);
+    if (Array.isArray(est.galleryImages)) {
+      for (const img of est.galleryImages) {
+        mediaBytes += estimateInlineMediaBytes(img);
+      }
+    }
+  }
+
+  const totalStorageBytes = attachmentBytes + mediaBytes;
+  const usedStorageMb = Math.round((totalStorageBytes / (1024 * 1024)) * 100) / 100;
+  const attachmentMb = Math.round((attachmentBytes / (1024 * 1024)) * 100) / 100;
+  const mediaMb = Math.round((mediaBytes / (1024 * 1024)) * 100) / 100;
+
+  const isUnlimitedPlan = activePlan.id === "ENTREPRISE";
+  const usedSeats = activeMembersCount + pendingInvitesCount;
+
+  const agentsMetric = buildQuotaMetric({
+    key: "agents",
+    label: "Collaborateurs",
+    used: usedSeats,
+    limit: activePlan.maxAgents,
+    unit: "siège",
+    unlimited: isUnlimitedPlan,
+    breakdown: {
+      activeMembers: activeMembersCount,
+      pendingInvitations: pendingInvitesCount,
+    },
+  });
+
+  const establishmentsMetric = buildQuotaMetric({
+    key: "establishments",
+    label: "Établissements",
+    used: establishments.length,
+    limit: activePlan.maxEstablishments,
+    unit: "site",
+    unlimited: isUnlimitedPlan,
+    breakdown: {
+      activeCount: establishments.filter((e) => e.isActive !== false).length,
+      publicCount: establishments.filter((e) => e.isPublic !== false).length,
+    },
+  });
+
+  const storageMetric = buildQuotaMetric({
+    key: "storage",
+    label: "Stockage fichiers",
+    used: usedStorageMb,
+    limit: activePlan.maxStorageMb || 500,
+    unit: "Mo",
+    unlimited: false,
+    breakdown: {
+      totalBytes: totalStorageBytes,
+      attachmentBytes,
+      attachmentMb,
+      attachmentFilesCount,
+      mediaBytes,
+      mediaMb,
+      limitLabel: activePlan.storageLabel || "500 Mo",
+    },
+  });
+
+  const metrics = {
+    agents: agentsMetric,
+    establishments: establishmentsMetric,
+    storage: storageMetric,
+  };
+
+  const alerts = [];
+  if (agentsMetric.status === "REACHED") {
+    alerts.push({
+      key: "agents",
+      severity: "REACHED",
+      title: `Quota collaborateurs atteint (${agentsMetric.used}/${agentsMetric.limit})`,
+      message: `Votre formule ${activePlan.name} inclut ${agentsMetric.limit} collaborateur(s). Passez au forfait supérieur pour inviter d'autres conseillers.`,
+    });
+  } else if (agentsMetric.status === "WARNING") {
+    alerts.push({
+      key: "agents",
+      severity: "WARNING",
+      title: `Quota collaborateurs presque atteint (${agentsMetric.used}/${agentsMetric.limit})`,
+      message: `Il ne reste que ${agentsMetric.remaining} place(s) disponible(s) sur votre formule ${activePlan.name}.`,
+    });
+  }
+
+  if (establishmentsMetric.status === "REACHED") {
+    alerts.push({
+      key: "establishments",
+      severity: "REACHED",
+      title: `Quota d'établissements atteint (${establishmentsMetric.used}/${establishmentsMetric.limit})`,
+      message: `Votre formule ${activePlan.name} est limitée à ${establishmentsMetric.limit} établissement(s).`,
+    });
+  } else if (establishmentsMetric.status === "WARNING") {
+    alerts.push({
+      key: "establishments",
+      severity: "WARNING",
+      title: `Quota d'établissements bientôt atteint (${establishmentsMetric.used}/${establishmentsMetric.limit})`,
+      message: `Il ne reste que ${establishmentsMetric.remaining} emplacement(s) disponible(s).`,
+    });
+  }
+
+  if (storageMetric.status === "REACHED") {
+    alerts.push({
+      key: "storage",
+      severity: "REACHED",
+      title: `Espace de stockage saturé (${storageMetric.used} Mo / ${activePlan.storageLabel})`,
+      message: `Votre espace a atteint la limite de stockage de la formule ${activePlan.name}.`,
+    });
+  } else if (storageMetric.status === "WARNING") {
+    alerts.push({
+      key: "storage",
+      severity: "WARNING",
+      title: `Stockage bientôt plein (${storageMetric.percentage}%)`,
+      message: `Vous utilisez ${storageMetric.used} Mo sur ${activePlan.storageLabel}.`,
+    });
+  }
+
+  const hasReached = alerts.some((a) => a.severity === "REACHED");
+  const hasWarning = alerts.some((a) => a.severity === "WARNING");
+  const globalSeverity = hasReached ? "REACHED" : hasWarning ? "WARNING" : "OK";
+
+  const finitePercentages = Object.values(metrics)
+    .filter((m) => !m.unlimited)
+    .map((m) => m.percentage);
+  const peakPercentage = finitePercentages.length > 0 ? Math.max(...finitePercentages) : 0;
+
+  const currentIdx = PLAN_UPGRADE_ORDER.indexOf(activePlan.id);
+  const nextPlanId =
+    currentIdx >= 0 && currentIdx < PLAN_UPGRADE_ORDER.length - 1
+      ? PLAN_UPGRADE_ORDER[currentIdx + 1]
+      : null;
+
+  return {
+    workspaceId,
+    plan: {
+      id: activePlan.id,
+      name: activePlan.name,
+      priceXaf: activePlan.priceXaf,
+      periodLabel: activePlan.periodLabel,
+      isPaid: activePlan.isPaid,
+      currentPeriodStart: subscription?.currentPeriodStart || null,
+      currentPeriodEnd: subscription?.currentPeriodEnd || null,
+      nextRecommendedPlanId: nextPlanId,
+    },
+    metrics,
+    peakPercentage,
+    globalSeverity,
+    alerts,
+    monthlyActivity: {
+      periodStart: monthStart.toISOString(),
+      ticketsCount: ticketsThisMonth,
+      conversationsCount: conversationsThisMonth,
+      messagesCount: messagesThisMonth,
+    },
+    computedAt: now.toISOString(),
+  };
+}
+
+
+
 

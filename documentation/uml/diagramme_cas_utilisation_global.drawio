@@ -1,0 +1,194 @@
+<mxfile host="app.diagrams.net" modified="2026-11-22T12:00:00.000Z" agent="Antigravity" version="24.0.0">
+  <diagram id="zalisk-global-usecase" name="Zalisk - Cas d'Utilisation Global">
+    <mxGraphModel dx="2200" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2050" pageHeight="1260" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:20px;color:#0F172A;font-family:Helvetica;&quot;&gt;SYSTÈME ZALISK — DIAGRAMME GLOBAL DES CAS D&#x27;UTILISATION (UML 2.5)&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:12px;color:#64748B;font-family:Helvetica;&quot;&gt;Architecture SaaS Omnicanale • Moteur RAG Interne Zalisk &amp; Inférence Modèles Cloudflare Workers AI&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="500" y="12" width="1000" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="system_boundary" value="&lt;div style=&quot;text-align:left;padding-left:15px;padding-top:10px;&quot;&gt;&lt;b style=&quot;font-size:15px;letter-spacing:1px;color:#0F172A;font-family:Helvetica;&quot;&gt;SYSTÈME ZALISK&lt;/b&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1E293B;strokeWidth=2;verticalAlign=top;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="60" width="1380" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_client" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Client / Visiteur&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#1E40AF;font-family:Helvetica;&quot;&gt;(Grand Public)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#EFF6FF;strokeColor=#2563EB;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="90" y="310" width="55" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_cloudflare" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Cloudflare Workers AI&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#7E22CE;font-family:Helvetica;&quot;&gt;«service»
+(Fournisseur LLM)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="60" y="990" width="60" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_agent" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Conseiller SAV&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#047857;font-family:Helvetica;&quot;&gt;(AGENT)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1820" y="80" width="55" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_manager" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Superviseur SAV&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#B45309;font-family:Helvetica;&quot;&gt;(MANAGER)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1820" y="320" width="55" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_admin" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Administrateur&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#334155;font-family:Helvetica;&quot;&gt;(ADMIN)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1820" y="750" width="55" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_owner" value="&lt;div style=&quot;text-align:center;&quot;&gt;&lt;b style=&quot;font-size:12px;color:#0F172A;font-family:Helvetica;&quot;&gt;Propriétaire&lt;/b&gt;&lt;br/&gt;&lt;span style=&quot;font-size:10px;color:#A21CAF;font-family:Helvetica;&quot;&gt;(OWNER)&lt;/span&gt;&lt;/div&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#FDF2F8;strokeColor=#C026D3;strokeWidth=1.8;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1820" y="1060" width="55" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_annuaire" value="Consulter l&#x27;annuaire des&lt;br/&gt;fiches assistance" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;fontColor=#1E3A8A;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="100" width="360" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_soumettre" value="Soumettre une demande SAV&lt;br/&gt;en ligne (création ticket)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;fontColor=#1E3A8A;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="240" width="360" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_tchat" value="Échanger par messagerie&lt;br/&gt;temps réel (chat direct)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;fontColor=#1E3A8A;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="390" width="360" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_suivi" value="Suivre l&#x27;état d&#x27;avancement&lt;br/&gt;de sa demande SAV" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=1.5;fontColor=#1E3A8A;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="540" width="360" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_rag" value="Obtenir une assistance automatisée&lt;br/&gt;par RAG (Moteur interne Zalisk)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.5;fontColor=#581C87;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="700" width="360" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_transfert" value="Solliciter un transfert vers&lt;br/&gt;un conseiller humain" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.5;fontColor=#581C87;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="860" width="360" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_inference" value="Exécuter l&#x27;inférence des modèles LLM&lt;br/&gt;(Génération de texte via Cloudflare)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.5;fontColor=#581C87;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1010" width="360" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_sugg_ia" value="Écouter les suggestions de&lt;br/&gt;réponses formulées par l&#x27;IA" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#9333EA;strokeWidth=1.5;fontColor=#581C87;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="100" width="380" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_dispo" value="Gérer son statut&lt;br/&gt;de disponibilité" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="240" width="380" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_traiter_conv" value="Traiter les conversations clients&lt;br/&gt;et demandes en attente" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="390" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_elever_ticket" value="Élever une conversation&lt;br/&gt;en Ticket SAV officiel" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="545" width="380" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_notes_internes" value="Rédiger des notes&lt;br/&gt;internes d&#x27;équipe" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="700" width="380" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_partager_ticket" value="Partager un ticket à d&#x27;autres agents&lt;br/&gt;(entraide collaborative)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="855" width="380" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_gerer_tickets" value="Gérer le cycle de vie&lt;br/&gt;des tickets SAV (SLA)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#10B981;strokeWidth=1.5;fontColor=#064E3B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="1010" width="380" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_superviser_files" value="Superviser les files d&#x27;attente&lt;br/&gt;et la charge de travail" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="90" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_stats_sla" value="Consulter les tableaux de bord&lt;br/&gt;analytiques et le respect SLA" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="190" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_etablissements" value="Gérer les établissements&lt;br/&gt;de l&#x27;entreprise" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="290" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_competences" value="Définir et attribuer les&lt;br/&gt;compétences agents (Skills)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="390" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_reassigner" value="Réaffecter manuellement un&lt;br/&gt;ticket ou une conversation" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontColor=#78350F;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="490" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_suspendre" value="Suspendre ou réactiver&lt;br/&gt;l&#x27;accès d&#x27;un collaborateur" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;fontColor=#1E293B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="600" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_membres_rbac" value="Inviter des membres et&lt;br/&gt;attribuer les rôles (RBAC)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;fontColor=#1E293B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="700" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_knowledge" value="Administrer la base documentaire&lt;br/&gt;pour le RAG (Articles &amp; FAQ)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;fontColor=#1E293B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="800" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_params" value="Configurer les paramètres de&lt;br/&gt;l&#x27;entreprise (canaux, horodatage)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#64748B;strokeWidth=1.5;fontColor=#1E293B;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="900" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_abonnement" value="Gérer l&#x27;abonnement SaaS&lt;br/&gt;et les paiements Stripe" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FDF2F8;strokeColor=#C026D3;strokeWidth=1.5;fontColor=#701A75;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="1010" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_supprimer_ws" value="Supprimer définitivement&lt;br/&gt;l&#x27;espace de travail" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FDF2F8;strokeColor=#C026D3;strokeWidth=1.5;fontColor=#701A75;fontSize=11;fontFamily=Helvetica;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="1110" width="370" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_client" target="uc_annuaire">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_client" target="uc_soumettre">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_client" target="uc_tchat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_client" target="uc_suivi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_cloudflare" target="uc_inference">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_agent" target="uc_dispo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_agent" target="uc_traiter_conv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_agent" target="uc_gerer_tickets">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_manager" target="uc_superviser_files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_manager" target="uc_stats_sla">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_manager" target="uc_etablissements">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_manager" target="uc_competences">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_manager" target="uc_reassigner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_admin" target="uc_suspendre">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_admin" target="uc_membres_rbac">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_admin" target="uc_knowledge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_17" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_admin" target="uc_params">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_18" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_owner" target="uc_abonnement">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_19" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1E293B;strokeWidth=1.4;endArrow=none;fontSize=10;fontFamily=Helvetica;" edge="1" parent="1" source="actor_owner" target="uc_supprimer_ws">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_20" value="«include»" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_tchat" target="uc_rag">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_21" value="«include»" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_rag" target="uc_inference">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_22" value="«include»" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_sugg_ia" target="uc_inference">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_23" value="«extend»&lt;br/&gt;[seuil d&#x27;escalade]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_transfert" target="uc_rag">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_24" value="«extend»&lt;br/&gt;[file attente]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_transfert" target="uc_traiter_conv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_25" value="«extend»&lt;br/&gt;[assistance active]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_sugg_ia" target="uc_traiter_conv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_26" value="«extend»" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_elever_ticket" target="uc_traiter_conv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_27" value="«extend»" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_notes_internes" target="uc_traiter_conv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dep_28" value="«extend»&lt;br/&gt;[besoin d&#x27;expertise]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=4 4;strokeColor=#64748B;strokeWidth=1.3;endArrow=open;endFill=0;fontSize=10;fontColor=#475569;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="uc_partager_ticket" target="uc_gerer_tickets">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

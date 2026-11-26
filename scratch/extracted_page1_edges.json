@@ -1,0 +1,191 @@
+[
+  {
+    "id": "e1",
+    "source": "workspace",
+    "target": "membership",
+    "value": "contient<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e2",
+    "source": "workspace",
+    "target": "establishment",
+    "value": "poss\u00e8de<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e3",
+    "source": "user",
+    "target": "membership",
+    "value": "adh\u00e8re<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e4",
+    "source": "user",
+    "target": "workspaceinvitation",
+    "value": "invite<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e5",
+    "source": "user",
+    "target": "agentprofile",
+    "value": "incarne<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e6",
+    "source": "agentprofile",
+    "target": "agentskill",
+    "value": "d\u00e9tient<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e7",
+    "source": "skill",
+    "target": "agentskill",
+    "value": "qualifie<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e8",
+    "source": "assignmentengine",
+    "target": "agentprofile",
+    "value": "\u00e9value",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e9",
+    "source": "assignmentengine",
+    "target": "ticket",
+    "value": "affecte",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e10",
+    "source": "workspace",
+    "target": "ticket",
+    "value": "g\u00e8re<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e11",
+    "source": "customer",
+    "target": "ticket",
+    "value": "soumet<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e12",
+    "source": "ticket",
+    "target": "ticketactivity",
+    "value": "historise<br/>1 .. 1..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e13",
+    "source": "ticket",
+    "target": "ticketassignment",
+    "value": "retrace<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e14",
+    "source": "ticket",
+    "target": "ticketshare",
+    "value": "partage<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e15",
+    "source": "agentprofile",
+    "target": "ticket",
+    "value": "traite<br/>0..1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e16",
+    "source": "customer",
+    "target": "conversation",
+    "value": "\u00e9change via<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e17",
+    "source": "conversation",
+    "target": "ticket",
+    "value": "\u00e9l\u00e9vation<br/>0..1 .. 0..1",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2563EB;strokeWidth=1.8;endArrow=none;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e18",
+    "source": "conversation",
+    "target": "conversationmessage",
+    "value": "compose<br/>1 .. 1..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e19",
+    "source": "conversation",
+    "target": "conversationshare",
+    "value": "partage<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e20",
+    "source": "workspace",
+    "target": "knowledgedocument",
+    "value": "poss\u00e8de<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e21",
+    "source": "knowledgedocument",
+    "target": "knowledgechunk",
+    "value": "d\u00e9coup\u00e9 en<br/>1 .. 1..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e22",
+    "source": "aiassistantsupervisor",
+    "target": "knowledgechunk",
+    "value": "recherche s\u00e9mantique",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e23",
+    "source": "aiassistantsupervisor",
+    "target": "conversation",
+    "value": "assiste",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e24",
+    "source": "aiassistantsupervisor",
+    "target": "ticket",
+    "value": "escalade",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e25",
+    "source": "workspace",
+    "target": "outboxevent",
+    "value": "g\u00e9n\u00e8re<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e26",
+    "source": "conversationmessage",
+    "target": "pulseevent",
+    "value": "d\u00e9clenche",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#475569;strokeWidth=1.5;dashed=1;dashPattern=6 4;endArrow=open;endFill=0;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  },
+  {
+    "id": "e27",
+    "source": "workspace",
+    "target": "auditlog",
+    "value": "consigne<br/>1 .. 0..*",
+    "style": "edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#0F172A;strokeWidth=1.8;startArrow=diamond;startFill=1;fontColor=#0F172A;fontSize=12;fontFamily=Helvetica;fontStyle=1;;"
+  }
+]

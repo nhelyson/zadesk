@@ -1,0 +1,605 @@
+{
+  "workspace": {
+    "id": "workspace",
+    "name": "Workspace",
+    "stereo": "entity",
+    "fill": "#EFF6FF",
+    "stroke": "#2563EB",
+    "title_color": "#1D4ED8",
+    "stereo_color": "#3B82F6",
+    "div_color": "#93C5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ slug : text [UQ]",
+      "+ name : text",
+      "+ category : text",
+      "+ supportEmail : text?",
+      "+ supportPhone : text?",
+      "+ isPublic : boolean = true",
+      "+ verified : boolean = false"
+    ],
+    "methods": [
+      "+ createTicket() : Ticket",
+      "+ addMember() : Membership",
+      "+ getCapacityMetrics() : Metrics"
+    ],
+    "orig_x": 80.0,
+    "orig_y": 60.0,
+    "orig_w": 290.0,
+    "orig_h": 260.0
+  },
+  "establishment": {
+    "id": "establishment",
+    "name": "Establishment",
+    "stereo": "entity",
+    "fill": "#EFF6FF",
+    "stroke": "#2563EB",
+    "title_color": "#1D4ED8",
+    "stereo_color": "#3B82F6",
+    "div_color": "#93C5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ name : text",
+      "+ type : EstablishmentType",
+      "+ city : text?",
+      "+ isMain : boolean = false",
+      "+ isActive : boolean = true"
+    ],
+    "methods": [
+      "+ updateDetails() : void",
+      "+ toggleStatus() : void"
+    ],
+    "orig_x": 80.0,
+    "orig_y": 390.0,
+    "orig_w": 290.0,
+    "orig_h": 210.0
+  },
+  "membership": {
+    "id": "membership",
+    "name": "Membership",
+    "stereo": "entity",
+    "fill": "#EFF6FF",
+    "stroke": "#2563EB",
+    "title_color": "#1D4ED8",
+    "stereo_color": "#3B82F6",
+    "div_color": "#93C5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ userId : text [FK]",
+      "+ workspaceId : text [FK]",
+      "+ role : Role = AGENT",
+      "+ status : MembershipStatus"
+    ],
+    "methods": [
+      "+ changeRole(role) : void",
+      "+ hasPermission() : boolean"
+    ],
+    "orig_x": 470.0,
+    "orig_y": 60.0,
+    "orig_w": 270.0,
+    "orig_h": 180.0
+  },
+  "workspaceinvitation": {
+    "id": "workspaceinvitation",
+    "name": "WorkspaceInvitation",
+    "stereo": "entity",
+    "fill": "#EFF6FF",
+    "stroke": "#2563EB",
+    "title_color": "#1D4ED8",
+    "stereo_color": "#3B82F6",
+    "div_color": "#93C5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ email : text",
+      "+ invitedById : text [FK]",
+      "+ token : text [UQ]",
+      "+ role : Role = AGENT",
+      "+ expiresAt : timestamp"
+    ],
+    "methods": [
+      "+ accept(user) : Membership"
+    ],
+    "orig_x": 470.0,
+    "orig_y": 300.0,
+    "orig_w": 270.0,
+    "orig_h": 190.0
+  },
+  "user": {
+    "id": "user",
+    "name": "User",
+    "stereo": "entity",
+    "fill": "#ECFDF5",
+    "stroke": "#059669",
+    "title_color": "#047857",
+    "stereo_color": "#10B981",
+    "div_color": "#6EE7B7",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ email : text [UQ]",
+      "+ googleId : text? [UQ]",
+      "+ firstName : text",
+      "+ lastName : text",
+      "+ emailVerified : boolean"
+    ],
+    "methods": [
+      "+ getFullName() : text",
+      "+ verifyPassword(raw) : boolean",
+      "+ updateProfile(data) : void"
+    ],
+    "orig_x": 840.0,
+    "orig_y": 60.0,
+    "orig_w": 280.0,
+    "orig_h": 220.0
+  },
+  "agentprofile": {
+    "id": "agentprofile",
+    "name": "AgentProfile",
+    "stereo": "entity",
+    "fill": "#FFFBEB",
+    "stroke": "#D97706",
+    "title_color": "#B45309",
+    "stereo_color": "#D97706",
+    "div_color": "#FCD34D",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ userId : text [FK]",
+      "+ workspaceId : text [FK]",
+      "+ title : text = &#x27;Conseiller&#x27;",
+      "+ availability : AgentAvailability",
+      "+ maxCapacity : int = 10",
+      "+ autoAssignment : boolean"
+    ],
+    "methods": [
+      "+ setAvailability(s) : void",
+      "+ isAvailable() : boolean",
+      "+ getActiveTicketsCount() : int"
+    ],
+    "orig_x": 1220.0,
+    "orig_y": 60.0,
+    "orig_w": 280.0,
+    "orig_h": 230.0
+  },
+  "assignmentengine": {
+    "id": "assignmentengine",
+    "name": "AssignmentEngine",
+    "stereo": "service",
+    "fill": "#FFFBEB",
+    "stroke": "#D97706",
+    "title_color": "#B45309",
+    "stereo_color": "#D97706",
+    "div_color": "#FCD34D",
+    "attrs": [
+      "- criteria : AssignmentStrategy",
+      "- strictAvailability : boolean = true"
+    ],
+    "methods": [
+      "+ autoAssign(ticket) : AgentProfile?",
+      "+ calculateScore(agent, tck) : float",
+      "+ rebalanceWorkload(wsId) : Report"
+    ],
+    "orig_x": 1220.0,
+    "orig_y": 350.0,
+    "orig_w": 280.0,
+    "orig_h": 180.0
+  },
+  "skill": {
+    "id": "skill",
+    "name": "Skill",
+    "stereo": "entity",
+    "fill": "#FFFBEB",
+    "stroke": "#D97706",
+    "title_color": "#B45309",
+    "stereo_color": "#D97706",
+    "div_color": "#FCD34D",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ name : text",
+      "+ description : text?"
+    ],
+    "methods": [
+      "+ updateSkill(name, desc) : void"
+    ],
+    "orig_x": 1610.0,
+    "orig_y": 60.0,
+    "orig_w": 250.0,
+    "orig_h": 150.0
+  },
+  "agentskill": {
+    "id": "agentskill",
+    "name": "AgentSkill",
+    "stereo": "entity",
+    "fill": "#FFFBEB",
+    "stroke": "#D97706",
+    "title_color": "#B45309",
+    "stereo_color": "#D97706",
+    "div_color": "#FCD34D",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ agentProfileId : text [FK]",
+      "+ skillId : text [FK]",
+      "+ validatedAt : timestamp?"
+    ],
+    "methods": [
+      "+ validate(validatorId) : void",
+      "+ revoke() : void"
+    ],
+    "orig_x": 1610.0,
+    "orig_y": 270.0,
+    "orig_w": 250.0,
+    "orig_h": 160.0
+  },
+  "customer": {
+    "id": "customer",
+    "name": "Customer",
+    "stereo": "entity",
+    "fill": "#FAF5FF",
+    "stroke": "#7C3AED",
+    "title_color": "#6D28D9",
+    "stereo_color": "#8B5CF6",
+    "div_color": "#C4B5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ name : text",
+      "+ email : text?",
+      "+ phone : text?",
+      "+ createdAt : timestamp"
+    ],
+    "methods": [
+      "+ getTicketHistory() : List&lt;Ticket&gt;",
+      "+ getConversations() : List&lt;Conv&gt;"
+    ],
+    "orig_x": 80.0,
+    "orig_y": 670.0,
+    "orig_w": 290.0,
+    "orig_h": 210.0
+  },
+  "ticket": {
+    "id": "ticket",
+    "name": "Ticket",
+    "stereo": "entity",
+    "fill": "#FAF5FF",
+    "stroke": "#7C3AED",
+    "title_color": "#6D28D9",
+    "stereo_color": "#8B5CF6",
+    "div_color": "#C4B5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ reference : text [UQ]",
+      "+ workspaceId : text [FK]",
+      "+ customerId : text [FK]",
+      "+ assignedAgentId : text? [FK]",
+      "+ title : text",
+      "+ priority : TicketPriority",
+      "+ status : TicketStatus",
+      "+ slaDueAt : timestamp?"
+    ],
+    "methods": [
+      "+ assignToAgent(agent) : void",
+      "+ updateStatus(status) : void",
+      "+ isSlaBreached() : boolean",
+      "+ markResolved(summary) : void"
+    ],
+    "orig_x": 470.0,
+    "orig_y": 650.0,
+    "orig_w": 310.0,
+    "orig_h": 300.0
+  },
+  "ticketactivity": {
+    "id": "ticketactivity",
+    "name": "TicketActivity",
+    "stereo": "entity",
+    "fill": "#FAF5FF",
+    "stroke": "#7C3AED",
+    "title_color": "#6D28D9",
+    "stereo_color": "#8B5CF6",
+    "div_color": "#C4B5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ ticketId : text [FK]",
+      "+ actorId : text?",
+      "+ type : text",
+      "+ content : text?"
+    ],
+    "methods": [
+      "+ getFormattedLog() : text"
+    ],
+    "orig_x": 880.0,
+    "orig_y": 650.0,
+    "orig_w": 280.0,
+    "orig_h": 175.0
+  },
+  "ticketassignment": {
+    "id": "ticketassignment",
+    "name": "TicketAssignment",
+    "stereo": "entity",
+    "fill": "#FAF5FF",
+    "stroke": "#7C3AED",
+    "title_color": "#6D28D9",
+    "stereo_color": "#8B5CF6",
+    "div_color": "#C4B5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ ticketId : text [FK]",
+      "+ agentProfileId : text [FK]",
+      "+ assignedById : text?",
+      "+ reason : text?"
+    ],
+    "methods": [
+      "+ getDetails() : text"
+    ],
+    "orig_x": 360.0,
+    "orig_y": 1030.0,
+    "orig_w": 270.0,
+    "orig_h": 170.0
+  },
+  "ticketshare": {
+    "id": "ticketshare",
+    "name": "TicketShare",
+    "stereo": "entity",
+    "fill": "#FAF5FF",
+    "stroke": "#7C3AED",
+    "title_color": "#6D28D9",
+    "stereo_color": "#8B5CF6",
+    "div_color": "#C4B5FD",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ ticketId : text [FK]",
+      "+ sharedWithUserId : text [FK]",
+      "+ accessLevel : ShareAccessLevel"
+    ],
+    "methods": [
+      "+ revoke() : void"
+    ],
+    "orig_x": 710.0,
+    "orig_y": 1030.0,
+    "orig_w": 260.0,
+    "orig_h": 155.0
+  },
+  "conversation": {
+    "id": "conversation",
+    "name": "Conversation",
+    "stereo": "entity",
+    "fill": "#F0FDFA",
+    "stroke": "#0D9488",
+    "title_color": "#0F766E",
+    "stereo_color": "#14B8A6",
+    "div_color": "#5EEAD4",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ customerId : text [FK]",
+      "+ assignedAgentId : text? [FK]",
+      "+ status : ConversationStatus",
+      "+ channel : ChannelType",
+      "+ lastMessageAt : timestamp"
+    ],
+    "methods": [
+      "+ postMessage(text, type) : Message",
+      "+ elevateToTicket(priority) : Ticket",
+      "+ closeConversation() : void"
+    ],
+    "orig_x": 1250.0,
+    "orig_y": 650.0,
+    "orig_w": 290.0,
+    "orig_h": 250.0
+  },
+  "conversationmessage": {
+    "id": "conversationmessage",
+    "name": "ConversationMessage",
+    "stereo": "entity",
+    "fill": "#F0FDFA",
+    "stroke": "#0D9488",
+    "title_color": "#0F766E",
+    "stereo_color": "#14B8A6",
+    "div_color": "#5EEAD4",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ conversationId : text [FK]",
+      "+ senderUserId : text?",
+      "+ senderCustomerId : text?",
+      "+ type : MessageType",
+      "+ body : text"
+    ],
+    "methods": [
+      "+ isInternalNote() : boolean"
+    ],
+    "orig_x": 1640.0,
+    "orig_y": 650.0,
+    "orig_w": 270.0,
+    "orig_h": 180.0
+  },
+  "conversationshare": {
+    "id": "conversationshare",
+    "name": "ConversationShare",
+    "stereo": "entity",
+    "fill": "#F0FDFA",
+    "stroke": "#0D9488",
+    "title_color": "#0F766E",
+    "stereo_color": "#14B8A6",
+    "div_color": "#5EEAD4",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ conversationId : text [FK]",
+      "+ sharedWithUserId : text [FK]",
+      "+ accessLevel : ShareAccessLevel"
+    ],
+    "methods": [
+      "+ revoke() : void"
+    ],
+    "orig_x": 1640.0,
+    "orig_y": 890.0,
+    "orig_w": 270.0,
+    "orig_h": 150.0
+  },
+  "aiassistantsupervisor": {
+    "id": "aiassistantsupervisor",
+    "name": "AiAssistantSupervisor",
+    "stereo": "service",
+    "fill": "#EEF2FF",
+    "stroke": "#4F46E5",
+    "title_color": "#4338CA",
+    "stereo_color": "#6366F1",
+    "div_color": "#A5B4FC",
+    "attrs": [
+      "- modelName : text = &#x27;llama-3.3&#x27;",
+      "- confidenceThreshold : float = 0.75",
+      "- vectorStore : MongoDBAtlas"
+    ],
+    "methods": [
+      "+ handleMessage(msg) : AiResponse",
+      "+ retrieveChunks(query) : List&lt;Chunk&gt;",
+      "+ shouldEscalate(conf) : boolean"
+    ],
+    "orig_x": 80.0,
+    "orig_y": 1260.0,
+    "orig_w": 290.0,
+    "orig_h": 200.0
+  },
+  "aiconfiguration": {
+    "id": "aiconfiguration",
+    "name": "AiConfiguration",
+    "stereo": "entity",
+    "fill": "#EEF2FF",
+    "stroke": "#4F46E5",
+    "title_color": "#4338CA",
+    "stereo_color": "#6366F1",
+    "div_color": "#A5B4FC",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ autonomyMode : AutonomyMode",
+      "+ autoEscalate : boolean = true"
+    ],
+    "methods": [
+      "+ setMode(mode) : void"
+    ],
+    "orig_x": 80.0,
+    "orig_y": 1510.0,
+    "orig_w": 290.0,
+    "orig_h": 165.0
+  },
+  "knowledgedocument": {
+    "id": "knowledgedocument",
+    "name": "KnowledgeDocument",
+    "stereo": "target_doc",
+    "fill": "#EEF2FF",
+    "stroke": "#4F46E5",
+    "title_color": "#4338CA",
+    "stereo_color": "#6366F1",
+    "div_color": "#A5B4FC",
+    "attrs": [
+      "+ _id : ObjectId [PK]",
+      "+ workspaceId : text [Index]",
+      "+ title : text",
+      "+ category : text",
+      "+ status : DocumentStatus"
+    ],
+    "methods": [
+      "+ chunkDocument(size) : List&lt;Chunk&gt;",
+      "+ markAsOutdated() : void"
+    ],
+    "orig_x": 470.0,
+    "orig_y": 1260.0,
+    "orig_w": 280.0,
+    "orig_h": 190.0
+  },
+  "knowledgechunk": {
+    "id": "knowledgechunk",
+    "name": "KnowledgeChunk",
+    "stereo": "target_doc",
+    "fill": "#EEF2FF",
+    "stroke": "#4F46E5",
+    "title_color": "#4338CA",
+    "stereo_color": "#6366F1",
+    "div_color": "#A5B4FC",
+    "attrs": [
+      "+ _id : ObjectId [PK]",
+      "+ documentId : ObjectId [FK]",
+      "+ workspaceId : text [Index]",
+      "+ chunkIndex : int",
+      "+ embedding : float[1536]"
+    ],
+    "methods": [
+      "+ cosineSimilarity(vec) : float"
+    ],
+    "orig_x": 850.0,
+    "orig_y": 1260.0,
+    "orig_w": 280.0,
+    "orig_h": 180.0
+  },
+  "outboxevent": {
+    "id": "outboxevent",
+    "name": "OutboxEvent",
+    "stereo": "entity",
+    "fill": "#F8FAFC",
+    "stroke": "#475569",
+    "title_color": "#1E293B",
+    "stereo_color": "#64748B",
+    "div_color": "#CBD5E1",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ aggregateType : text",
+      "+ eventType : text",
+      "+ processed : boolean = false"
+    ],
+    "methods": [
+      "+ markProcessed() : void"
+    ],
+    "orig_x": 1250.0,
+    "orig_y": 1260.0,
+    "orig_w": 280.0,
+    "orig_h": 175.0
+  },
+  "pulseevent": {
+    "id": "pulseevent",
+    "name": "PulseEvent",
+    "stereo": "entity",
+    "fill": "#F8FAFC",
+    "stroke": "#475569",
+    "title_color": "#1E293B",
+    "stereo_color": "#64748B",
+    "div_color": "#CBD5E1",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ channel : text",
+      "+ eventName : text",
+      "+ emittedAt : timestamp"
+    ],
+    "methods": [
+      "+ broadcastSSE(stream) : void"
+    ],
+    "orig_x": 1630.0,
+    "orig_y": 1260.0,
+    "orig_w": 260.0,
+    "orig_h": 165.0
+  },
+  "auditlog": {
+    "id": "auditlog",
+    "name": "AuditLog",
+    "stereo": "entity",
+    "fill": "#F8FAFC",
+    "stroke": "#475569",
+    "title_color": "#1E293B",
+    "stereo_color": "#64748B",
+    "div_color": "#CBD5E1",
+    "attrs": [
+      "+ id : text [PK]",
+      "+ workspaceId : text [FK]",
+      "+ actorId : text",
+      "+ action : text",
+      "+ resource : text"
+    ],
+    "methods": [
+      "+ exportRecord() : text"
+    ],
+    "orig_x": 1250.0,
+    "orig_y": 1490.0,
+    "orig_w": 280.0,
+    "orig_h": 180.0
+  }
+}

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Zadesk — Direction 4 : Operational Editorial System (Mobile 390x844)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       ZADESK DIRECTION 4 MOBILE / PWA
+       Apple Human Interface Guidelines & Emil Kowalski Mobile Native Standards
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    :root {
+      --z-canvas: #FAFAF8;
+      --z-surface: #FFFFFF;
+      --z-navy-primary: #0D1B3D;
+      --z-hairline: rgba(13, 27, 61, 0.08);
+      --z-hairline-strong: rgba(13, 27, 61, 0.16);
+      --z-emerald: #059669;
+      --z-emerald-light: #ECFDF5;
+      --z-amber: #D97706;
+      --z-amber-light: #FFFBEB;
+      --z-text-primary: #0F172A;
+      --z-text-secondary: #475569;
+      --z-text-muted: #94A3B8;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--z-canvas);
+      color: var(--z-navy-primary);
+      width: 390px;
+      height: 844px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    /* --------------------------------------------------------------------------
+       1. TOPBAR NATIVE MOBILE (54px)
+       -------------------------------------------------------------------------- */
+    .mobile-header {
+      height: 54px;
+      background: var(--z-surface);
+      border-bottom: 1px solid var(--z-hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 30;
+    }
+    .header-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mobile-logo {
+      width: 28px;
+      height: 28px;
+      background: var(--z-navy-primary);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22C55E;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .mobile-brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--z-navy-primary);
+      letter-spacing: -0.02em;
+    }
+    .mobile-tenant-chip {
+      font-size: 9.5px;
+      background: #F1F5F9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mode-switch-mini {
+      background: #F1F5F9;
+      border-radius: 6px;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .ms-btn {
+      background: transparent;
+      border: none;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: var(--z-text-muted);
+      cursor: pointer;
+    }
+    .ms-btn.active {
+      background: #FFFFFF;
+      color: var(--z-navy-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .mobile-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #DCFCE7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --------------------------------------------------------------------------
+       2. CONTENEUR SCROLLABLE ERGONOMIQUE
+       -------------------------------------------------------------------------- */
+    .mobile-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      padding: 16px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* BULLETIN D'OUVERTURE DU SERVICE */
+    .editorial-brief-banner {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 2px solid var(--z-navy-primary);
+      padding-bottom: 12px;
+    }
+    .brief-super-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--z-text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .brief-main-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--z-navy-primary);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    .brief-highlight {
+      color: var(--z-amber);
+      background: rgba(217, 119, 6, 0.08);
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    /* RUBAN DE CHARGE MOBILE */
+    .mobile-tension-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .mt-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .mt-fig {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--z-navy-primary);
+    }
+    .mt-lbl {
+      font-size: 9.5px;
+      color: var(--z-text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    /* L'ÎLOT D'INTERVENTION CHIRURGICALE MOBILE */
+    .mobile-incident-card {
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-left: 4px solid var(--z-amber);
+      border-radius: 12px;
+      padding: 14px 14px 16px;
+      box-shadow: 0 1px 4px rgba(13, 27, 61, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .mic-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mic-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--z-amber);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .mic-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--z-amber);
+    }
+    .mic-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: var(--z-amber-light);
+      color: #92400E;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .mic-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      line-height: 1.3;
+    }
+    .mic-quote {
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.45;
+      background: #F8FAFC;
+      border-left: 2px solid #CBD5E1;
+      padding: 8px 10px;
+      border-radius: 0 4px 4px 0;
+    }
+    .mic-client {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .client-avatar-sq-m {
+      width: 26px;
+      height: 26px;
+      background: var(--z-navy-primary);
+      color: #FFFFFF;
+      font-family: 'Outfit';
+      font-weight: 700;
+      font-size: 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-takeover-mobile {
+      width: 100%;
+      height: 44px;
+      background: var(--z-navy-primary);
+      color: #FFFFFF;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .btn-takeover-mobile:active {
+      transform: scale(0.98);
+      background: #152C61;
+    }
+
+    /* ÉTAT CALME MOBILE */
+    .mobile-calm-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 12px;
+      text-align: center;
+      gap: 8px;
+    }
+    .calm-icon-m {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--z-emerald-light);
+      color: var(--z-emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* BAROMÈTRE DE CAPACITÉ MOBILE */
+    .mobile-capacity-card {
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mcc-left { display: flex; flex-direction: column; }
+    .mcc-title { font-size: 11px; font-weight: 700; color: var(--z-navy-primary); text-transform: uppercase; }
+    .mcc-sub { font-size: 10px; color: var(--z-text-muted); margin-top: 1px; }
+    .mcc-pill {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--z-emerald);
+      background: var(--z-emerald-light);
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    /* FILE CONTINUE MOBILE */
+    .mobile-queue-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mq-section-header {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--z-navy-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .mq-card {
+      background: var(--z-surface);
+      border: 1px solid var(--z-hairline);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.12s;
+    }
+    .mq-card:active {
+      background: #F8FAFC;
+    }
+    .mq-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .mq-name { font-weight: 700; font-size: 12px; color: var(--z-navy-primary); }
+    .mq-ref { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--z-text-muted); }
+    .mq-desc {
+      font-size: 11px;
+      color: var(--z-text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* NOTE HONNÊTE IA */
+    .mobile-ai-notice {
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 10px;
+      color: var(--z-text-muted);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* --------------------------------------------------------------------------
+       3. BOTTOM NAVIGATION BAR CANONIQUE 5 ONGLETS (60px)
+       -------------------------------------------------------------------------- */
+    .mobile-nav-bar {
+      height: 60px;
+      background: var(--z-surface);
+      border-top: 1px solid var(--z-hairline);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      flex-shrink: 0;
+      z-index: 30;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .nav-tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      text-decoration: none;
+      color: var(--z-text-muted);
+      font-size: 9px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-tab-btn.active {
+      color: var(--z-navy-primary);
+      font-weight: 700;
+    }
+    .nav-tab-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2px;
+    }
+    .nav-tab-btn.active svg {
+      stroke: var(--z-navy-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOPBAR NATIVE MOBILE -->
+  <header class="mobile-header">
+    <div class="header-brand-group">
+      <div class="mobile-logo">Z</div>
+      <div>
+        <span class="mobile-brand-title">Zadesk</span>
+        <span class="mobile-tenant-chip">Sodico</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="mode-switch-mini">
+        <button class="ms-btn active" id="btn-mob-busy" onclick="setMobileState('busy')">Affluence</button>
+        <button class="ms-btn" id="btn-mob-calm" onclick="setMobileState('calm')">Calme</button>
+      </div>
+      <div class="mobile-avatar">A</div>
+    </div>
+  </header>
+
+  <!-- 2. SCROLL VIEWPORT -->
+  <main class="mobile-viewport">
+    
+    <!-- BULLETIN ÉDITORIAL NARRATIF -->
+    <div class="editorial-brief-banner">
+      <div class="brief-super-title">
+        <span>QUART OPÉRATIONNEL • DOUALA AKWA</span>
+        <span style="color: #64748B;">[DÉMO]</span>
+      </div>
+      <h1 class="brief-main-title" id="mob-brief-text">
+        14 dossiers ouverts, dont <span class="brief-highlight">1 arbitrage immédiat</span> requis.
+      </h1>
+    </div>
+
+    <!-- RUBAN DE CHARGE -->
+    <div class="mobile-tension-bar">
+      <div class="mt-item">
+        <span class="mt-fig" id="mob-val-open">14</span>
+        <span class="mt-lbl">Ouverts</span>
+      </div>
+      <div class="mt-item">
+        <span class="mt-fig" style="color: var(--z-amber);" id="mob-val-pend">3</span>
+        <span class="mt-lbl">En attente</span>
+      </div>
+      <div class="mt-item">
+        <span class="mt-fig" style="color: var(--z-emerald);" id="mob-val-res">7</span>
+        <span class="mt-lbl">Résolus</span>
+      </div>
+    </div>
+
+    <!-- L'ÎLOT D'INTERVENTION CHIRURGICALE -->
+    <div class="mobile-incident-card" id="mob-incident-block">
+      <div class="mic-header">
+        <div class="mic-badge">
+          <span class="mic-dot"></span>
+          <span>ARBITRAGE PRIORITAIRE</span>
+        </div>
+        <div class="mic-timer">Attente : 28 min</div>
+      </div>
+
+      <div class="mic-title">
+        #TK-8021 — Colis non livré suite commande #84920
+      </div>
+
+      <div class="mic-quote">
+        « Colis introuvable à l'agence Akwa alors que le retrait était confirmé à 11h. »
+      </div>
+
+      <div class="mic-client">
+        <div class="client-avatar-sq-m">AT</div>
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--z-navy-primary);">Alain Tchakounte</div>
+          <div style="font-size: 9.5px; color: var(--z-text-muted);">Portail Client • Douala</div>
+        </div>
+      </div>
+
+      <button class="btn-takeover-mobile">
+        <span>Prendre en charge immédiatement</span>
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </button>
+    </div>
+
+    <!-- ÉTAT CALME MOBILE (ACTIVABLE VIA LE COMMUTATEUR) -->
+    <div class="mobile-calm-box" id="mob-calm-block">
+      <div class="calm-icon-m">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+      </div>
+      <div style="font-family: 'Outfit'; font-size: 15px; font-weight: 700; color: var(--z-navy-primary);">Flux totalement fluide</div>
+      <div style="font-size: 11px; color: var(--z-text-secondary); max-width: 260px;">Toutes les réclamations ont été prises en charge par les conseillers en service.</div>
+    </div>
+
+    <!-- JAUGE DE CAPACITÉ D'ÉQUIPE -->
+    <div class="mobile-capacity-card">
+      <div class="mcc-left">
+        <span class="mcc-title">Capacité de service</span>
+        <span class="mcc-sub">4/5 conseillers • Douala & Yaoundé</span>
+      </div>
+      <div class="mcc-pill">78% nominal</div>
+    </div>
+
+    <!-- FILE CONTINUE DES DOSSIERS SUIVANTS -->
+    <div class="mobile-queue-section">
+      <div class="mq-section-header">
+        <span>Dossiers suivants (3)</span>
+        <span style="font-size: 10px; color: var(--z-text-muted); font-weight: 600;">Tout voir &rarr;</span>
+      </div>
+
+      <div class="mq-card">
+        <div class="mq-row-top">
+          <span class="mq-name">Béatrice Ngo</span>
+          <span class="mq-ref">#TK-8019 • 14 min</span>
+        </div>
+        <div class="mq-desc">Demande urgente de duplicata de facture proforma #491</div>
+      </div>
+
+      <div class="mq-card">
+        <div class="mq-row-top">
+          <span class="mq-name">Mamadou Traoré</span>
+          <span class="mq-ref">#TK-8018 • Il y a 1h</span>
+        </div>
+        <div class="mq-desc">Question sur la garantie et pièces de rechange groupe</div>
+      </div>
+
+      <div class="mq-card">
+        <div class="mq-row-top">
+          <span class="mq-name">Cabinet Ekwalla</span>
+          <span class="mq-ref">#TK-8012 • 8 min</span>
+        </div>
+        <div class="mq-desc">Demande d'intervention d'un technicien à Bastos</div>
+      </div>
+    </div>
+
+    <!-- NOTE HONNÊTE IA -->
+    <div class="mobile-ai-notice">
+      Module IA en cours de paramétrage • Traitement 100% humain certifié
+    </div>
+
+  </main>
+
+  <!-- 3. BOTTOM NAVIGATION BAR OFFICIELLE VALIDÉE PHASE 1 -->
+  <nav class="mobile-nav-bar" aria-label="Navigation mobile principale">
+    <button class="nav-tab-btn active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+      <span>Accueil</span>
+    </button>
+    <button class="nav-tab-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+      <span>Conversations</span>
+    </button>
+    <button class="nav-tab-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+      <span>Demandes</span>
+    </button>
+    <button class="nav-tab-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      <span>Paramètres</span>
+    </button>
+    <button class="nav-tab-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      <span>Menu</span>
+    </button>
+  </nav>
+
+  <!-- LOGIQUE DE DÉMONSTRATION D'ÉTAT MOBILE -->
+  <script>
+    function setMobileState(state) {
+      const isBusy = (state === 'busy');
+      document.getElementById('btn-mob-busy').classList.toggle('active', isBusy);
+      document.getElementById('btn-mob-calm').classList.toggle('active', !isBusy);
+
+      const incident = document.getElementById('mob-incident-block');
+      const calm = document.getElementById('mob-calm-block');
+      const text = document.getElementById('mob-brief-text');
+      const valPend = document.getElementById('mob-val-pend');
+
+      if (isBusy) {
+        incident.style.display = 'flex';
+        calm.style.display = 'none';
+        text.innerHTML = '14 dossiers ouverts, dont <span class="brief-highlight">1 arbitrage immédiat</span> requis.';
+        valPend.textContent = '3';
+        valPend.style.color = 'var(--z-amber)';
+      } else {
+        incident.style.display = 'none';
+        calm.style.display = 'flex';
+        text.innerHTML = 'Flux SAV sous contrôle : <span style="color: var(--z-emerald);">0 arbitrage en attente</span>.';
+        valPend.textContent = '0';
+        valPend.style.color = 'var(--z-emerald)';
+      }
+    }
+  </script>
+</body>
+</html>

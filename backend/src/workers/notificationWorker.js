@@ -1,8 +1,16 @@
 import { Worker } from "bullmq";
 import { createBullMQConnection, BULLMQ_PREFIX } from "../config/bullmqRedis.js";
 import { QUEUE_NAMES } from "../queues/queueManager.js";
+import { NOTIFICATION_JOB_TYPES } from "../jobs/notificationJobs.js";
 import { prisma } from "../lib/prisma.js";
-import { sendInvitationEmail, RateLimitError, maskEmail } from "../services/zavuService.js";
+import { getRedisClient, isRedisReady } from "../config/redis.js";
+import {
+  sendInvitationEmail,
+  sendNotificationAlertEmail,
+  RateLimitError,
+  maskEmail,
+} from "../services/zavuService.js";
+import { sendWebPushToSubscriptions } from "../services/pushNotificationService.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 
@@ -49,12 +57,212 @@ export async function cleanupAcceptedInvitationDispatchState({
   } catch (_) {}
 }
 
+async function checkAndSetEmailCooldown(cooldownKey, ttlSeconds = 900) {
+  if (!isRedisReady()) return false;
+  try {
+    const redis = getRedisClient();
+    const exists = await redis.get(cooldownKey);
+    if (exists) return true; // throttled
+    await redis.set(cooldownKey, "1", "EX", ttlSeconds);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function processCustomerReplyAlertJob(job) {
+  const { workspaceId, conversationId, messageId, senderName, contentPreview } = job.data;
+
+  const conversation = await prisma.conversation.findFirst({
+    where: { id: conversationId, workspaceId },
+    include: {
+      workspace: { select: { id: true, name: true, slug: true } },
+    },
+  });
+
+  if (!conversation || !conversation.workspace) {
+    return { success: false, reason: "CONVERSATION_NOT_FOUND" };
+  }
+
+  const companyName = conversation.workspace.name;
+  const targetUrl = `/entreprises/${conversation.workspace.slug}?conv=${conversationId}`;
+  const fullUrl = `${env.FRONTEND_URL}${targetUrl}`;
+
+  const pushSubs = await prisma.pushSubscription.findMany({
+    where: {
+      workspaceId,
+      conversationId,
+      recipientType: "CUSTOMER",
+    },
+  });
+
+  let pushResult = { sent: 0, failed: 0, removed: 0 };
+  if (pushSubs.length > 0) {
+    pushResult = await sendWebPushToSubscriptions(pushSubs, {
+      title: `${companyName} vous a répondu`,
+      body: contentPreview || `${senderName || "Un conseiller"} vient de vous répondre.`,
+      url: targetUrl,
+      tag: `zalisk-msg-${messageId}`,
+      icon: "/icons/icon-192x192.png",
+    });
+  }
+
+  let emailSent = false;
+  if (pushResult.sent === 0 && conversation.customerEmail) {
+    const throttled = await checkAndSetEmailCooldown(
+      `zadesk:notif:email:customer:${conversationId}`,
+      900
+    );
+    if (!throttled) {
+      const emailRes = await sendNotificationAlertEmail({
+        to: conversation.customerEmail,
+        subject: `Nouvelle réponse de ${companyName} — Zalisk`,
+        heading: `Bonjour ${conversation.customerName || ""},\n\nLe service client de ${companyName} a répondu à votre demande :`,
+        body: `« ${contentPreview || "Consultez votre fil de discussion en ligne."} »`,
+        ctaLabel: "Voir la réponse et continuer l'échange",
+        ctaUrl: fullUrl,
+        workspaceName: companyName,
+      });
+      emailSent = Boolean(emailRes?.success);
+    }
+  }
+
+  return { success: true, pushResult, emailSent };
+}
+
+async function processAgentMessageAlertJob(job) {
+  const {
+    workspaceId,
+    conversationId,
+    messageId,
+    customerName,
+    assignedAgentId,
+    contentPreview,
+    isNewConversation,
+  } = job.data;
+
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    select: { id: true, name: true },
+  });
+  if (!workspace) {
+    return { success: false, reason: "WORKSPACE_NOT_FOUND" };
+  }
+
+  let targetUserIds = [];
+  if (assignedAgentId) {
+    targetUserIds = [assignedAgentId];
+  } else {
+    const activeProfiles = await prisma.agentProfile.findMany({
+      where: {
+        workspaceId,
+        availability: { in: ["AVAILABLE", "BUSY"] },
+      },
+      select: { userId: true },
+      take: 20,
+    });
+    if (activeProfiles.length > 0) {
+      targetUserIds = activeProfiles.map((p) => p.userId);
+    } else {
+      const members = await prisma.membership.findMany({
+        where: { workspaceId, status: "ACTIVE" },
+        select: { userId: true },
+        take: 15,
+      });
+      targetUserIds = members.map((m) => m.userId);
+    }
+  }
+
+  if (targetUserIds.length === 0) {
+    return { success: true, recipients: 0 };
+  }
+
+  const [users, profiles, allSubs] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { in: targetUserIds } },
+      select: { id: true, email: true, firstName: true },
+    }),
+    prisma.agentProfile.findMany({
+      where: { workspaceId, userId: { in: targetUserIds } },
+      select: { userId: true, notificationApp: true, notificationEmail: true },
+    }),
+    prisma.pushSubscription.findMany({
+      where: { recipientType: "AGENT", userId: { in: targetUserIds } },
+    }),
+  ]);
+
+  const profileMap = new Map(profiles.map((p) => [p.userId, p]));
+  const subsByUser = new Map();
+  for (const sub of allSubs) {
+    if (!subsByUser.has(sub.userId)) subsByUser.set(sub.userId, []);
+    subsByUser.get(sub.userId).push(sub);
+  }
+
+  const targetUrl = `/app/conversations?id=${conversationId}`;
+  const fullUrl = `${env.FRONTEND_URL}${targetUrl}`;
+
+  let totalPushSent = 0;
+  let totalEmailsSent = 0;
+
+  for (const u of users) {
+    const profile = profileMap.get(u.id);
+    const allowPush = profile ? profile.notificationApp !== false : true;
+    const allowEmail = profile ? profile.notificationEmail !== false : true;
+    const userSubs = subsByUser.get(u.id) || [];
+
+    let userPushSent = 0;
+    if (allowPush && userSubs.length > 0) {
+      const res = await sendWebPushToSubscriptions(userSubs, {
+        title: isNewConversation
+          ? `Nouveau client · ${customerName}`
+          : `${customerName} vous a écrit`,
+        body: contentPreview || "Nouveau message client sur Zalisk.",
+        url: targetUrl,
+        tag: `zalisk-msg-${messageId}`,
+        icon: "/icons/icon-192x192.png",
+      });
+      userPushSent = res.sent;
+      totalPushSent += res.sent;
+    }
+
+    if (userPushSent === 0 && allowEmail && u.email) {
+      const throttled = await checkAndSetEmailCooldown(
+        `zadesk:notif:email:agent:${u.id}:${conversationId}`,
+        900
+      );
+      if (!throttled) {
+        const emailRes = await sendNotificationAlertEmail({
+          to: u.email,
+          subject: `[${workspace.name}] ${
+            isNewConversation ? `Nouvelle demande de ${customerName}` : `Nouveau message de ${customerName}`
+          }`,
+          heading: `Bonjour ${u.firstName || "Conseiller"},\n\nLe client ${customerName} attend votre réponse sur ${workspace.name} :`,
+          body: `« ${contentPreview || "Nouveau message reçu."} »`,
+          ctaLabel: "Répondre dans Zalisk",
+          ctaUrl: fullUrl,
+          workspaceName: workspace.name,
+        });
+        if (emailRes?.success) totalEmailsSent += 1;
+      }
+    }
+  }
+
+  return { success: true, totalPushSent, totalEmailsSent };
+}
+
 /**
  * Processor for NOTIFICATIONS_QUEUE jobs.
  * Enforces strict multi-tenant boundary checks, idempotency, resilient state transitions,
  * and zero secret exposure in logs.
  */
 export async function processNotificationJob(job) {
+  if (job?.name === NOTIFICATION_JOB_TYPES.CUSTOMER_REPLY_ALERT) {
+    return processCustomerReplyAlertJob(job);
+  }
+  if (job?.name === NOTIFICATION_JOB_TYPES.AGENT_MESSAGE_ALERT) {
+    return processAgentMessageAlertJob(job);
+  }
+
   const startTime = Date.now();
   const { workspaceId, invitationId, email, role, invitedById } = job.data;
   const workerInstanceId = `worker-${process.pid}-${Date.now()}`;

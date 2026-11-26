@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import {
   MessageSquare,
   Search,
-  Sparkles,
+  Layers,
   Send,
   CheckCheck,
   AlertCircle,
@@ -32,32 +32,99 @@ import {
 import { useWorkspace } from '@/components/workspace/WorkspaceContext';
 import { agentApi } from '@/lib/api';
 import { AgentConversationItem } from '@/types/workspace';
-import { PulseConstellationCanvas } from '@/components/pulse/PulseConstellationCanvas';
+import gsap from 'gsap';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Surface,
+  Hairline,
+  Pressable,
+  StatusPill,
+  EmptyState,
+} from '@/components/workspace/design-system';
+import {
+  PulseConstellationCanvas,
+  PulseCanvasMessageEvent,
+  PulseCanvasNewNodeEvent,
+} from '@/components/pulse/PulseConstellationCanvas';
 import { PulseConversationDrawer } from '@/components/pulse/PulseConversationDrawer';
-import { PulseNotifications } from '@/components/pulse/PulseNotifications';
-import { usePulseStream } from '@/hooks/usePulseStream';
+import {
+  PulseReadStore,
+  getPulseReadStorageKey,
+  loadPulseReadStore,
+  savePulseReadStore,
+  computeConversationUnreadCount,
+  markConversationAsReadInStore,
+  incrementConversationUnreadInStore,
+  matchesConversationFilter,
+  matchesConversationSearch,
+  applyIncomingPulseEventToConversations,
+  getConversationPreview,
+  getConversationLastTimestamp,
+} from '@/components/pulse/pulseState';
 
 export interface ConversationsViewProps {
   previewConversations?: AgentConversationItem[];
 }
 
 export function ConversationsView({ previewConversations }: ConversationsViewProps = {}) {
-  const { currentWorkspace, userRole, user } = useWorkspace();
+  const {
+    currentWorkspace,
+    userRole,
+    user,
+    sseStatus: globalSseStatus,
+    setActiveViewedConversationId,
+    dismissPulseConversationNotifications,
+  } = useWorkspace();
   const [conversations, setConversations] = useState<AgentConversationItem[]>(previewConversations || []);
   const [activeConvId, setActiveConvId] = useState<string | null>(previewConversations?.[0]?.id || null);
   const [loading, setLoading] = useState(!previewConversations);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mode de visualisation : Constellation Pulse vs Liste classique
-  const [viewMode, setViewMode] = useState<'pulse' | 'classic'>(
-    previewConversations ? 'classic' : 'pulse'
-  );
+  // Mode de visualisation : Cockpit Opérationnel (Défaut) vs Constellation Pulse
+  const [viewMode, setViewMode] = useState<'classic' | 'pulse'>('classic');
   const [isPulseDrawerOpen, setIsPulseDrawerOpen] = useState(false);
-  const [pulseEvent, setPulseEvent] = useState<{ conversationId: string; timestamp: number } | null>(null);
-  const [newNodeEvent, setNewNodeEvent] = useState<{ conversationId: string; timestamp: number } | null>(null);
-  // Volet Fiche Client & Ticket
+  const [pulseEvent, setPulseEvent] = useState<PulseCanvasMessageEvent | null>(null);
+  const [newNodeEvent, setNewNodeEvent] = useState<PulseCanvasNewNodeEvent | null>(null);
+
+  // Persistance des statuts lu/non-lu par espace & utilisateur
+  const readStorageKey = useMemo(
+    () => (previewConversations ? null : getPulseReadStorageKey(currentWorkspace?.id, user?.id)),
+    [previewConversations, currentWorkspace?.id, user?.id]
+  );
+  const [readStore, setReadStore] = useState<PulseReadStore>({ readAt: {}, unreadCounts: {} });
+
+  useEffect(() => {
+    setReadStore(loadPulseReadStore(readStorageKey));
+  }, [readStorageKey]);
+
+  const unreadCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    conversations.forEach((conv) => {
+      map[conv.id] = computeConversationUnreadCount(conv, readStore);
+    });
+    return map;
+  }, [conversations, readStore]);
+
+  const markConversationRead = useCallback(
+    (conversationId: string, timestampMs?: number) => {
+      if (!conversationId) return;
+      setReadStore((prev) => {
+        const next = markConversationAsReadInStore(prev, conversationId, timestampMs);
+        savePulseReadStore(readStorageKey, next);
+        return next;
+      });
+    },
+    [readStorageKey]
+  );
+  // Volet Fiche Client & Ticket (ouvert par défaut sur Desktop >= 1280px)
   const [isCustomerPanelOpen, setIsCustomerPanelOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1280) {
+      setIsCustomerPanelOpen(true);
+    }
+  }, []);
 
   // État du fil de discussion actif (séparation stricte de la boîte de réception)
   const [activeThreadMessages, setActiveThreadMessages] = useState<any[]>([]);
@@ -143,6 +210,27 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
 
   const activeConvIdRef = useRef(activeConvId);
   activeConvIdRef.current = activeConvId;
+  const processedPulseEventIdsRef = useRef<Set<string>>(new Set());
+  const isThreadActivelyVisible =
+    Boolean(activeConvId) &&
+    (viewMode === 'pulse'
+      ? isPulseDrawerOpen
+      : isMobileViewingThread || (typeof window !== 'undefined' && window.innerWidth >= 768));
+  const isThreadActivelyVisibleRef = useRef(isThreadActivelyVisible);
+  isThreadActivelyVisibleRef.current = isThreadActivelyVisible;
+
+  // Deep-link ?id=<conversationId> (depuis une notification Push ou Email)
+  useEffect(() => {
+    if (previewConversations || typeof window === 'undefined') return;
+    const convParam = new URLSearchParams(window.location.search).get('id');
+    if (convParam) {
+      setActiveConvId(convParam);
+      activeConvIdRef.current = convParam;
+      if (window.innerWidth < 768) {
+        setIsMobileViewingThread(true);
+      }
+    }
+  }, [previewConversations]);
 
   // Auto-scroll intelligent dans le fil de discussion
   const scrollToBottom = useCallback((smooth = true) => {
@@ -185,13 +273,18 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
       }
       try {
         const data = await agentApi.getConversations(currentWorkspace.id);
-        const items = Array.isArray(data) ? data : ((data as any)?.conversations || []);
+        const rawItems = Array.isArray(data) ? data : ((data as any)?.conversations || []);
+        const uniqueById = new Map<string, AgentConversationItem>();
+        rawItems.forEach((item: AgentConversationItem) => {
+          if (item && item.id) uniqueById.set(item.id, item);
+        });
+        const items = Array.from(uniqueById.values());
         setConversations(items);
         if (items.length > 0) {
           const targetId = selectId || activeConvIdRef.current;
           if (targetId && items.some((c: any) => c.id === targetId)) {
             setActiveConvId(targetId);
-          } else {
+          } else if (!activeConvIdRef.current) {
             setActiveConvId(items[0].id);
           }
         }
@@ -230,6 +323,21 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
     }
   }, [activeThreadMessages, scrollToBottom]);
 
+  // Orchestration GSAP d'arrivée des messages dans le fil de discussion
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !threadScrollContainerRef.current) return;
+
+    const bubbles = threadScrollContainerRef.current.querySelectorAll('.conversation-bubble');
+    if (bubbles.length > 0) {
+      gsap.fromTo(
+        bubbles,
+        { opacity: 0, y: 6 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: 'power2.out' }
+      );
+    }
+  }, [activeConvId, activeThreadMessages.length]);
+
   useEffect(() => {
     if (previewConversations) {
       setConversations(previewConversations);
@@ -242,26 +350,85 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
     fetchConversations();
   }, [previewConversations, fetchConversations]);
 
-  // Flux SSE temps réel avec reconnexion automatique et récupération d'état complet
+  // Flux SSE temps réel avec déduplication stricte et mise à jour incrémentale
   const handlePulseEvent = useCallback(
     (event: any) => {
+      if (!event || !event.type) return;
+      if (event.id) {
+        if (processedPulseEventIdsRef.current.has(event.id)) {
+          return;
+        }
+        processedPulseEventIdsRef.current.add(event.id);
+        if (processedPulseEventIdsRef.current.size > 250) {
+          const first = processedPulseEventIdsRef.current.values().next().value;
+          if (first) processedPulseEventIdsRef.current.delete(first);
+        }
+      }
+
       if (event.type === 'PULSE_MESSAGE_CREATED' && event.conversationId) {
-        setPulseEvent({ conversationId: event.conversationId, timestamp: Date.now() });
+        const isClientMessage =
+          typeof event.isClientMessage === 'boolean'
+            ? event.isClientMessage
+            : event.senderType === 'CUSTOMER';
+        const isCurrentlyViewed =
+          activeConvIdRef.current === event.conversationId && isThreadActivelyVisibleRef.current;
+
+        setConversations((prev) => applyIncomingPulseEventToConversations(prev, event));
+
+        if (isClientMessage && !event.isInternalNote) {
+          if (isCurrentlyViewed) {
+            const msgTs = event.timestamp ? new Date(event.timestamp).getTime() : Date.now();
+            markConversationRead(event.conversationId, msgTs);
+          } else {
+            setReadStore((prev) => {
+              const next = incrementConversationUnreadInStore(prev, event.conversationId);
+              savePulseReadStore(readStorageKey, next);
+              return next;
+            });
+          }
+        } else if (!event.isInternalNote && event.senderType !== 'AI') {
+          markConversationRead(event.conversationId);
+        }
+
+        setPulseEvent({
+          eventId: event.id,
+          conversationId: event.conversationId,
+          timestamp: Date.now(),
+          isClientMessage,
+          senderType: event.senderType,
+        });
+
         fetchConversations(undefined, true);
         if (event.conversationId === activeConvIdRef.current) {
           loadActiveConversationThread(event.conversationId, true);
         }
       } else if (event.type === 'PULSE_CONVERSATION_CREATED' && event.conversationId) {
-        setNewNodeEvent({ conversationId: event.conversationId, timestamp: Date.now() });
-        fetchConversations(event.conversationId, true);
-      } else if (
-        event.type === 'PULSE_CONVERSATION_UPDATED' ||
-        event.type === 'PULSE_CONVERSATION_READ'
-      ) {
+        setConversations((prev) => applyIncomingPulseEventToConversations(prev, event));
+        setReadStore((prev) => {
+          const next = incrementConversationUnreadInStore(prev, event.conversationId);
+          savePulseReadStore(readStorageKey, next);
+          return next;
+        });
+        setNewNodeEvent({
+          eventId: event.id,
+          conversationId: event.conversationId,
+          timestamp: Date.now(),
+        });
+        // Conserver la conversation en cours de lecture sans voler le focus de l'agent
+        fetchConversations(undefined, true);
+      } else if (event.type === 'PULSE_CONVERSATION_READ' && event.conversationId) {
+        markConversationRead(event.conversationId);
+        fetchConversations(undefined, true);
+      } else if (event.type === 'PULSE_CONVERSATION_UPDATED') {
         fetchConversations(undefined, true);
       }
     },
-    [fetchConversations, loadActiveConversationThread]
+    [
+      fetchConversations,
+      loadActiveConversationThread,
+      markConversationRead,
+      readStorageKey,
+    ]
   );
 
   const handleFullSync = useCallback(async () => {
@@ -271,16 +438,63 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
     }
   }, [fetchConversations, loadActiveConversationThread]);
 
-  const {
-    status: sseStatus,
-    notifications,
-    dismissNotification,
-  } = usePulseStream({
-    workspaceId: currentWorkspace?.id,
-    enabled: !previewConversations && Boolean(currentWorkspace?.id),
-    onFullSyncNeeded: handleFullSync,
-    onEvent: handlePulseEvent,
-  });
+  const sseStatus = previewConversations ? 'connected' : globalSseStatus;
+
+  // Informer le contexte global & marquer la conversation comme lue uniquement lorsque le fil est visible
+  useEffect(() => {
+    if (previewConversations) return;
+    if (activeConvId && isThreadActivelyVisible) {
+      setActiveViewedConversationId(activeConvId);
+      dismissPulseConversationNotifications(activeConvId);
+      const current = conversations.find((c) => c.id === activeConvId);
+      const latestTs = current ? getConversationLastTimestamp(current) : Date.now();
+      markConversationRead(activeConvId, latestTs);
+    } else {
+      setActiveViewedConversationId(null);
+    }
+    return () => {
+      setActiveViewedConversationId(null);
+    };
+  }, [
+    activeConvId,
+    isThreadActivelyVisible,
+    previewConversations,
+    conversations,
+    setActiveViewedConversationId,
+    dismissPulseConversationNotifications,
+    markConversationRead,
+  ]);
+
+  // S'abonner au flux Pulse global diffusé par WorkspaceContext
+  useEffect(() => {
+    if (previewConversations || typeof window === 'undefined') return;
+    const onPulseEvent = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail) handlePulseEvent(detail);
+    };
+    const onPulseSync = () => {
+      handleFullSync();
+    };
+    const onSelectConv = (e: Event) => {
+      const convId = (e as CustomEvent).detail?.conversationId;
+      if (convId) {
+        setActiveConvId(convId);
+        setIsMobileViewingThread(true);
+        if (viewMode === 'pulse') {
+          setIsPulseDrawerOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('zadesk:pulse-event', onPulseEvent);
+    window.addEventListener('zadesk:pulse-sync', onPulseSync);
+    window.addEventListener('zadesk:select-conversation', onSelectConv);
+    return () => {
+      window.removeEventListener('zadesk:pulse-event', onPulseEvent);
+      window.removeEventListener('zadesk:pulse-sync', onPulseSync);
+      window.removeEventListener('zadesk:select-conversation', onSelectConv);
+    };
+  }, [previewConversations, handlePulseEvent, handleFullSync, viewMode]);
 
   const activeConv = conversations.find((c) => c.id === activeConvId) || conversations[0] || null;
 
@@ -292,11 +506,46 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
       }
     : null;
 
-  const handleDrawerSendMessage = async (text: string, internalNote: boolean) => {
-    if (!activeConv || !currentWorkspace || sendingMessage) return;
+  const handleDrawerSendMessage = async (text: string, internalNote: boolean): Promise<boolean> => {
+    if (!activeConv || sendingMessage) return false;
     setSendingMessage(true);
+    setFeedback(null);
+
+    if (previewConversations) {
+      const newMsg = {
+        id: `preview-msg-${Date.now()}`,
+        senderType: (internalNote ? 'INTERNAL_NOTE' : 'AGENT') as 'INTERNAL_NOTE' | 'AGENT',
+        senderName: user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Agent SAV',
+        content: text.trim(),
+        createdAt: new Date().toISOString(),
+        isInternalNote: internalNote,
+      };
+      setActiveThreadMessages((prev) => [...prev, newMsg]);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === activeConv.id
+            ? {
+                ...c,
+                lastMessage: internalNote ? c.lastMessage : text.trim(),
+                lastMessageAt: newMsg.createdAt,
+                messages: [...(c.messages || []), newMsg],
+              }
+            : c
+        )
+      );
+      markConversationRead(activeConv.id, Date.now());
+      setSendingMessage(false);
+      return true;
+    }
+
+    if (!currentWorkspace) {
+      setSendingMessage(false);
+      return false;
+    }
+
+    const tempId = `temp-${Date.now()}`;
     const optimisticMsg = {
-      id: `temp-${Date.now()}`,
+      id: tempId,
       senderType: (internalNote ? 'INTERNAL_NOTE' : 'AGENT') as any,
       senderName: user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Agent SAV',
       content: text.trim(),
@@ -306,31 +555,33 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
     setActiveThreadMessages((prev) => [...prev, optimisticMsg]);
     try {
       await agentApi.sendMessage(currentWorkspace.id, activeConv.id, {
-        content: text,
+        content: text.trim(),
         isInternalNote: internalNote,
       });
+      markConversationRead(activeConv.id, Date.now());
       await Promise.all([
         fetchConversations(activeConv.id, true),
         loadActiveConversationThread(activeConv.id, true),
       ]);
+      return true;
     } catch (err: any) {
-      console.error('Drawer send message error:', err);
+      setActiveThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setFeedback({
+        type: 'error',
+        text: err?.message || "Impossible d'envoyer le message pour le moment.",
+      });
+      return false;
     } finally {
       setSendingMessage(false);
     }
   };
 
   const filteredConversations = conversations.filter((c) => {
-    if (filterStatus !== 'ALL' && c.status !== filterStatus) return false;
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      return (
-        c.customerName.toLowerCase().includes(q) ||
-        (c.customerPhone && c.customerPhone.includes(q)) ||
-        (c.lastMessage && c.lastMessage.toLowerCase().includes(q))
-      );
-    }
-    return true;
+    const unread = unreadCounts[c.id] ?? 0;
+    return (
+      matchesConversationFilter(c, unread, filterStatus) &&
+      matchesConversationSearch(c, searchTerm)
+    );
   });
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -365,7 +616,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
         type: 'success',
         text: isInternalNote
           ? 'Note interne enregistrée dans le fil.'
-          : 'Message transmis en direct sur le canal WhatsApp.',
+          : 'Message transmis au client via Zalisk.',
       });
       setSendingMessage(false);
       return;
@@ -388,6 +639,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
         isInternalNote,
       });
 
+      markConversationRead(activeConv.id, Date.now());
       await Promise.all([
         fetchConversations(activeConv.id, true),
         loadActiveConversationThread(activeConv.id, true),
@@ -396,7 +648,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
         type: 'success',
         text: isInternalNote
           ? 'Note interne confidentielle enregistrée.'
-          : 'Message enregistré sur la plateforme Zadesk.',
+          : 'Message enregistré sur la plateforme Zalisk.',
       });
     } catch (err: any) {
       setFeedback({
@@ -439,213 +691,171 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
   };
 
   return (
-    <div className="h-[calc(100dvh-5.5rem)] sm:h-[calc(100dvh-7.5rem)] flex flex-col space-y-3 sm:space-y-4 animate-fade-in">
-      {/* Header Bar — masqué sur mobile lors de la consultation d'un fil pour dédier 100% de la hauteur à la discussion */}
-      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 ${
+    <div className="h-[calc(100dvh-5.5rem)] sm:h-[calc(100dvh-6.5rem)] flex flex-col space-y-3">
+      {/* Barre d'outils compacte (sans en-tête redondant) */}
+      <div className={`flex flex-wrap items-center justify-between gap-2.5 shrink-0 ${
         isMobileViewingThread ? 'hidden md:flex' : 'flex'
       }`}>
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5 tracking-tight">
-              <MessageSquare className="w-5 h-5 text-emerald-600" />
-              <span>Mes Conversations SAV</span>
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Visualisation temps réel, constellation dynamique et traitement unifié des flux clients.
-            </p>
-          </div>
-
-          {/* Segmented View Mode Switcher */}
-          <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200 shrink-0">
-            <button
-              onClick={() => setViewMode('pulse')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'pulse'
-                  ? 'bg-[#0D1B3D] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Constellation Pulse</span>
-            </button>
-            <button
-              onClick={() => setViewMode('classic')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'classic'
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
-              <span>Liste Classique</span>
-            </button>
-          </div>
+        <div className="inline-flex items-center p-0.5 bg-[#F4F3EF] rounded-lg border border-[#E5E4DF] shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode('classic')}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              viewMode === 'classic'
+                ? 'bg-white text-[#0D1B3D] font-semibold shadow-sm'
+                : 'text-slate-600 hover:text-[#0D1B3D]'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Boîte de réception</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setViewMode('pulse');
+              setIsPulseDrawerOpen(false);
+            }}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              viewMode === 'pulse'
+                ? 'bg-white text-[#0D1B3D] font-semibold shadow-sm'
+                : 'text-slate-600 hover:text-[#0D1B3D]'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Constellation Pulse</span>
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* SSE Live Status Indicator */}
           {!previewConversations && (
             <div
-              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold flex items-center gap-1.5 border ${
-                sseStatus === 'connected'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : sseStatus === 'connecting'
-                  ? 'bg-amber-50 text-amber-700 border-amber-200'
-                  : 'bg-slate-100 text-slate-500 border-slate-200'
-              }`}
+              className="px-2.5 h-8 rounded-lg text-[11px] font-medium flex items-center gap-1.5 border border-[#E5E4DF] bg-white text-slate-600"
               title={
                 sseStatus === 'connected'
-                  ? 'Connecté au flux d’événements SSE temps réel'
+                  ? 'Connecté au flux temps réel'
                   : sseStatus === 'connecting'
-                  ? 'Connexion au serveur SSE en cours...'
-                  : 'Déconnecté du flux SSE'
+                  ? 'Connexion en cours...'
+                  : 'Hors ligne'
               }
             >
               <span
-                className={`w-2 h-2 rounded-full ${
-                  sseStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
+                className={`w-1.5 h-1.5 rounded-full ${
+                  sseStatus === 'connected'
+                    ? 'bg-[#22C55E]'
+                    : sseStatus === 'connecting'
+                    ? 'bg-amber-500'
+                    : 'bg-slate-300'
                 }`}
               />
               <span className="hidden sm:inline">
                 {sseStatus === 'connected'
-                  ? 'SSE En direct'
+                  ? 'Flux temps réel'
                   : sseStatus === 'connecting'
-                  ? 'Connexion...'
+                  ? 'Connexion…'
                   : 'Hors ligne'}
               </span>
             </div>
           )}
 
-          {/* Action : Tester Guichet Client */}
           {currentWorkspace?.slug && (
             <Link
               href={`/entreprises/${currentWorkspace.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-              title="Ouvrir le portail SAV public de votre entreprise dans un nouvel onglet"
+              className="px-3 h-8 rounded-lg bg-white hover:bg-[#F4F3EF] text-[#0D1B3D] border border-[#E5E4DF] text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Ouvrir le guichet SAV public"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="hidden sm:inline">Guichet SAV Client ↗</span>
+              <span>Guichet public</span>
+              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
             </Link>
           )}
 
           <button
+            type="button"
             onClick={() => fetchConversations()}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-600 border border-slate-200 cursor-pointer shadow-2xs transition-colors"
+            className="w-8 h-8 rounded-lg bg-white hover:bg-[#F4F3EF] text-slate-600 border border-[#E5E4DF] cursor-pointer flex items-center justify-center transition-colors"
             title="Actualiser les conversations"
+            aria-label="Actualiser les conversations"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#0D1B3D]' : ''}`} />
           </button>
         </div>
       </div>
 
       {viewMode === 'pulse' ? (
         /* ========================================================= */
-        /* VUE CONSTELLATION PULSE (Interface Immersive)             */
+        /* VUE CONSTELLATION PULSE 3D (Plein espace + Drawer overlay) */
         /* ========================================================= */
-        <div className="flex-1 min-h-0 relative rounded-3xl overflow-hidden border border-slate-800 bg-[#050B17] shadow-2xl flex flex-col">
-          {/* Top Floating Filter & Search HUD inside Pulse */}
-          <div className="p-3.5 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shrink-0 z-10">
-            {/* Search */}
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Rechercher par client, mot-clé, ticket..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-slate-900/90 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
+        <Surface
+          variant="panel"
+          className="flex-1 min-h-0 relative rounded-xl overflow-hidden border border-[#E5E4DF] bg-[#FAFAF8]"
+        >
+          <PulseConstellationCanvas
+            conversations={conversations}
+            unreadCounts={unreadCounts}
+            activeConversationId={activeConvId}
+            onSelectConversation={(id) => {
+              setActiveConvId(id);
+              const selected = conversations.find((c) => c.id === id);
+              markConversationRead(id, selected ? getConversationLastTimestamp(selected) : Date.now());
+            }}
+            onOpenConversation={(id) => {
+              setActiveConvId(id);
+              setIsPulseDrawerOpen(true);
+              const selected = conversations.find((c) => c.id === id);
+              markConversationRead(id, selected ? getConversationLastTimestamp(selected) : Date.now());
+            }}
+            pulseEvent={pulseEvent}
+            newNodeEvent={newNodeEvent}
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            statusFilter={filterStatus}
+            onStatusFilterChange={setFilterStatus}
+            isDrawerOpen={isPulseDrawerOpen && Boolean(activeConvWithThread)}
+            onResetFilters={() => {
+              setSearchTerm('');
+              setFilterStatus('ALL');
+            }}
+          />
 
-            {/* Status Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-              {[
-                { id: 'ALL', label: 'Toutes les conversations' },
-                { id: 'UNREAD', label: 'Non lues' },
-                { id: 'ACTIVE', label: 'En cours' },
-                { id: 'WAITING_CUSTOMER', label: 'Attente client' },
-                { id: 'RESOLVED', label: 'Résolues' },
-              ].map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setFilterStatus(filter.id)}
-                  className={`px-3 py-1 rounded-xl text-[11px] font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
-                    filterStatus === filter.id
-                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                      : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Interactive Canvas Viewport */}
-          <div className="flex-1 relative w-full h-full min-h-0">
-            <PulseConstellationCanvas
-              conversations={conversations}
-              activeConversationId={activeConvId}
-              onSelectConversation={(id) => {
-                setActiveConvId(id);
-                setIsPulseDrawerOpen(true);
-              }}
-              pulseEvent={pulseEvent}
-              newNodeEvent={newNodeEvent}
-              searchTerm={searchTerm}
-              statusFilter={filterStatus}
-            />
-
-            {/* Conversation Drawer */}
-            <PulseConversationDrawer
-              conversation={activeConvWithThread}
-              isOpen={isPulseDrawerOpen && Boolean(activeConvWithThread)}
-              onClose={() => setIsPulseDrawerOpen(false)}
-              onSendMessage={handleDrawerSendMessage}
-              sendingMessage={sendingMessage}
-              cannedResponses={cannedResponsesList}
-              onOpenLinkTicketModal={() => setIsLinkTicketModalOpen(true)}
-            />
-
-            {/* Floating Live Notifications */}
-            <PulseNotifications
-              notifications={notifications}
-              onSelectConversation={(id) => {
-                setActiveConvId(id);
-                setIsPulseDrawerOpen(true);
-              }}
-              onDismiss={dismissNotification}
-            />
-          </div>
-        </div>
+          <PulseConversationDrawer
+            conversation={activeConvWithThread}
+            isOpen={isPulseDrawerOpen && Boolean(activeConvWithThread)}
+            onClose={() => setIsPulseDrawerOpen(false)}
+            onSendMessage={handleDrawerSendMessage}
+            sendingMessage={sendingMessage}
+            loadingThread={loadingThread}
+            feedback={feedback}
+            onDismissFeedback={() => setFeedback(null)}
+            cannedResponses={cannedResponsesList}
+            onOpenLinkTicketModal={() => setIsLinkTicketModalOpen(true)}
+          />
+        </Surface>
       ) : (
         /* ========================================================= */
         /* VUE CLASSIQUE : COCKPIT DE MESSAGERIE DUAL-PANE (2 Volets) */
         /* ========================================================= */
-        <div className="flex-1 flex flex-col md:flex-row gap-3 sm:gap-4 min-h-0 overflow-hidden">
-          {/* VOLET 1 : Boîte de Réception Agile (Gauche) */}
-          <div
-            className={`w-full md:w-[350px] lg:w-[380px] xl:w-[410px] rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 flex flex-col min-h-0 overflow-hidden shadow-sm shrink-0 ${
+        <div className="flex-1 flex flex-col md:flex-row gap-3 min-h-0 overflow-hidden">
+          {/* VOLET 1 : Liste des files (sobre, filets #E5E4DF, zéro empilement de badges) */}
+          <Surface
+            variant="panel"
+            className={`w-full md:w-[310px] lg:w-[330px] flex flex-col min-h-0 overflow-hidden shrink-0 rounded-xl border border-[#E5E4DF] ${
               isMobileViewingThread ? 'hidden md:flex' : 'flex'
             }`}
           >
-            {/* Header / Recherche & Filtres Rapides */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-100 space-y-2.5 shrink-0 bg-slate-50/50">
+            <div className="p-3 border-b border-[#E5E4DF] space-y-3 shrink-0 bg-white">
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Rechercher client, numéro, message..."
+                  placeholder="Rechercher client, contact, #ticket…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-800 placeholder:text-slate-400"
+                  className="w-full h-9 pl-9 pr-3 bg-[#FAFAF8] border border-[#E5E4DF] rounded-lg text-xs focus:outline-none focus:border-[#0D1B3D] text-[#0D1B3D] placeholder:text-slate-400"
                 />
               </div>
 
-              {/* Filtres de statut épurés */}
-              <div className="flex items-center gap-1.5 overflow-x-auto overscroll-contain scrollbar-none pb-0.5">
+              <div className="flex items-center gap-3.5 overflow-x-auto overscroll-contain scrollbar-none -mb-3 border-b border-transparent text-xs">
                 {[
                   { id: 'ALL', label: 'Toutes' },
                   { id: 'UNREAD', label: 'Non lues' },
@@ -655,11 +865,12 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                 ].map((st) => (
                   <button
                     key={st.id}
+                    type="button"
                     onClick={() => setFilterStatus(st.id)}
-                    className={`px-3 py-1.5 sm:px-2.5 sm:py-1 rounded-xl text-[11px] font-bold tracking-tight transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
+                    className={`pb-2.5 border-b-2 text-xs transition-colors cursor-pointer whitespace-nowrap ${
                       filterStatus === st.id
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'bg-white text-slate-500 hover:bg-slate-100 active:bg-slate-200 border border-slate-200'
+                        ? 'border-[#0D1B3D] text-[#0D1B3D] font-semibold'
+                        : 'border-transparent text-slate-500 hover:text-[#0D1B3D] font-medium'
                     }`}
                   >
                     {st.label}
@@ -668,16 +879,15 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
               </div>
             </div>
 
-            {/* Liste des conversations aérées */}
-            <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-slate-100">
+            <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-[#F0EFEA]">
               {loading ? (
                 <div className="p-8 text-center text-xs text-slate-400">
-                  <RefreshCw className="w-5 h-5 animate-spin text-emerald-600 mx-auto mb-2" />
-                  <span>Chargement des conversations...</span>
+                  <RefreshCw className="w-5 h-5 animate-spin text-[#0D1B3D] mx-auto mb-2" />
+                  <span>Chargement des conversations…</span>
                 </div>
               ) : filteredConversations.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-400 space-y-3">
-                  <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                  <div className="w-10 h-10 rounded-xl bg-[#F4F3EF] flex items-center justify-center mx-auto text-slate-400">
                     <MessageSquare className="w-5 h-5" />
                   </div>
                   <p className="font-medium text-slate-500">Aucune conversation trouvée.</p>
@@ -686,185 +896,174 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                       href={`/entreprises/${currentWorkspace.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 text-xs font-bold border border-emerald-200 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAFAF8] text-[#0D1B3D] text-xs font-medium border border-[#E5E4DF] transition-colors cursor-pointer"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Ouvrir Guichet Client</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Ouvrir le guichet public</span>
                     </Link>
                   )}
                 </div>
               ) : (
                 filteredConversations.map((conv) => {
                   const isSelected = activeConv?.id === conv.id;
-                  const channel = conv.externalChannel || 'PORTAL';
-                  const isWhatsApp = channel.toUpperCase().includes('WHATSAPP');
+                  const unread = unreadCounts[conv.id] ?? 0;
+                  const previewText = getConversationPreview(conv) || 'Nouvelle conversation';
+                  const statusLabel =
+                    conv.status === 'RESOLVED' || conv.status === 'CLOSED'
+                      ? 'Résolue'
+                      : conv.status === 'WAITING_CUSTOMER'
+                      ? 'Attente client'
+                      : conv.status === 'OPEN'
+                      ? 'À assigner'
+                      : 'En cours';
 
                   return (
-                    <div
+                    <button
                       key={conv.id}
+                      type="button"
                       onClick={() => {
                         setActiveConvId(conv.id);
                         setIsMobileViewingThread(true);
+                        markConversationRead(conv.id, getConversationLastTimestamp(conv));
                       }}
-                      className={`p-3.5 sm:p-4 transition-all cursor-pointer flex items-start gap-3 relative active:bg-slate-100/90 ${
-                        isSelected
-                          ? 'bg-emerald-50/70 border-l-4 border-l-emerald-600'
-                          : 'hover:bg-slate-50/80'
+                      className={`w-full relative text-left px-3.5 py-3 transition-colors cursor-pointer flex items-start gap-3 ${
+                        isSelected ? 'bg-[#FAFAF8]' : 'bg-white hover:bg-[#FAFAF8]/60'
                       }`}
                     >
-                      {/* Avatar avec badge initiales */}
-                      <div className="relative shrink-0">
+                      {isSelected && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r bg-[#0D1B3D]"
+                        />
+                      )}
+
+                      <div className="relative shrink-0 mt-0.5">
                         <div
-                          className={`w-11 h-11 rounded-2xl font-bold text-xs flex items-center justify-center shadow-xs border ${
+                          className={`w-9 h-9 rounded-lg font-bold text-xs flex items-center justify-center ${
                             isSelected
-                              ? 'bg-emerald-600 text-white border-emerald-600'
-                              : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              ? 'bg-[#0D1B3D] text-white'
+                              : 'bg-[#F4F3EF] text-[#0D1B3D]'
                           }`}
                         >
                           {conv.customerName.charAt(0).toUpperCase()}
                         </div>
                         <span
-                          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                          className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-white ${
                             conv.status === 'RESOLVED' || conv.status === 'CLOSED'
-                              ? 'bg-slate-400'
+                              ? 'bg-slate-300'
                               : conv.status === 'WAITING_CUSTOMER'
                               ? 'bg-amber-400'
-                              : 'bg-emerald-500'
+                              : 'bg-[#22C55E]'
                           }`}
                         />
                       </div>
 
-                      {/* Infos conversation */}
                       <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex items-center justify-between gap-1">
-                          <h4 className="text-xs font-bold text-slate-900 truncate">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className={`text-[13px] truncate ${unread > 0 ? 'font-bold text-[#0D1B3D]' : 'font-semibold text-[#0D1B3D]'}`}>
                             {conv.customerName}
                           </h4>
-                          <span className="text-[10px] text-slate-400 font-mono shrink-0">
-                            {conv.lastMessageAt
-                              ? new Date(conv.lastMessageAt).toLocaleTimeString('fr-FR', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })
-                              : ''}
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {unread > 0 && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-[#22C55E] text-white text-[10px] font-bold tabular-nums leading-none">
+                                {unread > 99 ? '99+' : unread}
+                              </span>
+                            )}
+                            <span className="text-[11px] text-slate-400 tabular-nums">
+                              {conv.lastMessageAt
+                                ? new Date(conv.lastMessageAt).toLocaleTimeString('fr-FR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : ''}
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Aperçu du dernier message sur 2 lignes claires */}
-                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                          {conv.lastMessage || 'Nouvelle conversation initialisée'}
+                        <p className="text-xs text-slate-500 line-clamp-1">
+                          {previewText}
                         </p>
 
-                        {/* Badges de métadonnées (Canal, Catégorie, Ticket) */}
-                        <div className="flex items-center gap-1.5 pt-0.5">
-                          {isWhatsApp ? (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                              WhatsApp
-                            </span>
-                          ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200/80">
-                              Portail Web
-                            </span>
-                          )}
-
-                          {conv.category && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-medium bg-slate-100 text-slate-600 truncate max-w-[130px]">
-                              {conv.category}
-                            </span>
-                          )}
-
+                        <div className="flex items-center justify-between pt-0.5 text-[11px] text-slate-400">
+                          <span className="truncate">
+                            {statusLabel}
+                            {conv.category ? ` · ${conv.category}` : ''}
+                          </span>
                           {conv.ticket && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold font-mono bg-emerald-100 text-emerald-800">
-                              #{conv.ticket.reference}
+                            <span className="font-mono text-slate-600 font-medium shrink-0 ml-2">
+                              {conv.ticket.reference}
                             </span>
                           )}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })
               )}
             </div>
-          </div>
+          </Surface>
 
-          {/* VOLET 2 : Studio de Discussion Grand Format (Droite) */}
-          <div
-            className={`flex-1 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 flex flex-col min-h-0 overflow-hidden shadow-sm relative ${
+          {/* VOLET 2 : Fil de discussion central (Canvas Lin #FAFAF8 + Blanc + Midnight Navy) */}
+          <Surface
+            variant="panel"
+            className={`flex-1 flex flex-col min-h-0 overflow-hidden rounded-xl border border-[#E5E4DF] relative ${
               !isMobileViewingThread ? 'hidden md:flex' : 'flex'
             }`}
           >
             {activeConv ? (
               <>
-                {/* En-tête de Conversation Spacieux */}
-                <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0">
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="px-4 h-14 border-b border-[#E5E4DF] bg-white flex items-center justify-between shrink-0 z-10">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <button
                       type="button"
                       onClick={() => setIsMobileViewingThread(false)}
-                      className="md:hidden p-2 -ml-1 text-slate-600 hover:text-slate-900 active:bg-slate-200 rounded-xl transition-colors cursor-pointer shrink-0"
+                      className="md:hidden w-9 h-9 -ml-1.5 text-slate-600 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] rounded-lg flex items-center justify-center transition-colors cursor-pointer shrink-0 touch-manipulation"
                       title="Retour à la liste"
                       aria-label="Retour à la liste des conversations"
                     >
                       <ArrowLeft className="w-5 h-5" />
                     </button>
 
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs sm:text-sm border border-emerald-200 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#0D1B3D] text-white flex items-center justify-center font-bold text-xs shrink-0">
                       {activeConv.customerName.charAt(0).toUpperCase()}
                     </div>
 
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-[110px] xs:max-w-[160px] sm:max-w-none">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-[#0D1B3D] truncate">
                           {activeConv.customerName}
                         </h3>
-                        <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                          {activeConv.externalChannel || 'Portail SAV'}
+                        <span className="text-[11px] text-slate-400 shrink-0 hidden sm:inline">
+                          · Guichet Web
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5 truncate flex items-center gap-2">
+                      <p className="text-[11px] text-slate-500 truncate flex items-center gap-1.5">
                         {activeConv.customerPhone && (
                           <span className="font-mono text-slate-600">{activeConv.customerPhone}</span>
                         )}
                         {activeConv.customerEmail && (
-                          <span className="text-slate-400 hidden sm:inline">• {activeConv.customerEmail}</span>
-                        )}
-                        {activeConv.category && (
-                          <span className="px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 text-[10px] font-medium hidden xs:inline">
-                            {activeConv.category}
-                          </span>
+                          <span className="hidden sm:inline">· {activeConv.customerEmail}</span>
                         )}
                       </p>
                     </div>
                   </div>
 
-                  {/* Actions d'en-tête (Dossier Client / Résoudre) */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <span
-                      className={`px-2 sm:px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-bold ${
-                        activeConv.status === 'RESOLVED'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                          : activeConv.status === 'WAITING_CUSTOMER'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                          : 'bg-cyan-100 text-cyan-800 border border-cyan-200'
-                      }`}
-                    >
-                      {activeConv.status}
-                    </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <StatusPill status={activeConv.status} size="sm" />
 
-                    {/* Bouton pour afficher/masquer le volet Fiche Client & Ticket */}
                     <button
                       type="button"
                       onClick={() => setIsCustomerPanelOpen(!isCustomerPanelOpen)}
-                      className={`p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border shrink-0 ${
+                      className={`h-8 px-2.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer border shrink-0 ${
                         isCustomerPanelOpen
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 active:bg-slate-200'
+                          ? 'bg-[#F4F3EF] text-[#0D1B3D] border-[#0D1B3D]/25 font-semibold'
+                          : 'bg-white text-slate-600 border-[#E5E4DF] hover:text-[#0D1B3D]'
                       }`}
-                      title="Afficher ou masquer la fiche client et les détails du dossier"
-                      aria-label="Afficher ou masquer la fiche client et les détails du dossier"
+                      title="Fiche client"
+                      aria-label="Afficher ou masquer la fiche client"
                     >
-                      <FolderKanban className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-emerald-500" />
-                      <span className="hidden sm:inline">Dossier client</span>
+                      <FolderKanban className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="hidden sm:inline">Dossier</span>
                     </button>
                   </div>
                 </div>
@@ -885,34 +1084,28 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                   </div>
                 )}
 
-                {/* Fil des messages grand format */}
+                {/* Fil des messages sur Canvas Lin #FAFAF8 */}
                 <div
                   ref={threadScrollContainerRef}
-                  className="flex-1 p-3.5 sm:p-5 overflow-y-auto overscroll-contain space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-slate-200 bg-[#F8FAFC]/70"
+                  className="flex-1 p-4 sm:p-5 overflow-y-auto overscroll-contain space-y-3.5 bg-[#FAFAF8]"
                 >
-                  <div className="flex items-center justify-center my-2">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-white border border-slate-200 px-3 py-0.5 rounded-full shadow-2xs">
-                      Historique de conversation certifié
-                    </span>
-                  </div>
-
                   {loadingThread && activeThreadMessages.length === 0 ? (
                     <div className="py-16 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" />
-                      <span>Chargement du fil complet...</span>
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#0D1B3D]" />
+                      <span>Chargement des messages…</span>
                     </div>
                   ) : activeThreadMessages && activeThreadMessages.length > 0 ? (
                     activeThreadMessages.map((m) => {
                       if (m.isInternalNote) {
                         return (
-                          <div key={m.id} className="flex justify-center my-3">
-                            <div className="w-full max-w-[92%] p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 shadow-2xs space-y-1">
-                              <div className="flex items-center justify-between text-[11px] font-bold text-amber-800">
+                          <div key={m.id} className="conversation-bubble flex justify-center my-2">
+                            <div className="w-full max-w-xl p-3 rounded-lg bg-[#FDF8EC] border border-[#F2E2B8] border-l-[3px] border-l-amber-600 text-amber-950 space-y-1">
+                              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-900">
                                 <span className="flex items-center gap-1.5">
-                                  <Lock className="w-3.5 h-3.5 text-amber-600" />
-                                  <span>NOTE INTERNE (Confidentielle — Non visible par le client)</span>
+                                  <Lock className="w-3 h-3 text-amber-700" />
+                                  <span>Note interne · {m.senderName || 'Équipe SAV'}</span>
                                 </span>
-                                <span className="text-[10px] text-amber-600 font-normal">
+                                <span className="text-[11px] text-amber-700/75 tabular-nums font-normal">
                                   {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
                                     hour: '2-digit',
                                     minute: '2-digit',
@@ -920,9 +1113,6 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                                 </span>
                               </div>
                               <p className="text-xs leading-relaxed whitespace-pre-wrap">{m.content}</p>
-                              <p className="text-[10px] text-amber-600">
-                                Auteur : {m.senderName || 'Agent SAV'}
-                              </p>
                             </div>
                           </div>
                         );
@@ -934,13 +1124,13 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                       return (
                         <div
                           key={m.id}
-                          className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
+                          className={`conversation-bubble flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
                         >
-                          <div className="flex items-center gap-1.5 mb-1 text-[10px] text-slate-400 px-1 font-medium">
-                            {isAi && <Bot className="w-3 h-3 text-emerald-600" />}
+                          <div className="flex items-center gap-1.5 mb-1 text-[11px] text-slate-400 px-1">
+                            {isAi && <Bot className="w-3 h-3 text-slate-500" />}
                             <span>{m.senderName || (isCustomer ? 'Client' : 'Agent SAV')}</span>
-                            <span>•</span>
-                            <span>
+                            <span>·</span>
+                            <span className="tabular-nums">
                               {new Date(m.createdAt).toLocaleTimeString('fr-FR', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -949,18 +1139,49 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                           </div>
 
                           <div
-                            className={`max-w-[85%] sm:max-w-[70%] p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                            className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 rounded-xl text-[13px] leading-relaxed ${
                               isCustomer
-                                ? 'bg-white text-slate-900 rounded-tl-xs border border-slate-200'
+                                ? 'bg-white text-[#0D1B3D] rounded-bl-sm border border-[#E5E4DF]'
                                 : isAi
-                                ? 'bg-emerald-50 text-slate-900 rounded-tr-xs border border-emerald-200'
-                                : 'bg-[#0D1B3D] text-white rounded-tr-xs'
+                                ? 'bg-[#F4F3EF] text-[#0D1B3D] rounded-br-sm border border-[#E5E4DF]'
+                                : 'bg-[#0D1B3D] text-white rounded-br-sm'
                             }`}
                           >
-                            <p className="whitespace-pre-line">{m.content}</p>
-                            {!isCustomer && (
-                              <div className="flex items-center justify-end gap-1 mt-1.5 text-[9px] text-white/70">
-                                <CheckCheck className="w-3 h-3 text-emerald-400" />
+                            {m.content && <p className="whitespace-pre-line">{m.content}</p>}
+                            {Array.isArray(m.attachments) && m.attachments.length > 0 && (
+                              <div className={`${m.content ? 'mt-2.5' : ''} space-y-2`}>
+                                {m.attachments.map((att: any) =>
+                                  att.isImage && att.url ? (
+                                    <a
+                                      key={att.id || att.fileName}
+                                      href={att.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block rounded-lg overflow-hidden border border-[#E5E4DF] max-w-[240px]"
+                                    >
+                                      <img
+                                        src={att.url}
+                                        alt={att.name || 'Pièce jointe'}
+                                        className="w-full h-auto max-h-48 object-cover"
+                                      />
+                                    </a>
+                                  ) : (
+                                    <a
+                                      key={att.id || att.fileName}
+                                      href={att.url || '#'}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                                        isCustomer || isAi
+                                          ? 'bg-[#FAFAF8] text-[#0D1B3D] border-[#E5E4DF] hover:bg-[#F4F3EF]'
+                                          : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
+                                      }`}
+                                    >
+                                      <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                                      <span className="truncate">{att.name || 'Document joint'}</span>
+                                    </a>
+                                  )
+                                )}
                               </div>
                             )}
                           </div>
@@ -975,58 +1196,57 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                   <div ref={threadEndRef} />
                 </div>
 
-                {/* Formulaire de réponse et note interne confortable */}
+                {/* Formulaire de réponse sobre */}
                 <form
                   onSubmit={handleSendMessage}
-                  className={`p-3 sm:p-4 border-t border-slate-100 bg-white space-y-2.5 sm:space-y-3 shrink-0 ${
-                    isInternalNote ? 'bg-amber-50/40' : ''
+                  className={`p-3 sm:p-4 border-t border-[#E5E4DF] space-y-2 shrink-0 ${
+                    isInternalNote ? 'bg-[#FFFCF5]' : 'bg-white'
                   }`}
                   style={{
                     paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
                   }}
                 >
                   <div className="flex items-center justify-between text-xs gap-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setIsInternalNote(false)}
-                        className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                           !isInternalNote
-                            ? 'bg-[#0D1B3D] text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300'
+                            ? 'bg-[#F4F3EF] text-[#0D1B3D] font-semibold'
+                            : 'text-slate-500 hover:text-[#0D1B3D]'
                         }`}
                       >
-                        Réponse Client
+                        Réponse client
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsInternalNote(true)}
-                        className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
                           isInternalNote
-                            ? 'bg-amber-500 text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 active:bg-slate-300'
+                            ? 'bg-amber-100 text-amber-950 font-semibold'
+                            : 'text-slate-500 hover:text-[#0D1B3D]'
                         }`}
                       >
                         <Lock className="w-3 h-3" />
-                        <span>Note Interne</span>
+                        <span>Note interne</span>
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {isInternalNote && (
-                        <span className="text-[11px] font-semibold text-amber-700 flex items-center gap-1 mr-1">
-                          <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          <span className="hidden sm:inline">Invisible pour le client</span>
+                        <span className="text-[11px] font-medium text-amber-800 hidden sm:inline">
+                          Non visible par le client
                         </span>
                       )}
                       <button
                         type="button"
                         onClick={() => setIsCannedResponsesModalOpen(true)}
-                        className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100 active:bg-emerald-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs shrink-0"
+                        className="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                         title="Insérer une réponse type enregistrée"
                       >
-                        <Zap className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="hidden xs:inline">Réponses types</span>
+                        <Zap className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="hidden sm:inline">Réponses types</span>
                       </button>
                     </div>
                   </div>
@@ -1038,49 +1258,48 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder={
                         isInternalNote
-                          ? "Ajouter une note interne confidentielle pour l'équipe SAV..."
-                          : "Rédiger une réponse client enregistrée dans Zadesk..."
+                          ? "Ajouter une note confidentielle pour l'équipe…"
+                          : 'Écrire une réponse au client…'
                       }
-                      className={`w-full pl-3.5 sm:pl-4 pr-12 py-3 sm:py-3.5 text-xs sm:text-sm rounded-2xl focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full pl-3.5 pr-12 py-2.5 text-base sm:text-xs rounded-lg focus:outline-none transition-colors ${
                         isInternalNote
-                          ? 'bg-amber-50 border border-amber-200 text-amber-950 focus:ring-amber-500/30'
-                          : 'bg-slate-50 border border-slate-200 text-slate-900 focus:ring-emerald-500/20'
+                          ? 'bg-white border border-amber-300 text-amber-950 focus:border-amber-600'
+                          : 'bg-[#FAFAF8] border border-[#E5E4DF] text-[#0D1B3D] focus:border-[#0D1B3D] focus:bg-white'
                       }`}
                     />
                     <button
                       type="submit"
                       disabled={!replyText.trim() || sendingMessage}
-                      className={`absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 p-2 sm:p-2.5 rounded-xl text-white disabled:opacity-30 transition-all cursor-pointer shadow-xs active:scale-95 ${
-                        isInternalNote ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#0D1B3D] hover:bg-[#152B5A]'
+                      className={`absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md text-white disabled:opacity-30 transition-all cursor-pointer flex items-center justify-center ${
+                        isInternalNote ? 'bg-amber-700 hover:bg-amber-800' : 'bg-[#0D1B3D] hover:bg-[#152C61]'
                       }`}
                       title={isInternalNote ? 'Enregistrer la note interne' : 'Envoyer le message'}
                       aria-label="Envoyer"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </form>
 
-                {/* Volet coulissant : Fiche Client & Ticket (Rétractable, responsive plein écran sur smartphone) */}
+                {/* Volet mobile / tablette Fiche Client */}
                 {isCustomerPanelOpen && (
-                  <div className="absolute inset-0 sm:inset-y-0 sm:left-auto sm:right-0 sm:w-85 bg-white border-l border-slate-200 p-4 sm:p-5 flex flex-col justify-between shadow-2xl z-30 animate-in slide-in-from-right duration-200 overscroll-contain">
+                  <div className="xl:hidden absolute inset-0 sm:inset-y-0 sm:left-auto sm:right-0 sm:w-80 bg-white border-l border-[#E5E4DF] p-5 flex flex-col justify-between shadow-2xl z-30 overscroll-contain">
                     <div className="space-y-5 overflow-y-auto">
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                          Dossier Client SAV
-                        </span>
+                      <div className="flex items-center justify-between border-b border-[#E5E4DF] pb-3">
+                        <span className="text-xs font-bold text-[#0D1B3D]">Fiche client</span>
                         <button
+                          type="button"
                           onClick={() => setIsCustomerPanelOpen(false)}
-                          className="p-2 rounded-xl text-slate-500 hover:text-slate-800 active:bg-slate-100 cursor-pointer"
-                          aria-label="Fermer le dossier client"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#0D1B3D] hover:bg-[#F4F3EF] cursor-pointer"
+                          aria-label="Fermer la fiche client"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
 
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-slate-900">{activeConv.customerName}</h4>
-                        <p className="text-xs text-emerald-700 font-mono font-semibold">
+                        <h4 className="text-sm font-bold text-[#0D1B3D]">{activeConv.customerName}</h4>
+                        <p className="text-xs text-slate-600 font-mono">
                           {activeConv.customerPhone || 'Numéro non renseigné'}
                         </p>
                         {activeConv.customerEmail && (
@@ -1088,14 +1307,11 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                         )}
                       </div>
 
-                      {/* Responsable */}
-                      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                          Responsable Zadesk
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <UserCheck className="w-4 h-4 text-emerald-600" />
-                          <span className="font-bold text-slate-800">
+                      <div className="pt-4 border-t border-[#E5E4DF] space-y-1.5 text-xs">
+                        <span className="text-xs font-medium text-slate-400 block">Responsable</span>
+                        <div className="flex items-center gap-2 text-[#0D1B3D] font-semibold">
+                          <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+                          <span>
                             {activeConv.assignedAgent?.user
                               ? `${activeConv.assignedAgent.user.firstName || ''} ${activeConv.assignedAgent.user.lastName || ''}`
                               : 'Non assigné'}
@@ -1103,53 +1319,41 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                         </div>
                       </div>
 
-                      {/* Ticket de continuité */}
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                          Ticket de Continuité
-                        </span>
+                      <div className="pt-4 border-t border-[#E5E4DF] space-y-2">
+                        <span className="text-xs font-medium text-slate-400 block">Ticket lié</span>
                         {activeConv.ticket ? (
                           <Link
                             href={`/app/tickets?ticketId=${activeConv.ticket.id}`}
-                            className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 block space-y-1 group hover:border-emerald-300 transition-all"
+                            className="p-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] block space-y-1 hover:border-[#0D1B3D]/30 transition-colors"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-xs font-bold text-emerald-800">
+                              <span className="font-mono text-xs font-bold text-[#0D1B3D]">
                                 {activeConv.ticket.reference}
                               </span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                              <span className="text-[11px] font-medium text-slate-500">
                                 {activeConv.ticket.status}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-700 font-semibold group-hover:text-emerald-800 transition-colors">
-                              {activeConv.ticket.title}
-                            </p>
-                            <span className="text-[10px] text-emerald-600 flex items-center gap-1 pt-1">
-                              <span>Consulter le dossier</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </span>
+                            <p className="text-xs text-slate-700 font-medium">{activeConv.ticket.title}</p>
                           </Link>
                         ) : (
-                          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-2">
-                            <p className="text-xs text-slate-500">Aucun ticket relié.</p>
-                            <button
-                              onClick={() => setIsLinkTicketModalOpen(true)}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 mx-auto cursor-pointer"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Créer un ticket</span>
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsLinkTicketModalOpen(true)}
+                            className="w-full h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#FAFAF8] text-xs font-medium text-[#0D1B3D] flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Créer un ticket</span>
+                          </button>
                         )}
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100">
+                    <div className="pt-4 border-t border-[#E5E4DF]">
                       <Link
                         href="/app/tickets"
-                        className="w-full py-2.5 px-3.5 rounded-2xl bg-[#0D1B3D] hover:bg-[#152B5A] text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full h-9 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-xs font-semibold text-white transition-colors flex items-center justify-center gap-2"
                       >
-                        <FolderKanban className="w-4 h-4 text-emerald-400" />
                         <span>Tous les tickets</span>
                       </Link>
                     </div>
@@ -1157,17 +1361,16 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                 )}
               </>
             ) : (
-              /* État vide accueillant lorsqu'aucune conversation n'est sélectionnée */
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shadow-sm">
-                  <MessageSquare className="w-8 h-8 text-emerald-600" />
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-[#FAFAF8]">
+                <div className="w-12 h-12 rounded-xl bg-white text-slate-400 flex items-center justify-center border border-[#E5E4DF]">
+                  <MessageSquare className="w-5 h-5" />
                 </div>
                 <div className="max-w-xs space-y-1">
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-[#0D1B3D]">
                     Sélectionnez une conversation
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Cliquez sur un client dans la boîte de réception à gauche pour ouvrir son fil complet et lui répondre en direct.
+                    Choisissez un échange dans la file à gauche pour répondre au client.
                   </p>
                 </div>
                 {currentWorkspace?.slug && (
@@ -1175,15 +1378,101 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                     href={`/entreprises/${currentWorkspace.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+                    className="px-3.5 h-9 rounded-lg bg-white hover:bg-[#F4F3EF] border border-[#E5E4DF] text-[#0D1B3D] text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Tester le Guichet SAV Client</span>
+                    <span>Ouvrir le guichet public</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                   </Link>
                 )}
               </div>
             )}
-          </div>
+          </Surface>
+
+          {/* VOLET 3 : Fiche Client & Continuité (filets 1px #E5E4DF, zéro boîtes vertes) */}
+          {activeConv && isCustomerPanelOpen && (
+            <Surface
+              variant="panel"
+              className="hidden xl:flex w-[280px] rounded-xl border border-[#E5E4DF] p-4 flex-col justify-between shrink-0 overflow-hidden"
+            >
+              <div className="space-y-5 overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-[#E5E4DF] pb-3">
+                  <span className="text-xs font-bold text-[#0D1B3D]">Fiche client</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomerPanelOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-[#0D1B3D] transition-colors cursor-pointer"
+                    title="Masquer le volet"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-[#0D1B3D]">{activeConv.customerName}</h4>
+                  <p className="text-xs text-slate-600 font-mono">
+                    {activeConv.customerPhone || 'Numéro non renseigné'}
+                  </p>
+                  {activeConv.customerEmail && (
+                    <p className="text-xs text-slate-500">{activeConv.customerEmail}</p>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t border-[#E5E4DF] space-y-1.5 text-xs">
+                  <span className="text-xs font-medium text-slate-400 block">Responsable</span>
+                  <div className="flex items-center gap-2 font-semibold text-[#0D1B3D]">
+                    <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+                    <span>
+                      {activeConv.assignedAgent?.user
+                        ? `${activeConv.assignedAgent.user.firstName || ''} ${activeConv.assignedAgent.user.lastName || ''}`
+                        : 'Non assigné'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-[#E5E4DF] space-y-2">
+                  <span className="text-xs font-medium text-slate-400 block">Ticket lié</span>
+                  {activeConv.ticket ? (
+                    <Link
+                      href={`/app/tickets?ticketId=${activeConv.ticket.id}`}
+                      className="p-3 rounded-lg bg-[#FAFAF8] border border-[#E5E4DF] block space-y-1 hover:border-[#0D1B3D]/30 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-[#0D1B3D]">
+                          {activeConv.ticket.reference}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-500">
+                          {activeConv.ticket.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-700 font-medium">{activeConv.ticket.title}</p>
+                      <span className="text-[11px] text-slate-500 flex items-center gap-1 pt-0.5">
+                        <span>Consulter le dossier</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </span>
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsLinkTicketModalOpen(true)}
+                      className="w-full h-9 rounded-lg border border-[#E5E4DF] bg-white hover:bg-[#FAFAF8] text-xs font-medium text-[#0D1B3D] flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Créer un ticket</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#E5E4DF]">
+                <Link
+                  href="/app/tickets"
+                  className="w-full h-9 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-xs font-semibold text-white transition-colors flex items-center justify-center"
+                >
+                  <span>Tous les tickets</span>
+                </Link>
+              </div>
+            </Surface>
+          )}
         </div>
       )}
 
@@ -1191,7 +1480,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
       {/* MODAL : CRÉER UN TICKET DEPUIS LA CONVERSATION             */}
       {/* ========================================================= */}
       {isLinkTicketModalOpen && activeConv && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
@@ -1248,9 +1537,9 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                 <button
                   type="submit"
                   disabled={creatingTicket}
-                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-[#0D1B3D] hover:bg-[#152C61] text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {creatingTicket ? 'Création...' : 'Créer et Relier'}
+                  {creatingTicket ? 'Création...' : 'Créer et relier'}
                 </button>
               </div>
             </form>
@@ -1260,19 +1549,14 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
 
       {/* Canned Responses Modal */}
       {isCannedResponsesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[85vh] animate-scale-in">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Réponses enregistrées</h3>
-                  <p className="text-[11px] text-slate-500">
-                    Cliquez sur un modèle pour l'insérer directement dans votre zone de saisie.
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D1B3D]/35 backdrop-blur-sm">
+          <div className="bg-white rounded-xl max-w-xl w-full p-5 shadow-2xl border border-[#E5E4DF] flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5E4DF] shrink-0">
+              <div>
+                <h3 className="text-sm font-bold text-[#0D1B3D]">Réponses enregistrées</h3>
+                <p className="text-xs text-slate-500">
+                  Cliquez sur un modèle pour l&apos;insérer dans la zone de saisie.
+                </p>
               </div>
               <button
                 type="button"
@@ -1313,7 +1597,7 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                     onClick={() => setCannedCategoryFilter(cat.id)}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                       cannedCategoryFilter === cat.id
-                        ? 'bg-[#0D1B3D] text-white shadow-2xs'
+                        ? 'bg-[#0D1B3D] text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -1331,30 +1615,30 @@ export function ConversationsView({ previewConversations }: ConversationsViewPro
                 </div>
               ) : (
                 filteredCannedResponses.map((cr: any) => (
-                  <div
-                    key={cr.id}
-                    onClick={() => handleSelectCanned(cr.content)}
-                    className="p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all cursor-pointer group text-left"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-900 transition-colors">
-                          {cr.title}
-                        </span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 group-hover:bg-emerald-100 text-slate-600 group-hover:text-emerald-800 font-semibold transition-colors">
-                          {cr.category}
-                        </span>
+                    <div
+                      key={cr.id}
+                      onClick={() => handleSelectCanned(cr.content)}
+                      className="p-3.5 rounded-lg border border-[#E5E4DF] hover:border-[#0D1B3D]/30 hover:bg-[#FAFAF8] transition-colors cursor-pointer group text-left"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#0D1B3D]">
+                            {cr.title}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            · {cr.category}
+                          </span>
+                        </div>
+                        {cr.shortcut && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F4F3EF] text-slate-600 border border-[#E5E4DF]">
+                            {cr.shortcut}
+                          </span>
+                        )}
                       </div>
-                      {cr.shortcut && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold border border-slate-200">
-                          {cr.shortcut}
-                        </span>
-                      )}
+                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        {cr.content}
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {cr.content}
-                    </p>
-                  </div>
                 ))
               )}
             </div>

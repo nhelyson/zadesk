@@ -12,6 +12,7 @@ import {
   Edit3,
   AlertCircle,
 } from "lucide-react";
+import { getPlanConfig } from "@/config/plans";
 
 export interface Step3ReviewProps {
   companyName: string;
@@ -55,15 +56,8 @@ export const Step3Review: React.FC<Step3ReviewProps> = ({
   const flag = COUNTRY_FLAGS[country] || "📍";
   const displaySlug = generatedSlug || "votre-entreprise";
 
-  const planTitles: Record<string, { name: string; price: string; isPaid: boolean }> = {
-    decouverte: { name: "Découverte", price: "0 FCFA permanent", isPaid: false },
-    starter: { name: "Starter", price: "10 000 FCFA / mois", isPaid: true },
-    pro: { name: "Pro", price: "45 000 FCFA / mois", isPaid: true },
-    entreprise: { name: "Entreprise", price: "150 000 FCFA / mois", isPaid: true },
-  };
-
-  const normPlan = (selectedPlan || "decouverte").toLowerCase();
-  const currentPlan = planTitles[normPlan] || planTitles.decouverte;
+  const planConfig = getPlanConfig(selectedPlan);
+  const isPaidPlan = planConfig.priceXaf > 0;
 
   return (
     <div className="space-y-6">
@@ -162,30 +156,29 @@ export const Step3Review: React.FC<Step3ReviewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Offre commerciale sélectionnée
             </span>
-            <a
-              href="/tarifs"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => onGoToStep(3)}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline transition-all cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5" />
-              Modifier l&apos;offre
-            </a>
+              Modifier la formule
+            </button>
           </div>
 
           <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
             <div className="space-y-0.5">
               <div className="font-bold text-sm text-[#0D1B3D] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Formule {currentPlan.name}</span>
+                <span>Formule {planConfig.name}</span>
               </div>
               <p className="text-xs text-slate-500">
-                {currentPlan.isPaid ? "Facturation mensuelle sans engagement" : "Offre permanente gratuite"}
+                {isPaidPlan ? "Facturation mensuelle sans engagement" : "Offre permanente gratuite"}
               </p>
             </div>
             <div className="text-right">
               <span className="font-mono font-bold text-sm text-[#0D1B3D]">
-                {currentPlan.price}
+                {planConfig.price} {planConfig.periodLabel}
               </span>
             </div>
           </div>
@@ -196,8 +189,8 @@ export const Step3Review: React.FC<Step3ReviewProps> = ({
       <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600 leading-relaxed">
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
         <span>
-          {currentPlan.isPaid ? (
-            <>Votre espace sera créé immédiatement avec l&apos;accès Découverte actif. Vous pourrez ensuite valider votre règlement mensuel sans aucun blocage.</>
+          {isPaidPlan ? (
+            <>Votre espace sera créé immédiatement avec l&apos;accès Découverte actif. Vous pourrez ensuite valider votre règlement mensuel SasPay sans aucun blocage.</>
           ) : (
             <>Votre espace de travail sera prêt instantanément. La formule Découverte est 100% gratuite et permanente sans carte requise.</>
           )}
@@ -205,7 +198,7 @@ export const Step3Review: React.FC<Step3ReviewProps> = ({
       </div>
 
       {/* Actions de validation Desktop */}
-      <div className="pt-2 hidden sm:flex items-center justify-between gap-4">
+      <div className="pt-2 flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={onBack}
@@ -231,8 +224,8 @@ export const Step3Review: React.FC<Step3ReviewProps> = ({
             <>
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>
-                {currentPlan.isPaid
-                  ? "Créer mon espace & voir le récapitulatif"
+                {isPaidPlan
+                  ? `Créer mon espace & procéder au paiement (${planConfig.price})`
                   : "Activer mon espace gratuitement"}
               </span>
             </>

@@ -56,7 +56,7 @@ export function CompanyInfoBubbleModal({
     : "";
   const whatsappUrl = cleanWhatsAppNumber
     ? `https://wa.me/${cleanWhatsAppNumber}?text=${encodeURIComponent(
-        `Bonjour le service client de ${company.name}, je vous contacte depuis la plateforme Zadesk pour une demande d'assistance.`
+        `Bonjour le service client de ${company.name}, je vous contacte depuis la plateforme Zalisk pour une demande d'assistance.`
       )}`
     : null;
 
@@ -167,7 +167,7 @@ export function CompanyInfoBubbleModal({
                       {company.name}
                     </h3>
                     {company.verified && (
-                      <span title="Entreprise certifiée Zadesk">
+                      <span title="Entreprise certifiée Zalisk">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 fill-emerald-50 shrink-0" />
                       </span>
                     )}
@@ -430,12 +430,12 @@ export function CompanyInfoBubbleModal({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
                       <h4 className="text-xs font-bold tracking-wide text-[#1D1D1F] uppercase">
                         Nos établissements & Boutiques ({company.establishments.length})
                       </h4>
                     </div>
-                    <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
+                    <span className="text-[11px] text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
                       Accueil au public
                     </span>
                   </div>
@@ -454,17 +454,18 @@ export function CompanyInfoBubbleModal({
                         OTHER: "Établissement",
                       };
 
+                      const handleOpen = () => {
+                        if (onSelectEstablishment) {
+                          setIsOpen(false);
+                          onSelectEstablishment(est.id);
+                        }
+                      };
+
                       return (
-                        <div
+                        <article
                           key={est.id}
-                          onClick={() => {
-                            if (onSelectEstablishment) {
-                              setIsOpen(false);
-                              onSelectEstablishment(est.id);
-                            }
-                          }}
-                          className={`break-inside-avoid rounded-2xl border shadow-sm overflow-hidden bg-white hover:shadow-md transition-all group/card border-black/[0.06] ${
-                            onSelectEstablishment ? "cursor-pointer hover:border-slate-300" : ""
+                          className={`break-inside-avoid rounded-2xl border shadow-sm overflow-hidden bg-white hover:shadow-md transition-all group/card border-black/[0.08] focus-within:ring-2 focus-within:ring-[#0D1B3D] ${
+                            onSelectEstablishment ? "hover:border-slate-300" : ""
                           }`}
                           style={{
                             backgroundColor: "var(--company-surface, #FFFFFF)",
@@ -472,7 +473,12 @@ export function CompanyInfoBubbleModal({
                         >
                           {/* Storefront / Façade Image */}
                           {est.imageUrl ? (
-                            <div className="relative w-full overflow-hidden bg-slate-100 group/img">
+                            <button
+                              type="button"
+                              onClick={handleOpen}
+                              disabled={!onSelectEstablishment}
+                              className="relative block w-full text-left overflow-hidden bg-slate-100 group/img focus:outline-none cursor-pointer disabled:cursor-default"
+                            >
                               <img
                                 src={est.imageUrl}
                                 alt={est.name}
@@ -480,23 +486,23 @@ export function CompanyInfoBubbleModal({
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
                               <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 flex-wrap">
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md bg-white/90 text-slate-800 shadow-sm border border-white/40">
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold backdrop-blur-md bg-white/95 text-slate-800 shadow-sm border border-white/40">
                                   {typeLabels[est.type] || "Établissement"}
                                 </span>
                                 {est.isMain && (
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white backdrop-blur-md shadow-sm">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-white backdrop-blur-md shadow-sm">
                                     Siège principal
                                   </span>
                                 )}
                               </div>
-                            </div>
+                            </button>
                           ) : (
                             <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/60 border-b border-black/[0.04] flex items-center justify-between gap-1.5">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white border border-black/[0.06] text-slate-700">
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white border border-black/[0.06] text-slate-700">
                                 {typeLabels[est.type] || "Établissement"}
                               </span>
                               {est.isMain && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                                   Siège principal
                                 </span>
                               )}
@@ -506,14 +512,18 @@ export function CompanyInfoBubbleModal({
                           {/* Details Content */}
                           <div className="p-4 space-y-2.5">
                             <div className="flex items-start justify-between gap-2">
-                              <p className="font-bold text-xs text-[#1D1D1F] leading-snug group-hover/card:text-sky-600 transition-colors">
+                              <button
+                                type="button"
+                                onClick={handleOpen}
+                                disabled={!onSelectEstablishment}
+                                className="text-left font-bold text-xs text-[#1D1D1F] leading-snug group-hover/card:text-sky-700 transition-colors focus:outline-none focus-visible:underline cursor-pointer disabled:cursor-default"
+                              >
                                 {est.name}
-                              </p>
+                              </button>
                               {est.phone && (
                                 <a
                                   href={`tel:${est.phone}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="text-[11px] font-mono text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 shrink-0"
+                                  className="text-[11px] font-mono text-slate-600 hover:text-slate-950 transition-colors flex items-center gap-1 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D] rounded"
                                 >
                                   <Phone className="w-3 h-3 text-emerald-600" />
                                   <span>{est.phone}</span>
@@ -521,7 +531,7 @@ export function CompanyInfoBubbleModal({
                               )}
                             </div>
 
-                            <p className="text-[11px] text-[#86868B] leading-relaxed flex items-start gap-1">
+                            <p className="text-[11px] text-slate-600 leading-relaxed flex items-start gap-1">
                               <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
                               <span>
                                 {[est.address, est.addressDetails && est.addressDetails !== est.address ? est.addressDetails : null, est.city, est.country].filter(Boolean).join(", ")}
@@ -529,8 +539,8 @@ export function CompanyInfoBubbleModal({
                             </p>
 
                             {est.openingHours && (
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#86868B] pt-1.5 border-t border-black/[0.04]">
-                                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-600 pt-1.5 border-t border-black/[0.04]">
+                                <Clock className="w-3 h-3 text-slate-500 shrink-0" />
                                 <span className="font-medium">{est.openingHours}</span>
                               </div>
                             )}
@@ -540,7 +550,7 @@ export function CompanyInfoBubbleModal({
                                 {est.services.map((srv, idx) => (
                                   <span
                                     key={idx}
-                                    className="px-1.5 py-0.5 rounded-md bg-black/[0.04] text-[#86868B] text-[9px] font-medium"
+                                    className="px-2 py-0.5 rounded-md bg-black/[0.04] text-slate-600 text-[11px] font-medium"
                                   >
                                     {srv}
                                   </span>
@@ -549,19 +559,23 @@ export function CompanyInfoBubbleModal({
                             )}
 
                             {est.practicalInfo && (
-                              <p className="text-[10px] text-[#86868B] italic bg-black/[0.02] px-2 py-1 rounded-lg">
+                              <p className="text-[11px] text-slate-600 italic bg-black/[0.02] px-2.5 py-1.5 rounded-lg">
                                 ℹ {est.practicalInfo}
                               </p>
                             )}
 
                             {onSelectEstablishment && (
-                              <div className="pt-2 border-t border-black/[0.04] flex items-center justify-between text-[11px] text-sky-600 font-semibold group-hover/card:text-sky-700">
+                              <button
+                                type="button"
+                                onClick={handleOpen}
+                                className="w-full pt-2 border-t border-black/[0.04] flex items-center justify-between text-xs text-[#0D1B3D] font-semibold hover:text-emerald-700 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D1B3D] rounded"
+                              >
                                 <span>Consulter la fiche complète</span>
                                 <span className="group-hover/card:translate-x-0.5 transition-transform">→</span>
-                              </div>
+                              </button>
                             )}
                           </div>
-                        </div>
+                        </article>
                       );
                     })}
                   </div>
@@ -624,8 +638,8 @@ export function CompanyInfoBubbleModal({
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <p className="font-semibold text-xs text-[#1D1D1F]">Service vérifié par Zadesk</p>
-                  <p className="text-[11px] text-[#86868B]">
+                  <p className="font-semibold text-xs text-[#1D1D1F]">Service vérifié par Zalisk</p>
+                  <p className="text-[11px] text-slate-600">
                     Les échanges sur cette interface sont directement transmis au service après-vente
                     officiel de {company.name}.
                   </p>
@@ -634,8 +648,8 @@ export function CompanyInfoBubbleModal({
             </div>
 
             {/* Sheet Footer */}
-            <div className="p-4 px-5 border-t border-black/[0.06] bg-white/80 backdrop-blur-xl flex items-center justify-between">
-              <span className="text-[11px] text-[#86868B]">Fiche certifiée Zadesk</span>
+            <div className="p-4 px-5 border-t border-black/[0.06] bg-white/90 backdrop-blur-xl flex items-center justify-between">
+              <span className="text-[11px] text-slate-600 font-medium">Fiche certifiée Zalisk</span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}

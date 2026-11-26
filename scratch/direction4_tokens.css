@@ -1,0 +1,171 @@
+/**
+ * ZADESK DESIGN SYSTEM — OPERATIONAL EDITORIAL SYSTEM (DIRECTION 4)
+ * Canonical Design Tokens (CSS Variables)
+ * 
+ * Strict alignment with:
+ * - Zadesk Landing Page identity & Swiss Graphic Design
+ * - Midnight Navy (#0D1B3D), Emerald (#22C55E), Linen Canvas (#FAFAF8)
+ * - Typography: Outfit (Brand/Headings) + Inter (Body/UI) + JetBrains Mono (Tech/Numbers)
+ * - Linear/Apple precision hairlines & surfaces
+ */
+
+:root {
+  /* ========================================================================
+     1. COLOR PALETTE & SEMANTIC TOKENS (60-28-8-3-1 Rule)
+     ======================================================================== */
+  
+  /* Brand Anchors */
+  --z-color-navy-950: #060B18;
+  --z-color-navy-900: #0D1B3D; /* Canonical Midnight Navy */
+  --z-color-navy-800: #152C61;
+  --z-color-navy-700: #1E3A8A;
+  --z-color-navy-subtle: rgba(13, 27, 61, 0.05);
+  --z-color-navy-tint: rgba(13, 27, 61, 0.08);
+
+  /* Emerald (System Health, Resolutions, Primary Success) */
+  --z-color-emerald-50: #F0FDF4;
+  --z-color-emerald-100: #DCFCE7;
+  --z-color-emerald-400: #34D399;
+  --z-color-emerald-500: #22C55E; /* Canonical Emerald */
+  --z-color-emerald-600: #16A34A;
+  --z-color-emerald-700: #15803D;
+  --z-color-emerald-800: #166534;
+  --z-color-emerald-text: #059669;
+
+  /* Canvas Linen & Neutrals (Warm Backgrounds & Crisp Surfaces) */
+  --z-color-canvas: #FAFAF8;       /* Canonical warm linen backdrop (60%) */
+  --z-color-surface: #FFFFFF;      /* Crisp pure white operational plates (28%) */
+  --z-color-surface-subtle: #F8FAFC;
+  --z-color-surface-sunken: #F1F5F9;
+  --z-color-surface-contrast: #0D1B3D;
+
+  /* Hairlines & Structural Separators */
+  --z-color-hairline: rgba(13, 27, 61, 0.08);        /* Subtle 0.5px / 1px line */
+  --z-color-hairline-strong: rgba(13, 27, 61, 0.16); /* Strong section division */
+  --z-color-border-solid: #E2E8F0;
+  --z-color-border-subtle: #F1F5F9;
+  --z-color-border-focus: #0D1B3D;
+
+  /* Typography Colors */
+  --z-color-text-primary: #0F172A;   /* Pure black-slate for ultimate clarity */
+  --z-color-text-navy: #0D1B3D;      /* Midnight Navy for headlines and figures */
+  --z-color-text-secondary: #475569; /* Balanced graphite for paragraphs & labels */
+  --z-color-text-muted: #94A3B8;     /* Slate muted for timecodes & tertiary text */
+  --z-color-text-inverse: #FFFFFF;   /* Pure white on dark surfaces */
+
+  /* Operational Functional Accents */
+  --z-color-amber: #D97706;          /* Action required / SLA attention */
+  --z-color-amber-light: #FFFBEB;
+  --z-color-amber-border: #FCD34D;
+  
+  --z-color-rose: #DC2626;           /* Critical breach / error / urgent */
+  --z-color-rose-light: #FEF2F2;
+  --z-color-rose-border: #FCA5A5;
+
+  --z-color-blue: #2563EB;           /* Informational / In progress */
+  --z-color-blue-light: #EFF6FF;
+  --z-color-blue-border: #BFDBFE;
+
+  /* ========================================================================
+     2. TYPOGRAPHY SCALE (Outfit + Inter + JetBrains Mono)
+     ======================================================================== */
+  --z-font-brand: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --z-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --z-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Desktop Font Sizes & Line Heights */
+  --z-text-display-1: 44px;
+  --z-leading-display-1: 1.05;
+  --z-tracking-display-1: -0.03em;
+
+  --z-text-title-h1: 22px;
+  --z-leading-title-h1: 1.25;
+  --z-tracking-title-h1: -0.025em;
+
+  --z-text-title-h2: 17px;
+  --z-leading-title-h2: 1.3;
+  --z-tracking-title-h2: -0.02em;
+
+  --z-text-title-h3: 14px;
+  --z-leading-title-h3: 1.35;
+  --z-tracking-title-h3: 0.05em;
+
+  --z-text-body: 13px;
+  --z-leading-body: 1.5;
+
+  --z-text-body-sm: 12px;
+  --z-leading-body-sm: 1.45;
+
+  --z-text-meta: 11px;
+  --z-leading-meta: 1.4;
+
+  --z-text-caption: 10px;
+  --z-leading-caption: 1.3;
+
+  /* Font Weights */
+  --z-weight-regular: 400;
+  --z-weight-medium: 500;
+  --z-weight-semibold: 600;
+  --z-weight-bold: 700;
+  --z-weight-extrabold: 800;
+  --z-weight-black: 900;
+
+  /* ========================================================================
+     3. SPACING & LAYOUT GRID SCALE
+     ======================================================================== */
+  --z-space-1: 4px;
+  --z-space-2: 8px;
+  --z-space-3: 12px;
+  --z-space-4: 16px;
+  --z-space-5: 20px;
+  --z-space-6: 24px;
+  --z-space-7: 28px;
+  --z-space-8: 32px;
+  --z-space-10: 40px;
+  --z-space-12: 48px;
+
+  /* Layout Dimensions */
+  --z-sidebar-width: 256px;
+  --z-topbar-height: 52px;
+  --z-dual-plane-main: 1fr;
+  --z-dual-plane-side: 360px;
+  --z-max-content-width: 1440px;
+
+  /* Mobile Touch Dimensions */
+  --z-touch-target-min: 44px;
+  --z-mobile-topbar-height: 54px;
+  --z-mobile-bottom-nav-height: 60px;
+
+  /* ========================================================================
+     4. RADII & SHADOWS (Architectural Precision, Zero Excess)
+     ======================================================================== */
+  --z-radius-xs: 4px;
+  --z-radius-sm: 6px;
+  --z-radius-md: 8px;   /* Canonical for buttons, inputs, table rows */
+  --z-radius-lg: 12px;  /* Canonical for operational plates & panels */
+  --z-radius-xl: 16px;  /* Major workspace containers */
+  --z-radius-full: 9999px; /* Status pills, chips, avatars */
+
+  /* Shadows (Discreet micro-depth) */
+  --z-shadow-none: none;
+  --z-shadow-subtle: 0 1px 2px rgba(13, 27, 61, 0.03);
+  --z-shadow-plate: 0 2px 6px rgba(13, 27, 61, 0.03), 0 0 0 1px rgba(13, 27, 61, 0.06);
+  --z-shadow-overlay: 0 12px 32px -4px rgba(13, 27, 61, 0.12), 0 4px 12px -2px rgba(13, 27, 61, 0.08);
+
+  /* ========================================================================
+     5. TRANSITIONS & SPRINGS (Apple WWDC 2018 Standards)
+     ======================================================================== */
+  --z-ease-press: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-duration-fast: 120ms;
+  --z-duration-normal: 180ms;
+  --z-duration-modal: 240ms;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --z-duration-fast: 0ms;
+    --z-duration-normal: 0ms;
+    --z-duration-modal: 0ms;
+  }
+}

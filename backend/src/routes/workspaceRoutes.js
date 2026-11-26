@@ -20,6 +20,7 @@ import {
   cancelInvitation,
   getSkills,
   createSkill,
+  updateSkill,
   assignSkillToAgent,
   removeSkillFromAgent,
   updateAgentProfileStatus,
@@ -93,6 +94,7 @@ router.delete("/:workspaceId/agents/:agentId/skills/:skillId", requireWorkspaceR
 
 router.get("/:workspaceId/skills", getSkills);
 router.post("/:workspaceId/skills", requireWorkspaceRole(["OWNER", "ADMIN", "MANAGER"]), createSkill);
+router.patch("/:workspaceId/skills/:skillId", requireWorkspaceRole(["OWNER", "ADMIN", "MANAGER"]), updateSkill);
 
 // Physical Establishments & SAV Branches
 router.get("/:workspaceId/establishments", getEstablishments);

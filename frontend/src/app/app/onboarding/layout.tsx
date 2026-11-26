@@ -2,9 +2,9 @@ import React from "react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Configuration & Déploiement de votre SAV — Zadesk",
+  title: "Configuration & Déploiement de votre SAV — Zalisk",
   description:
-    "Parcours officiel de création, organisation et personnalisation du service après-vente Zadesk pour entreprises.",
+    "Parcours officiel de création, organisation et personnalisation du service après-vente Zalisk pour entreprises.",
 };
 
 export default function OnboardingLayout({

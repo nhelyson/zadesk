@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/Button";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Mail, Loader2, CheckCircle2 } from "lucide-react";
 import { verifyOtpApi, resendOtpApi, UserProfile, AuthResponse } from "@/lib/auth";
 import { AuthFeedback } from "./AuthFeedback";
 import { TurnstileWidget, TurnstileWidgetRef } from "./TurnstileWidget";
@@ -194,22 +193,30 @@ export const OtpVerificationForm: React.FC<OtpVerificationFormProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="text-center space-y-1.5">
+      <div className="text-center space-y-2">
         <div className="flex justify-center mb-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-[11px] font-bold">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Vérification de sécurité</span>
-          </span>
+          <div className="w-11 h-11 rounded-2xl bg-[#0D1B3D] text-white flex items-center justify-center shadow-xs">
+            <Mail className="w-5 h-5 text-emerald-400" />
+          </div>
         </div>
-        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 tracking-tight leading-tight">
-          Vérifiez votre email
+
+        <h1 className="text-xl sm:text-2xl font-black text-[#0D1B3D] tracking-tight leading-tight uppercase">
+          Code de confirmation
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
-          Nous avons envoyé un code de confirmation à 6 chiffres à{" "}
-          <strong className="text-slate-800 font-semibold">{email}</strong>.
+
+        <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+          Saisissez le code à 6 chiffres transmis à l&apos;adresse :
         </p>
+
+        {/* Email Pill Badge */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-xs font-semibold text-[#0D1B3D] max-w-full truncate">
+            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="truncate">{email}</span>
+          </div>
+        </div>
       </div>
 
       {/* Feedback Alerts */}
@@ -220,44 +227,98 @@ export const OtpVerificationForm: React.FC<OtpVerificationFormProps> = ({
         onClearSuccess={() => setInfoMsg(null)}
       />
 
-      {/* Form with 6 Digit Boxes */}
+      {/* Form with 6 Digit Boxes Split 3 + 3 */}
       <form onSubmit={handleManualSubmit} className="space-y-6">
-        <div className="flex items-center justify-center gap-2 sm:gap-2.5">
-          {digits.map((digit, idx) => (
-            <input
-              key={idx}
-              ref={(el) => {
-                inputRefs.current[idx] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleDigitChange(idx, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(idx, e)}
-              onPaste={(e) => {
-                e.preventDefault();
-                handlePaste(e.clipboardData.getData("text"));
-              }}
-              className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold text-slate-900 bg-white border border-slate-200 rounded-2xl transition-all duration-150 ease-out hover:border-slate-300 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/15 focus:bg-white shadow-xs select-none font-mono"
-              autoComplete="one-time-code"
-              aria-label={`Chiffre ${idx + 1}`}
-            />
-          ))}
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+          {/* Premier groupe de 3 chiffres */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {digits.slice(0, 3).map((digit, idx) => (
+              <input
+                key={idx}
+                ref={(el) => {
+                  inputRefs.current[idx] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleDigitChange(idx, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(idx, e)}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  handlePaste(e.clipboardData.getData("text"));
+                }}
+                className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-mono font-black rounded-2xl border transition-all duration-150 select-none shadow-2xs ${
+                  digit
+                    ? "bg-[#FAFAF8] border-[#0D1B3D] text-[#0D1B3D] shadow-xs"
+                    : "bg-white border-slate-200 text-slate-900 focus:border-[#0D1B3D] focus:ring-4 focus:ring-[#0D1B3D]/10"
+                }`}
+                autoComplete="one-time-code"
+                aria-label={`Chiffre ${idx + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Séparateur central élégant */}
+          <div className="w-2.5 h-0.5 bg-slate-300 rounded-full mx-0.5 sm:mx-1 shrink-0" aria-hidden="true" />
+
+          {/* Second groupe de 3 chiffres */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {digits.slice(3, 6).map((digit, i) => {
+              const idx = i + 3;
+              return (
+                <input
+                  key={idx}
+                  ref={(el) => {
+                    inputRefs.current[idx] = el;
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleDigitChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    handlePaste(e.clipboardData.getData("text"));
+                  }}
+                  className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-mono font-black rounded-2xl border transition-all duration-150 select-none shadow-2xs ${
+                    digit
+                      ? "bg-[#FAFAF8] border-[#0D1B3D] text-[#0D1B3D] shadow-xs"
+                      : "bg-white border-slate-200 text-slate-900 focus:border-[#0D1B3D] focus:ring-4 focus:ring-[#0D1B3D]/10"
+                  }`}
+                  autoComplete="one-time-code"
+                  aria-label={`Chiffre ${idx + 1}`}
+                />
+              );
+            })}
+          </div>
         </div>
 
         {/* Primary Verification Button */}
-        <Button
+        <button
           type="submit"
-          variant="gradient"
-          size="lg"
-          className="w-full justify-center font-bold shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all cursor-pointer"
-          isLoading={isLoading}
-          disabled={digits.some((d) => d === "")}
+          disabled={digits.some((d) => d === "") || isLoading}
+          className={`w-full h-12 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs select-none touch-manipulation ${
+            digits.every((d) => d !== "") && !isLoading
+              ? "bg-[#0D1B3D] text-white hover:bg-slate-800 active:scale-[0.98] shadow-slate-900/10"
+              : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+          }`}
         >
-          Vérifier le code
-        </Button>
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Vérification en cours...</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Vérifier le code</span>
+            </>
+          )}
+        </button>
       </form>
 
       {/* Secondary Actions: Resend & Change Email */}
@@ -267,7 +328,7 @@ export const OtpVerificationForm: React.FC<OtpVerificationFormProps> = ({
           <div>
             <span>Vous n&apos;avez pas reçu le code ? </span>
             {cooldown > 0 && (
-              <span className="text-slate-400 font-semibold">
+              <span className="text-slate-500 font-semibold font-mono">
                 Renvoyer dans {cooldown}s
               </span>
             )}
@@ -294,9 +355,9 @@ export const OtpVerificationForm: React.FC<OtpVerificationFormProps> = ({
                 type="button"
                 onClick={handleResend}
                 disabled={isResending || (!turnstileToken && !isDev)}
-                className="mt-1 font-bold text-emerald-700 hover:text-emerald-800 underline transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-1 font-bold text-[#0D1B3D] hover:underline transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isResending ? "Envoi en cours..." : "Renvoyer le code"}
+                {isResending ? "Envoi en cours..." : "Renvoyer un nouveau code"}
               </button>
             </div>
           )}
@@ -307,7 +368,7 @@ export const OtpVerificationForm: React.FC<OtpVerificationFormProps> = ({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors cursor-pointer py-1"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-semibold transition-colors cursor-pointer py-1 active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Modifier l&apos;adresse email</span>

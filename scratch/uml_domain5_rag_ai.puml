@@ -1,0 +1,111 @@
+@startuml zadesk_domain5_rag_ai
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #F7FAFC
+    BorderColor #2B6CB0
+    BorderThickness 1.2
+    HeaderBackgroundColor #EBF8FF
+}
+
+package "Domaine 5 : Assistance Intelligente & RAG (Architecture Cible)" {
+
+    enum AutonomyMode <<enumeration, target>> {
+        ASSISTED
+        SEMI_AUTONOMOUS
+        FULL_AUTONOMOUS
+    }
+
+    enum DocumentStatus <<enumeration, target>> {
+        DRAFT
+        INDEXED
+        OUTDATED
+        ARCHIVED
+    }
+
+    class Workspace <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class Conversation <<external>> {
+        - id: CUID
+        - customerName: String
+    }
+
+    class Ticket <<external>> {
+        - id: CUID
+        - priority: TicketPriority
+    }
+
+    class KnowledgeDocument <<entity, target>> {
+        - id: String {readOnly, unique}
+        - workspaceId: String
+        - title: String
+        - category: String
+        - fileType: String
+        - sourceUrl: String?
+        - totalChunks: Integer = 0
+        - status: DocumentStatus = DRAFT
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + extractText(): String
+        + chunkAndEmbed(chunkSize: Integer, overlap: Integer): List<KnowledgeChunk>
+        + archive(): void
+    }
+
+    class KnowledgeChunk <<entity, target>> {
+        - id: String {readOnly, unique}
+        - documentId: String
+        - workspaceId: String
+        - chunkIndex: Integer
+        - content: String
+        - tokenCount: Integer
+        - embedding: Float[1536]
+        - metadata: Json
+        - createdAt: DateTime {readOnly}
+    }
+
+    class AiAssistantSupervisor <<service, target>> {
+        - confidenceThreshold: Float = 0.82
+        - autonomyMode: AutonomyMode = SEMI_AUTONOMOUS
+        --
+        + query(message: String, workspaceId: String): AiResponseDTO
+        - vectorSearch(embedding: Float[], workspaceId: String, limit: Integer): List<KnowledgeChunk>
+        - evaluateConfidence(score: Float): ConfidenceLevel
+        + escalateToHuman(conversation: Conversation, reason: String): Ticket
+    }
+
+    class AiConfiguration <<entity, target>> {
+        - workspaceId: String {unique}
+        - autonomyMode: AutonomyMode = SEMI_AUTONOMOUS
+        - tone: String = "PROFESSIONAL_EMPATHETIC"
+        - language: String = "fr"
+        - confidenceMin: Float = 0.85
+        - escalationKeywords: List<String>
+        - claimAmountThreshold: Decimal = 50000.00
+        --
+        + updateRules(data: AiConfigDTO): void
+    }
+
+    ' Relations du Domaine 5
+    Workspace "1" *-- "0..*" KnowledgeDocument : possède >
+    KnowledgeDocument "1" *-- "1..*" KnowledgeChunk : découpé en >
+    Workspace "1" *-- "0..1" AiConfiguration : paramètre >
+    AiAssistantSupervisor ..> KnowledgeChunk : recherche sémantique >
+    AiAssistantSupervisor ..> Conversation : assiste >
+    AiAssistantSupervisor ..> Ticket : escalade >
+}
+@enduml

@@ -38,6 +38,7 @@ interface UsePulseStreamOptions {
   workspaceId?: string;
   onEvent?: (event: PulseEventData) => void;
   onFullSyncNeeded?: () => Promise<void>;
+  shouldSuppressNotification?: (event: PulseEventData) => boolean;
   enabled?: boolean;
 }
 
@@ -45,6 +46,7 @@ export function usePulseStream({
   workspaceId,
   onEvent,
   onFullSyncNeeded,
+  shouldSuppressNotification,
   enabled = true,
 }: UsePulseStreamOptions) {
   const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected'>('disconnected');
@@ -60,9 +62,16 @@ export function usePulseStream({
   onEventRef.current = onEvent;
   const onFullSyncNeededRef = useRef(onFullSyncNeeded);
   onFullSyncNeededRef.current = onFullSyncNeeded;
+  const shouldSuppressRef = useRef(shouldSuppressNotification);
+  shouldSuppressRef.current = shouldSuppressNotification;
 
   const dismissNotification = useCallback((id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  const dismissConversationNotifications = useCallback((conversationId: string) => {
+    if (!conversationId) return;
+    setNotifications((prev) => prev.filter((n) => n.conversationId !== conversationId));
   }, []);
 
   const connect = useCallback(() => {
@@ -117,12 +126,15 @@ export function usePulseStream({
         }
 
         // Trigger Audio Chime & In-App Toast
+        const suppressed = shouldSuppressRef.current ? shouldSuppressRef.current(payload) : false;
+
         if (payload.type === 'PULSE_MESSAGE_CREATED') {
-          if (payload.isClientMessage) {
+          if (payload.isClientMessage && !suppressed) {
             pulseAudio.playMessagePulse();
+            const notifId = `notif-${payload.id}`;
             setNotifications((prev) => [
               {
-                id: `notif-${payload.id}`,
+                id: notifId,
                 eventId: payload.id,
                 type: 'NEW_MESSAGE',
                 conversationId: payload.conversationId || '',
@@ -131,24 +143,31 @@ export function usePulseStream({
                 category: payload.category,
                 timestamp: payload.timestamp || new Date().toISOString(),
               },
-              ...prev.slice(0, 4), // Keep max 5 active toast notifications
+              ...prev.slice(0, 3), // Keep max 4 active toast notifications
             ]);
+            setTimeout(() => {
+              setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+            }, 15000);
           }
-        } else if (payload.type === 'PULSE_CONVERSATION_CREATED') {
+        } else if (payload.type === 'PULSE_CONVERSATION_CREATED' && !suppressed) {
           pulseAudio.playNewNodeChime();
+          const notifId = `notif-${payload.id}`;
           setNotifications((prev) => [
             {
-              id: `notif-${payload.id}`,
+              id: notifId,
               eventId: payload.id,
               type: 'NEW_CONVERSATION',
               conversationId: payload.conversationId || '',
               customerName: payload.customerName || 'Nouveau client',
-              preview: 'Nouvelle conversation entrée dans la constellation',
+              preview: payload.contentPreview || 'Nouvelle demande client reçue',
               category: payload.category,
               timestamp: payload.timestamp || new Date().toISOString(),
             },
-            ...prev.slice(0, 4),
+            ...prev.slice(0, 3),
           ]);
+          setTimeout(() => {
+            setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+          }, 15000);
         }
 
         // Notify parent observer
@@ -208,6 +227,7 @@ export function usePulseStream({
     status,
     notifications,
     dismissNotification,
+    dismissConversationNotifications,
   };
 }
 

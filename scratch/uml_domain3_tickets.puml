@@ -1,0 +1,150 @@
+@startuml zadesk_domain3_tickets
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 4
+skinparam classFontSize 12
+skinparam classFontName "Inter, Arial, sans-serif"
+skinparam classAttributeFontSize 11
+skinparam classAttributeFontName "Consolas, 'JetBrains Mono', monospace"
+skinparam packageFontSize 14
+skinparam packageFontName "Outfit, sans-serif"
+skinparam linetype ortho
+skinparam dpi 300
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #2D3748
+    BorderThickness 1.2
+    HeaderBackgroundColor #EDF2F7
+}
+
+package "Domaine 3 : Clients & Demandes SAV (Tickets)" {
+
+    enum TicketStatus <<enumeration>> {
+        PENDING_ASSIGNMENT
+        OPEN
+        IN_PROGRESS
+        WAITING_CUSTOMER
+        RESOLVED
+        CLOSED
+    }
+
+    enum TicketPriority <<enumeration>> {
+        LOW
+        MEDIUM
+        HIGH
+        URGENT
+    }
+
+    enum ShareAccessLevel <<enumeration>> {
+        READ_ONLY
+        CONTRIBUTE
+    }
+
+    class Workspace <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class AgentProfile <<external>> {
+        - id: CUID
+        - userId: String
+    }
+
+    class Establishment <<external>> {
+        - id: CUID
+        - name: String
+    }
+
+    class Conversation <<external>> {
+        - id: CUID
+    }
+
+    class Customer <<concept>> {
+        - identifier: String {unique, readOnly}
+        - fullName: String
+        - phone: String?
+        - email: String?
+        - city: String?
+        - firstSeenAt: DateTime {readOnly}
+        - lastInteractionAt: DateTime
+        --
+        + getTicketsHistory(): List<Ticket>
+        + getConversations(): List<Conversation>
+        + updateContactInfo(phone: String, email: String): void
+    }
+
+    class Ticket <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketNumber: String {unique}
+        - workspaceId: String
+        - createdById: String?
+        - assignedAgentId: String?
+        - establishmentId: String?
+        - title: String
+        - description: String
+        - category: String = "Général"
+        - priority: TicketPriority = MEDIUM
+        - status: TicketStatus = PENDING_ASSIGNMENT
+        - customerName: String
+        - customerEmail: String?
+        - customerPhone: String?
+        - slaDeadlineAt: DateTime?
+        - resolvedAt: DateTime?
+        - closedAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        - updatedAt: DateTime
+        --
+        + assignTo(agent: AgentProfile, reason: String): void
+        + updateStatus(newStatus: TicketStatus, authorId: String): void
+        + changePriority(newPriority: TicketPriority, authorId: String): void
+        + addNote(content: String, authorId: String): TicketActivity
+        + shareWith(targetAgent: AgentProfile, level: ShareAccessLevel, days: Integer): TicketShare
+        + reassign(newAgent: AgentProfile, reason: String, authorId: String): void
+        + markAsResolved(resolutionNotes: String): void
+        + closeTicket(): void
+    }
+
+    class TicketAssignment <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - previousAgentId: String?
+        - newAgentId: String
+        - reason: String?
+        - assignedAt: DateTime {readOnly}
+    }
+
+    class TicketShare <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - sharedWithAgentId: String
+        - accessLevel: ShareAccessLevel = READ_ONLY
+        - expiresAt: DateTime?
+        - createdAt: DateTime {readOnly}
+        --
+        + isExpired(): Boolean
+        + revoke(): void
+    }
+
+    class TicketActivity <<entity>> {
+        - id: CUID {readOnly, unique}
+        - ticketId: String
+        - authorId: String?
+        - type: String
+        - content: String
+        - createdAt: DateTime {readOnly}
+    }
+
+    ' Relations du Domaine 3
+    Workspace "1" *-- "0..*" Ticket : gère >
+    Establishment "0..1" -- "0..*" Ticket : localise >
+    AgentProfile "0..1" -- "0..*" Ticket : traite >
+    Customer "1" -- "0..*" Ticket : soumet >
+    Ticket "1" *-- "1..*" TicketActivity : historise >
+    Ticket "1" *-- "0..*" TicketAssignment : retrace >
+    Ticket "1" *-- "0..*" TicketShare : partage >
+    AgentProfile "0..1" -- "0..*" TicketShare : reçoit >
+    Ticket "0..1" -- "0..1" Conversation : lié à >
+}
+@enduml

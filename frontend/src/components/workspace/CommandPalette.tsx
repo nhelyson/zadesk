@@ -15,7 +15,9 @@ import {
   MessageCircle,
   BarChart3,
   Settings,
+  CreditCard,
   PlusCircle,
+  ShieldCheck,
   X,
   ArrowRight,
 } from "lucide-react";
@@ -32,7 +34,10 @@ interface CommandItem {
 }
 
 export const CommandPalette = () => {
-  const { commandPaletteOpen, setCommandPaletteOpen } = useWorkspace();
+  const { commandPaletteOpen, setCommandPaletteOpen, userRole } = useWorkspace();
+  const isAgent = userRole === "AGENT";
+  const canManageBilling = !isAgent && (userRole === "OWNER" || userRole === "ADMIN");
+  const canManageChannels = !isAgent && (userRole === "OWNER" || userRole === "ADMIN");
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -52,108 +57,141 @@ export const CommandPalette = () => {
   }, [commandPaletteOpen]);
 
   const items: CommandItem[] = [
-    // Navigation
+    // Navigation commune / adaptée au rôle
     {
       id: "nav-dash",
       category: "Navigation",
-      title: "Vue d'ensemble / Dashboard",
-      subtitle: "Métriques clés et file de priorité",
+      title: "Vue d'ensemble",
+      subtitle: "Métriques clés et demandes en cours",
       icon: <LayoutDashboard className="w-4 h-4 text-emerald-600" />,
-      path: "/workspace",
+      path: "/app",
     },
     {
       id: "nav-conv",
       category: "Navigation",
-      title: "Conversations SAV",
-      subtitle: "Messagerie client WhatsApp et IA",
+      title: isAgent ? "Mes conversations" : "Conversations",
+      subtitle: isAgent ? "Échanges SAV qui vous sont confiés" : "Demandes issues de votre page publique",
       icon: <MessageSquare className="w-4 h-4 text-sky-600" />,
-      path: "/workspace/conversations",
+      path: "/app/conversations",
     },
     {
       id: "nav-tck",
       category: "Navigation",
-      title: "Dossiers & Tickets",
-      subtitle: "Continuité de service et agences",
+      title: isAgent ? "Dossiers assignés" : "Demandes clients",
+      subtitle: "Continuité de service et suivi SAV",
       icon: <Ticket className="w-4 h-4 text-indigo-600" />,
-      path: "/workspace/tickets",
+      path: "/app/tickets",
     },
     {
       id: "nav-cust",
       category: "Navigation",
-      title: "Annuaire Clients",
+      title: "Clients",
       subtitle: "Fiches clients et historique unifié",
       icon: <Users className="w-4 h-4 text-slate-600" />,
-      path: "/workspace/customers",
+      path: "/app/customers",
     },
-    {
-      id: "nav-agents",
-      category: "Navigation",
-      title: "Agents & Équipe",
-      subtitle: "Disponibilité et compétences SAV",
-      icon: <UserCheck className="w-4 h-4 text-emerald-600" />,
-      path: "/app/agents",
-    },
-    {
-      id: "nav-agencies",
-      category: "Navigation",
-      title: "Nos Établissements",
-      subtitle: "Boutiques, agences physiques et comptoirs SAV",
-      icon: <Building2 className="w-4 h-4 text-amber-600" />,
-      path: "/app/agencies",
-    },
-    {
-      id: "nav-ai",
-      category: "Navigation",
-      title: "Intelligence IA",
-      subtitle: "Règles d'autonomie et d'escalade",
-      icon: <Cpu className="w-4 h-4 text-purple-600" />,
-      path: "/workspace/ai",
-    },
-    {
-      id: "nav-kb",
-      category: "Navigation",
-      title: "Base de Connaissances",
-      subtitle: "Articles FAQ, garanties et procédures RAG",
-      icon: <BookOpen className="w-4 h-4 text-teal-600" />,
-      path: "/workspace/knowledge",
-    },
-    {
-      id: "nav-wa",
-      category: "Navigation",
-      title: "Canal WhatsApp",
-      subtitle: "Connexion Zavu API et templates",
-      icon: <MessageCircle className="w-4 h-4 text-emerald-500" />,
-      path: "/workspace/whatsapp",
-    },
-    {
-      id: "nav-stats",
-      category: "Navigation",
-      title: "Analyses & KPIs",
-      subtitle: "Performances et motifs de réclamations",
-      icon: <BarChart3 className="w-4 h-4 text-rose-600" />,
-      path: "/workspace/analytics",
-    },
-    {
-      id: "nav-settings",
-      category: "Navigation",
-      title: "Paramètres Workspace",
-      subtitle: "Membres, permissions RBAC et profil",
-      icon: <Settings className="w-4 h-4 text-slate-600" />,
-      path: "/workspace/settings",
-    },
+    ...(isAgent
+      ? [
+          {
+            id: "nav-agent-profile",
+            category: "Navigation" as const,
+            title: "Mon profil Agent",
+            subtitle: "Disponibilité, présence et notifications",
+            icon: <ShieldCheck className="w-4 h-4 text-[#0D1B3D]" />,
+            path: "/app/agent/profile",
+          },
+        ]
+      : [
+          {
+            id: "nav-agents",
+            category: "Navigation" as const,
+            title: "Équipe & accès",
+            subtitle: "Présence, disponibilité et compétences SAV",
+            icon: <UserCheck className="w-4 h-4 text-emerald-600" />,
+            path: "/app/agents",
+          },
+          {
+            id: "nav-agencies",
+            category: "Navigation" as const,
+            title: "Nos agences",
+            subtitle: "Boutiques, agences physiques et comptoirs SAV",
+            icon: <Building2 className="w-4 h-4 text-amber-600" />,
+            path: "/app/agencies",
+          },
+          {
+            id: "nav-kb",
+            category: "Navigation" as const,
+            title: "Base de connaissances",
+            subtitle: "Articles FAQ, garanties et procédures",
+            icon: <BookOpen className="w-4 h-4 text-teal-600" />,
+            path: "/app/knowledge",
+          },
+          {
+            id: "nav-ai",
+            category: "Navigation" as const,
+            title: "Automatisation",
+            subtitle: "Règles d'autonomie et d'escalade",
+            icon: <Cpu className="w-4 h-4 text-purple-600" />,
+            path: "/app/ai",
+          },
+          {
+            id: "nav-stats",
+            category: "Navigation" as const,
+            title: "Statistiques",
+            subtitle: "Performances et motifs de réclamations",
+            icon: <BarChart3 className="w-4 h-4 text-rose-600" />,
+            path: "/app/analytics",
+          },
+          {
+            id: "nav-settings",
+            category: "Navigation" as const,
+            title: "Paramètres",
+            subtitle: "Coordonnées, horaires et profil",
+            icon: <Settings className="w-4 h-4 text-slate-600" />,
+            path: "/app/settings",
+          },
+        ]),
+    ...(canManageChannels
+      ? [
+          {
+            id: "nav-wa",
+            category: "Navigation" as const,
+            title: "Canal WhatsApp",
+            subtitle: "Paramètres de synchronisation Meta",
+            icon: <MessageCircle className="w-4 h-4 text-emerald-500" />,
+            path: "/app/whatsapp",
+          },
+        ]
+      : []),
+    ...(canManageBilling
+      ? [
+          {
+            id: "nav-billing",
+            category: "Navigation" as const,
+            title: "Abonnement & Facturation",
+            subtitle: "Forfaits, quotas et renouvellement SasPay",
+            icon: <CreditCard className="w-4 h-4 text-indigo-600" />,
+            path: "/app/billing",
+          },
+        ]
+      : []),
 
     // Actions Rapides
-    {
-      id: "act-create-ws",
-      category: "Actions Rapides",
-      title: "Créer un nouvel Espace de travail",
-      subtitle: "Configurer une nouvelle entreprise ou filiale",
-      icon: <PlusCircle className="w-4 h-4 text-emerald-600" />,
-      action: () => {
-        setCommandPaletteOpen(false);
-        router.push("/app/onboarding");
-      },
-    },
+    ...(!isAgent
+      ? [
+          {
+            id: "act-create-ws",
+            category: "Actions Rapides" as const,
+            title: "Créer un nouvel Espace de travail",
+            subtitle: "Configurer une nouvelle entreprise ou filiale",
+            icon: <PlusCircle className="w-4 h-4 text-emerald-600" />,
+            action: () => {
+              setCommandPaletteOpen(false);
+              router.push("/app/onboarding");
+            },
+          },
+        ]
+      : []),
   ];
 
   const filteredItems = items.filter(
@@ -173,6 +211,7 @@ export const CommandPalette = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredItems.length === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % filteredItems.length);
@@ -191,12 +230,12 @@ export const CommandPalette = () => {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[10000] bg-navy-950/60 backdrop-blur-sm flex items-start justify-center px-3 sm:px-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[10000] bg-[#0D1B3D]/45 backdrop-blur-sm flex items-start justify-center px-3 sm:px-4"
       style={{ paddingTop: 'max(2.5rem, calc(env(safe-area-inset-top, 0px) + 1rem))' }}
       onClick={() => setCommandPaletteOpen(false)}
     >
       <div
-        className="bg-white w-full max-w-xl max-h-[85dvh] flex flex-col rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+        className="bg-white w-full max-w-xl max-h-[85dvh] flex flex-col rounded-2xl border border-slate-200 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
@@ -243,7 +282,7 @@ export const CommandPalette = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
                       {item.icon}
                     </div>
                     <div className="min-w-0">

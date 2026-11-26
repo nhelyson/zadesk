@@ -3,6 +3,7 @@ import authRoutes from "./authRoutes.js";
 import workspaceRoutes from "./workspaceRoutes.js";
 import publicRoutes from "./publicRoutes.js";
 import commercialRoutes from "./commercialRoutes.js";
+import saspayWebhookRoutes from "./saspayWebhookRoutes.js";
 import { isRedisReady } from "../config/redis.js";
 import { prisma } from "../lib/prisma.js";
 import { queueManager } from "../queues/queueManager.js";
@@ -58,6 +59,9 @@ apiRouter.use("/auth", authRoutes);
 // Commercial & Billing Routes: /api/commercial/* and /api/billing/*
 apiRouter.use("/commercial", commercialRoutes);
 apiRouter.use("/billing", commercialRoutes);
+
+// SasPay Webhook Route: /api/webhooks/saspay
+apiRouter.use("/webhooks/saspay", saspayWebhookRoutes);
 
 // Workspace & SAV Modules: /api/workspaces/*
 apiRouter.use("/workspaces", workspaceRoutes);

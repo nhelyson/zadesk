@@ -19,6 +19,7 @@ import {
   cancelWorkspaceInvitation,
   getWorkspaceSkills,
   createWorkspaceSkill,
+  updateWorkspaceSkill,
   assignAgentSkill,
   removeAgentSkill,
   updateAgentStatus,
@@ -290,7 +291,8 @@ export async function cancelInvitation(req, res, next) {
 export async function getSkills(req, res, next) {
   try {
     const { workspaceId } = req.params;
-    const skills = await getWorkspaceSkills(workspaceId);
+    const includeInactive = req.query.includeInactive === "true";
+    const skills = await getWorkspaceSkills(workspaceId, { includeInactive });
     return sendSuccess(res, { skills });
   } catch (error) {
     next(error);
@@ -301,9 +303,19 @@ export async function createSkill(req, res, next) {
   try {
     const { workspaceId } = req.params;
     const skill = await createWorkspaceSkill(workspaceId, req.body);
-    return sendSuccess(res, { skill }, "Compétence créée avec succès.", 201);
+    return sendSuccess(res, 201, "Compétence créée avec succès.", { skill });
   } catch (error) {
-    return sendError(res, error.message || "Erreur création compétence.", 400);
+    return sendError(res, error.message || "Erreur création compétence.", error.status || 400);
+  }
+}
+
+export async function updateSkill(req, res, next) {
+  try {
+    const { workspaceId, skillId } = req.params;
+    const skill = await updateWorkspaceSkill(workspaceId, skillId, req.body);
+    return sendSuccess(res, { skill }, "Compétence mise à jour avec succès.");
+  } catch (error) {
+    return sendError(res, error.message || "Erreur mise à jour compétence.", error.status || 400);
   }
 }
 
@@ -315,9 +327,9 @@ export async function assignSkillToAgent(req, res, next) {
       return sendError(res, "L'identifiant de compétence (skillId) est requis.", 400);
     }
     const agentSkill = await assignAgentSkill(workspaceId, agentId, skillId, req.user.id);
-    return sendSuccess(res, { agentSkill }, "Compétence attribuée à l'agent.");
+    return sendSuccess(res, { agentSkill }, "Compétence attribuée au conseiller.");
   } catch (error) {
-    return sendError(res, error.message || "Erreur attribution compétence.", 400);
+    return sendError(res, error.message || "Erreur attribution compétence.", error.status || 400);
   }
 }
 
@@ -325,7 +337,7 @@ export async function removeSkillFromAgent(req, res, next) {
   try {
     const { workspaceId, agentId, skillId } = req.params;
     await removeAgentSkill(workspaceId, agentId, skillId);
-    return sendSuccess(res, null, "Compétence retirée de l'agent.");
+    return sendSuccess(res, null, "Compétence retirée du conseiller.");
   } catch (error) {
     next(error);
   }
@@ -334,10 +346,10 @@ export async function removeSkillFromAgent(req, res, next) {
 export async function updateAgentProfileStatus(req, res, next) {
   try {
     const { workspaceId, agentId } = req.params;
-    const profile = await updateAgentStatus(workspaceId, agentId, req.body);
-    return sendSuccess(res, { profile }, "Profil agent mis à jour.");
+    const profile = await updateAgentStatus(workspaceId, agentId, req.body, req.user.id);
+    return sendSuccess(res, { profile }, "Paramètres du conseiller mis à jour.");
   } catch (error) {
-    return sendError(res, error.message || "Erreur mise à jour profil.", 400);
+    return sendError(res, error.message || "Erreur mise à jour profil.", error.status || 400);
   }
 }
 

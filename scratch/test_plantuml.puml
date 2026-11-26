@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #F8F9FA
+
+<style>
+root {
+  FontName "Helvetica"
+  FontSize 11
+  FontColor #2D3142
+  LineColor #4F5D75
+}
+rectangle {
+  BackgroundColor #FFFFFF
+  LineColor #CBD5E1
+  RoundCorner 8
+}
+actor {
+  BackgroundColor #FFFFFF
+  LineColor #2D3142
+}
+arrow {
+  LineColor #4F5D75
+  FontColor #2D3142
+  FontSize 10
+}
+</style>
+
+actor "Client" as client
+rectangle "Portail Public" as portal
+client --> portal : Accéder
+@enduml
